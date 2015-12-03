@@ -1,0 +1,32 @@
+{
+    "name": "danhunsaker/calends",
+    "description": "Arbitrary calendar systems in PHP.",
+    "keywords": ["date", "time", "calendar"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Hunsaker",
+            "email": "danhunsaker@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^5.4 || ^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.0"
+    },
+    "suggest": {
+        "illuminate/database": "Pulls calendar definitions from a database using Laravel's Eloquent ORM."
+    },
+    "autoload": {
+        "psr-4": {
+            "Danhunsaker\\Calends\\": "src/",
+            "Danhunsaker\\Calends\\Laravel\\": "laravel/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Danhunsaker\\Calends\\Tests\\": "tests/"
+        }
+    }
+}
