@@ -1,0 +1,26 @@
+suites:
+    calends:
+        namespace: Danhunsaker\Calends
+        psr4_prefix: Danhunsaker\Calends
+        src_path: %paths.config%/src
+        spec_path: %paths.config%
+        spec_prefix: spec
+extensions:
+  - Coduo\PhpSpec\DataProvider\DataProviderExtension
+  - PhpSpec\Extension\CodeCoverageExtension
+  - RMiller\BehatSpec\PhpSpecExtension
+  - RMiller\ExemplifyExtension\ExemplifyExtension
+  - RMiller\PhpSpecRunExtension\PhpSpecRunExtension
+rerunner:
+  path: vendor/bin/phpspec
+  commands: [describe, exemplify]
+code_coverage:
+  whitelist:
+    - src
+    - laravel
+  format:
+    - html
+    - clover
+  output:
+    html: coverage
+    clover: coverage.xml
