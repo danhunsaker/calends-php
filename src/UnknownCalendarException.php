@@ -2,6 +2,6 @@
 
 namespace Danhunsaker\Calends;
 
-class UnknownCalendarException extends Exception
+class UnknownCalendarException extends \Exception
 {
 }

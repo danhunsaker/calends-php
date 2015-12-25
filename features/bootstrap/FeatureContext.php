@@ -27,6 +27,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function __construct()
     {
+        date_default_timezone_set('Etc/UTC');
     }
 
     /**
@@ -74,7 +75,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Given /an input timestamp of ([-0-9a-fA-F.]+|ts:.+)/
+     * @Given /an input timestamp of (.+)/
      */
     public function anInputTimestampOf($stamp)
     {
@@ -106,7 +107,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @Then /the return value should be ([-0-9a-fA-F.]+)/
+     * @Then /the return value should be (.+)/
      */
     public function theReturnValueShouldBe($output)
     {

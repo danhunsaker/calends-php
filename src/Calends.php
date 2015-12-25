@@ -27,10 +27,10 @@ class Calends
             return;
         }
 
-        static::$timeConverters['toInternal']['unix'] = [$this, 'toInternalFromUnix'];
+        static::$timeConverters['toInternal']['unix'] = [static::class, 'toInternalFromUnix'];
 
         static::$timeConverters['toInternal']['jdc'] = function ($stamp) {
-            return $this->toInternalFromUnix(bcmul(bcsub($stamp, 2440587.5), 86400));
+            return static::toInternalFromUnix(bcmul(bcsub($stamp, 2440587.5), 86400));
         };
 
         static::$timeConverters['toInternal']['tai'] = function ($stamp) {
@@ -53,10 +53,10 @@ class Calends
             return $time;
         };
 
-        static::$timeConverters['fromInternal']['unix'] = [$this, 'fromInternalToUnix'];
+        static::$timeConverters['fromInternal']['unix'] = [static::class, 'fromInternalToUnix'];
 
         static::$timeConverters['fromInternal']['jdc'] = function ($time) {
-            return bcadd(bcdiv($this->fromInternalToUnix($time), 86400), 2440587.5);
+            return bcadd(bcdiv(static::fromInternalToUnix($time), 86400), 2440587.5);
         };
 
         static::$timeConverters['fromInternal']['tai'] = function ($time) {
@@ -66,7 +66,7 @@ class Calends
         };
     }
 
-    protected function toInternalFromUnix($stamp = null)
+    public static function toInternalFromUnix($stamp = null)
     {
         $stamp = is_null($stamp) ? microtime(true) : $stamp;
 
@@ -85,7 +85,7 @@ class Calends
         return $time;
     }
 
-    protected function fromInternalToUnix($time)
+    public static function fromInternalToUnix($time)
     {
         return bcadd(bcsub($time['seconds'], bcpow(2, 62), 0), bcdiv(bcadd(bcdiv($time['atto'], bcpow(10, 9), 9), $time['nano'], 9), bcpow(10, 9), 18), 18);
     }
@@ -102,10 +102,10 @@ class Calends
 
     protected function getCalendar($calendar)
     {
-        $calendar = Cased::fromCamelCase($calendar)->toCamelCase();
+        $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
 
         if ( ! array_key_exists($calendar, static::$timeConverters['toInternal'])) {
-            $className = 'Calends' . Cased::fromCamelCase($calendar)->toPascalCase();
+            $className = __NAMESPACE__ . '\\Calends' . Cased::fromCamelCase($calendar)->asPascalCase();
 
             if (class_exists($className)) {
                 static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
