@@ -1,11 +1,11 @@
 <?php
 
-use Danhunsaker\Calends\Calends;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
+use Danhunsaker\Calends\Calends;
 
 /**
  * Defines application features from the specific context.
@@ -36,14 +36,13 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $integers = [];
 
-        switch (strlen($tai))
-        {
+        switch (strlen($tai)) {
             case 32:
                 $integers['atto'] = gmp_strval(gmp_init('0x' . substr($tai, 24), 16), 10);
-                $tai = substr($tai, 0, 24);
+                $tai              = substr($tai, 0, 24);
             case 24:
                 $integers['nano'] = gmp_strval(gmp_init('0x' . substr($tai, 16), 16), 10);
-                $tai = substr($tai, 0, 16);
+                $tai              = substr($tai, 0, 16);
             case 16:
             default:
                 $integers['seconds'] = gmp_strval(gmp_init('0x' . $tai, 16), 10);
@@ -58,8 +57,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function namedTimestamp($name)
     {
-        switch ($name)
-        {
+        switch ($name) {
             case 'max':
                 return '4611686018427387903.999999999999999999';
             case 'epoch:unix':

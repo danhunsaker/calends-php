@@ -7,15 +7,19 @@ class Calends
     protected $internalTime = ['seconds' => 0];
 
     protected $timeConverters = [
-        'toInternal' => [],
+        'toInternal'   => [],
         'fromInternal' => [],
     ];
 
-    public function __construct($stamp = null, $format = 'unix')
+    public function __construct($stamp = null, $calendar = 'unix')
     {
         $this->setupConverters();
 
-        $this->internalTime = $this->timeConverters['toInternal'][$format]($stamp);
+        if ( ! array_key_exists($calendar, $this->timeConverters['toInternal'])) {
+            throw new UnknownCalendarException("Calendar {$calendar} not defined!");
+        }
+
+        $this->internalTime = $this->timeConverters['toInternal'][$calendar]($stamp);
     }
 
     protected function setupConverters()
@@ -33,16 +37,15 @@ class Calends
 
             $time = [
                 'seconds' => gmp_strval(gmp_init('0x' . substr($stamp, 0, 16), 16), 10),
-                'nano' => gmp_strval(gmp_init('0x' . substr($stamp, 16, 8), 16), 10),
-                'atto' => gmp_strval(gmp_init('0x' . substr($stamp, 24, 8), 16), 10),
+                'nano'    => gmp_strval(gmp_init('0x' . substr($stamp, 16, 8), 16), 10),
+                'atto'    => gmp_strval(gmp_init('0x' . substr($stamp, 24, 8), 16), 10),
             ];
 
-            if (bccomp($time['seconds'], bcpow(2, 63)) >= 0)
-            {
+            if (bccomp($time['seconds'], bcpow(2, 63)) >= 0) {
                 $time = [
                     'seconds' => bcsub(bcpow(2, 63), 1, 0),
-                    'nano' => '999999999',
-                    'atto' => '999999999',
+                    'nano'    => '999999999',
+                    'atto'    => '999999999',
                 ];
             }
 
@@ -67,19 +70,16 @@ class Calends
         $stamp = is_null($stamp) ? microtime(true) : $stamp;
 
         $time = [];
-        if (bccomp($stamp, bcsub(0, bcpow(2, 62))) === -1)
-        {
+        if (bccomp($stamp, bcsub(0, bcpow(2, 62))) === -1) {
             $stamp = bcsub(0, bcpow(2, 62));
-        }
-        elseif (bccomp($stamp, bcsub(bcpow(2, 63), bcpow(2, 62))) >= 0)
-        {
+        } elseif (bccomp($stamp, bcsub(bcpow(2, 63), bcpow(2, 62))) >= 0) {
             $stamp = bcsub(bcsub(bcpow(2, 63), bcpow(2, 62)), bcpow(10, -18));
         }
         $unix_seconds = bcdiv($stamp, 1, 0);
 
         $time['seconds'] = bcadd($unix_seconds, bcpow(2, 62), 0);
-        $time['nano'] = gmp_strval(gmp_abs(bcmul(bcsub($stamp, $unix_seconds), bcpow(10, 9), 0)), 10);
-        $time['atto'] = gmp_strval(gmp_abs(bcmul(bcsub(bcmul(bcsub($stamp, $unix_seconds), bcpow(10, 9), 9), bcmul(bccomp($unix_seconds, 0), $time['nano'])), bcpow(10, 9), 0)), 10);
+        $time['nano']    = gmp_strval(gmp_abs(bcmul(bcsub($stamp, $unix_seconds), bcpow(10, 9), 0)), 10);
+        $time['atto']    = gmp_strval(gmp_abs(bcmul(bcsub(bcmul(bcsub($stamp, $unix_seconds), bcpow(10, 9), 9), bcmul(bccomp($unix_seconds, 0), $time['nano'])), bcpow(10, 9), 0)), 10);
 
         return $time;
     }
@@ -94,8 +94,12 @@ class Calends
         return $this->internalTime;
     }
 
-    public function getDate($format = 'unix')
+    public function getDate($calendar = 'unix')
     {
-        return $this->timeConverters['fromInternal'][$format]($this->internalTime);
+        if ( ! array_key_exists($calendar, $this->timeConverters['fromInternal'])) {
+            throw new UnknownCalendarException("Calendar {$calendar} not defined!");
+        }
+
+        return $this->timeConverters['fromInternal'][$calendar]($this->internalTime);
     }
 }
