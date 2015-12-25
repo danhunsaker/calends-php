@@ -4,9 +4,47 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9185f903af9aee140fc1eb34245cb4d3",
-    "content-hash": "77dfa023dec32c42fcab88697f3a84d1",
-    "packages": [],
+    "hash": "7142e359856faa03845ca6e1d62be887",
+    "content-hash": "054cfa59d97b048c26d924e6b1a7c5aa",
+    "packages": [
+        {
+            "name": "rmiller/caser",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/richardmiller/caser.git",
+                "reference": "ec7b0d9b5db806f5e6bcee48d6cce58efb20e834"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/richardmiller/caser/zipball/ec7b0d9b5db806f5e6bcee48d6cce58efb20e834",
+                "reference": "ec7b0d9b5db806f5e6bcee48d6cce58efb20e834",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpspec/phpspec": "~2.1@dev"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "RMiller\\Caser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Richard Miller",
+                    "email": "mrrmiller46@gmail.com"
+                }
+            ],
+            "description": "Manipulates case",
+            "homepage": "https://github.com/richardmiller/caser",
+            "time": "2014-11-02 22:15:20"
+        }
+    ],
     "packages-dev": [
         {
             "name": "behat/behat",
@@ -1023,43 +1061,6 @@
                 "StoryBDD"
             ],
             "time": "2014-11-12 14:09:59"
-        },
-        {
-            "name": "rmiller/caser",
-            "version": "0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/richardmiller/caser.git",
-                "reference": "ec7b0d9b5db806f5e6bcee48d6cce58efb20e834"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/richardmiller/caser/zipball/ec7b0d9b5db806f5e6bcee48d6cce58efb20e834",
-                "reference": "ec7b0d9b5db806f5e6bcee48d6cce58efb20e834",
-                "shasum": ""
-            },
-            "require-dev": {
-                "phpspec/phpspec": "~2.1@dev"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "RMiller\\Caser\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Richard Miller",
-                    "email": "mrrmiller46@gmail.com"
-                }
-            ],
-            "description": "Manipulates case",
-            "homepage": "https://github.com/richardmiller/caser",
-            "time": "2014-11-02 22:15:20"
         },
         {
             "name": "rmiller/error-extension",

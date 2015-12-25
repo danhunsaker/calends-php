@@ -2,11 +2,13 @@
 
 namespace Danhunsaker\Calends;
 
+use RMiller\Caser\Cased;
+
 class Calends
 {
     protected $internalTime = ['seconds' => 0];
 
-    protected $timeConverters = [
+    protected static $timeConverters = [
         'toInternal'   => [],
         'fromInternal' => [],
     ];
@@ -14,25 +16,24 @@ class Calends
     public function __construct($stamp = null, $calendar = 'unix')
     {
         $this->setupConverters();
-
-        if ( ! array_key_exists($calendar, $this->timeConverters['toInternal'])) {
-            throw new UnknownCalendarException("Calendar {$calendar} not defined!");
-        }
-
-        $this->internalTime = $this->timeConverters['toInternal'][$calendar]($stamp);
+        $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
     }
 
     protected function setupConverters()
     {
         bcscale(18);
 
-        $this->timeConverters['toInternal']['unix'] = [$this, 'toInternalFromUnix'];
+        if (array_key_exists('unix', static::$timeConverters['toInternal'])) {
+            return;
+        }
 
-        $this->timeConverters['toInternal']['jdc'] = function ($stamp) {
+        static::$timeConverters['toInternal']['unix'] = [$this, 'toInternalFromUnix'];
+
+        static::$timeConverters['toInternal']['jdc'] = function ($stamp) {
             return $this->toInternalFromUnix(bcmul(bcsub($stamp, 2440587.5), 86400));
         };
 
-        $this->timeConverters['toInternal']['tai'] = function ($stamp) {
+        static::$timeConverters['toInternal']['tai'] = function ($stamp) {
             $stamp = str_pad(str_pad($stamp, 16, '0', STR_PAD_LEFT), 32, '0', STR_PAD_RIGHT);
 
             $time = [
@@ -52,13 +53,13 @@ class Calends
             return $time;
         };
 
-        $this->timeConverters['fromInternal']['unix'] = [$this, 'fromInternalToUnix'];
+        static::$timeConverters['fromInternal']['unix'] = [$this, 'fromInternalToUnix'];
 
-        $this->timeConverters['fromInternal']['jdc'] = function ($time) {
+        static::$timeConverters['fromInternal']['jdc'] = function ($time) {
             return bcadd(bcdiv($this->fromInternalToUnix($time), 86400), 2440587.5);
         };
 
-        $this->timeConverters['fromInternal']['tai'] = function ($time) {
+        static::$timeConverters['fromInternal']['tai'] = function ($time) {
             return str_pad(gmp_strval(gmp_init($time['seconds'], 10), 16), 16, '0', STR_PAD_LEFT)
                  . str_pad(gmp_strval(gmp_init($time['nano'], 10), 16), 8, '0', STR_PAD_LEFT)
                  . str_pad(gmp_strval(gmp_init($time['atto'], 10), 16), 8, '0', STR_PAD_LEFT);
@@ -96,10 +97,24 @@ class Calends
 
     public function getDate($calendar = 'unix')
     {
-        if ( ! array_key_exists($calendar, $this->timeConverters['fromInternal'])) {
-            throw new UnknownCalendarException("Calendar {$calendar} not defined!");
+        return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->internalTime);
+    }
+
+    protected function getCalendar($calendar)
+    {
+        $calendar = Cased::fromCamelCase($calendar)->toCamelCase();
+
+        if ( ! array_key_exists($calendar, static::$timeConverters['toInternal'])) {
+            $className = 'Calends' . Cased::fromCamelCase($calendar)->toPascalCase();
+
+            if (class_exists($className)) {
+                static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
+                static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
+            } else {
+                throw new UnknownCalendarException("Can't find the '{$calendar}' calendar!");
+            }
         }
 
-        return $this->timeConverters['fromInternal'][$calendar]($this->internalTime);
+        return $calendar;
     }
 }
