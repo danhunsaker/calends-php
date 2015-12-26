@@ -15,55 +15,12 @@ class Calends
 
     public function __construct($stamp = null, $calendar = 'unix')
     {
-        $this->setupConverters();
-        $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
-    }
-
-    protected function setupConverters()
-    {
         bcscale(18);
 
-        if (array_key_exists('unix', static::$timeConverters['toInternal'])) {
-            return;
-        }
-
-        static::$timeConverters['toInternal']['unix'] = [static::class, 'toInternalFromUnix'];
-
-        static::$timeConverters['toInternal']['jdc'] = function ($stamp) {
-            return static::toInternalFromUnix(bcmul(bcsub($stamp, 2440587.5), 86400));
-        };
-
-        static::$timeConverters['toInternal']['tai'] = function ($stamp) {
-            $stamp = str_pad(str_pad($stamp, 16, '0', STR_PAD_LEFT), 32, '0', STR_PAD_RIGHT);
-
-            $time = [
-                'seconds' => gmp_strval(gmp_init('0x' . substr($stamp, 0, 16), 16), 10),
-                'nano'    => gmp_strval(gmp_init('0x' . substr($stamp, 16, 8), 16), 10),
-                'atto'    => gmp_strval(gmp_init('0x' . substr($stamp, 24, 8), 16), 10),
-            ];
-
-            if (bccomp($time['seconds'], bcpow(2, 63)) >= 0) {
-                $time = [
-                    'seconds' => bcsub(bcpow(2, 63), 1, 0),
-                    'nano'    => '999999999',
-                    'atto'    => '999999999',
-                ];
-            }
-
-            return $time;
-        };
-
-        static::$timeConverters['fromInternal']['unix'] = [static::class, 'fromInternalToUnix'];
-
-        static::$timeConverters['fromInternal']['jdc'] = function ($time) {
-            return bcadd(bcdiv(static::fromInternalToUnix($time), 86400), 2440587.5);
-        };
-
-        static::$timeConverters['fromInternal']['tai'] = function ($time) {
-            return str_pad(gmp_strval(gmp_init($time['seconds'], 10), 16), 16, '0', STR_PAD_LEFT)
-                 . str_pad(gmp_strval(gmp_init($time['nano'], 10), 16), 8, '0', STR_PAD_LEFT)
-                 . str_pad(gmp_strval(gmp_init($time['atto'], 10), 16), 8, '0', STR_PAD_LEFT);
-        };
+        static::registerCalendar('unix', __NAMESPACE__ . '\\CalendsUnix');
+        static::registerCalendar('jdc', __NAMESPACE__ . '\\CalendsJulianDayCount');
+        static::registerCalendar('tai', __NAMESPACE__ . '\\CalendsTAI64');
+        $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
     }
 
     public static function toInternalFromUnix($stamp)
@@ -108,14 +65,23 @@ class Calends
             $className = __NAMESPACE__ . '\\Calends' . Cased::fromCamelCase($calendar)->asPascalCase();
 
             if (class_exists($className)) {
-                static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
-                static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
+                static::registerCalendar($calendar, $className);
             } else {
                 throw new UnknownCalendarException("Can't find the '{$calendar}' calendar!");
             }
         }
 
         return $calendar;
+    }
+
+    public static function registerCalendar($calendar, $className)
+    {
+        if (array_key_exists($calendar, static::$timeConverters['toInternal'])) {
+            return;
+        }
+
+        static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
+        static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
     }
 
     public function __toString()

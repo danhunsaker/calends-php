@@ -94,8 +94,8 @@ $date = new Calends($tai, 'tai');
 The external [TAI64NA][] format is used internally (or rather, an unserialized
 version is used internally) for all date/time values, so using it is
 considerably faster than converting between any of the other supported
-calendars. Note, however, that only the TAI64NA *format* is used - the seconds
-represented are still UTC seconds, not TAI seconds, as PHP currently lacks a
+calendars. **Note, however, that only the TAI64NA *format* is used - the seconds
+represented are still UTC seconds, not TAI seconds**, as PHP currently lacks a
 reliable mechanism for calculating the associated offset between the two.
 
 ## Contributions
