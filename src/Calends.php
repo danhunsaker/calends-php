@@ -117,4 +117,9 @@ class Calends
 
         return $calendar;
     }
+
+    public function __toString()
+    {
+        return $this->getDate('tai');
+    }
 }
