@@ -66,7 +66,7 @@ class Calends
         };
     }
 
-    public static function toInternalFromUnix($stamp = null)
+    public static function toInternalFromUnix($stamp)
     {
         $stamp = is_null($stamp) ? microtime(true) : $stamp;
 

@@ -21,4 +21,14 @@ class CalendsSpec extends ObjectBehavior
     {
         $this->getDate()->shouldBeString();
     }
+
+    public function it_should_to_internal_from_unix()
+    {
+        $this::toInternalFromUnix(0)->shouldHaveKey('seconds');
+    }
+
+    public function it_should_from_internal_to_unix()
+    {
+        $this::fromInternalToUnix(['seconds' => 0, 'nano' => 0, 'atto' => 0])->shouldBeString();
+    }
 }

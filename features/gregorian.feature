@@ -4,7 +4,8 @@ Feature: Gregorian Calendar handling
   I need to be able to interpret, convert, and output Gregorian dates
 
   Rules:
-  -
+  - Gregorian input should be interpreted accurately
+  - Time values should be converted to Gregorian output accurately
 
   Scenario Outline: Output calandar-neutral date/time
     Given an input timestamp of <input>
