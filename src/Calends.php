@@ -79,13 +79,18 @@ class Calends implements Serializable, JsonSerializable
     public static function registerCalendar($calendar, $className)
     {
         $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
-        
+
         if (array_key_exists($calendar, static::$timeConverters['toInternal'])) {
             return;
         }
 
         static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
         static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
+    }
+
+    public function __invoke($calendar = 'unix')
+    {
+        return $this->getDate($calendar);
     }
 
     public function __toString()

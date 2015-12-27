@@ -17,9 +17,9 @@ composer require danhunsaker/calends
 
 ## Usage
 
-- Setup
-  - [ ] Vanilla PHP
+- [ ] Setup
   - [ ] Laravel
+  - [ ] Vanilla PHP
 - [x] Dates
 - [x] Conversion
 - [x] Storage
@@ -32,7 +32,13 @@ composer require danhunsaker/calends
 
 ### Setup
 
-* To Do
+#### Laravel
+
+* ***__TO DO__***
+
+#### Other Projects
+
+* ***__TO DO__***
 
 ### Dates
 
@@ -42,9 +48,15 @@ constructor:
 ```php
 use Danhunsaker\Calends\Calends;
 
+// The default date is the value of microtime(true), and the default
+// calendar is 'unix' - the following are equivalent:
 $now = new Calends();
+$now = new Calends(null, 'unix');
+$now = new Calends(microtime(true));
+$now = new Calends(microtime(true), 'unix');
 
 // UNIX Epoch - the following are equivalent:
+$epoch = new Calends(0);
 $epoch = new Calends(0, 'unix');
 $epoch = new Calends(2440587.5, 'jdc');
 $epoch = new Calends('1970-01-01 00:00:00 UTC', 'gregorian');
@@ -59,10 +71,16 @@ use Danhunsaker\Calends\Calends;
 
 $now = new Calends();
 
-$unix = $now->getDate('unix');              // 1451165670.329400000000000000
-$julianDayCount = $now->getDate('jdc');     // 2457383.398962145833333333
-$gregorian = $now->getDate('gregorian');    // Sat Dec 26 14:34:30 2015
-$julianCalendar = $now->getDate('julian');  // 12/13/2015 14:34:30 GMT-07:00
+// Using getDate():
+$unix = $now->getDate('unix');     // 1451165670.329400000000000000
+// Or just use as a function - __invoke() calls getDate()
+$unix = $now('unix');              // 1451165670.329400000000000000
+// The default 'calendar' for getDate() is also 'unix'
+$unix = $now();                    // 1451165670.329400000000000000
+
+$julianDayCount = $now('jdc');     // 2457383.398962145833333333
+$gregorian = $now('gregorian');    // Sat Dec 26 14:34:30 2015
+$julianCalendar = $now('julian');  // 12/13/2015 14:34:30 GMT-07:00
 ```
 
 ### Storage
@@ -77,8 +95,9 @@ use Danhunsaker\Calends\Calends;
 
 $now = new Calends();
 
-$tai = $now->getDate('tai');                // 40000000567f07e613a23ec000000000
-$tai = (string) $now;                       // Same as above
+$tai = $now->getDate('tai');       // 40000000567f07e613a23ec000000000
+$tai = $now('tai');                // 40000000567f07e613a23ec000000000
+$tai = (string) $now;              // 40000000567f07e613a23ec000000000
 
 // Save the value of $tai in your database, or wherever makes sense for your app
 ```
@@ -107,11 +126,19 @@ itself to (and from, in the case of `unserialize()`) the `tai` date.
 
 ### Compare
 
+* ***__TO DO__***
+
 ### Modify
+
+* ***__TO DO__***
 
 ### Ranges
 
+* ***__TO DO__***
+
 ### New Calendars
+
+#### Class Definitions
 
 There are two ways to provide new calendar definitions.  The first, and most
 flexible, is with a class implementing
@@ -129,14 +156,16 @@ Calends::registerCalendar('myCustomCalendar', MyCustomCalendar::class);
 This will make your calendar system available to all `Calends` objects
 throughout your project.
 
-The other way is with by storing your definition in a database.  To use this
+#### Database Definitions
+
+The other way is by storing your definition in a database.  To use this
 approach, you need to include `illuminate/database` in your project.  (This
 library is part of the Laravel framework, so you may already have it available.)
 It takes a bit more work to use this approach, but it can be extremely useful in
 cases where you wish to allow your users to define their own calendar systems in
 your project, without expecting them to write any code.
 
-***__TODO:__*** implement database definitions, and document them here.
+* ***__TO DO:__*** implement database definitions, and document them here.
 
 ## Contributions
 
