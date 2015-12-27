@@ -23,10 +23,12 @@ composer require danhunsaker/calends
 - [x] Dates
 - [x] Conversion
 - [x] Storage
-- [ ] Modify
 - [ ] Compare
+- [ ] Modify
 - [ ] Ranges
 - [ ] New Calendars
+  - [x] Class Definitions
+  - [ ] Database Definitions
 
 ### Setup
 
@@ -103,11 +105,45 @@ interfaces, which means you can `serialize()`, `unserialize()`, and
 `json_encode()` a `Calends` object safely, too - it will automatically convert
 itself to (and from, in the case of `unserialize()`) the `tai` date.
 
+### Compare
+
+### Modify
+
+### Ranges
+
+### New Calendars
+
+There are two ways to provide new calendar definitions.  The first, and most
+flexible, is with a class implementing
+[`Danhunsaker\Calends\Calendar\DefinitionInterface`](src/Calendar/DefinitionInterface.php).
+This is, in fact, the way the calendars which ship with Calends are built.  Once
+your calendar definition class is available in your project, you need to
+register it with `Calends::registerCalendar()`:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+Calends::registerCalendar('myCustomCalendar', MyCustomCalendar::class);
+```
+
+This will make your calendar system available to all `Calends` objects
+throughout your project.
+
+The other way is with by storing your definition in a database.  To use this
+approach, you need to include `illuminate/database` in your project.  (This
+library is part of the Laravel framework, so you may already have it available.)
+It takes a bit more work to use this approach, but it can be extremely useful in
+cases where you wish to allow your users to define their own calendar systems in
+your project, without expecting them to write any code.
+
+***__TODO:__*** implement database definitions, and document them here.
+
 ## Contributions
 
 Pull requests, bug reports, and so forth are all welcome on [GitHub][].
 
-Security issues should be reported directly to [danhunsaker+calends@gmail.com](mailto:danhunsaker+calends@gmail.com).
+Security issues should be reported directly to [danhunsaker (plus) calends (at)
+gmail (dot) com](mailto:danhunsaker+calends@gmail.com).
 
 And head to [GitHub][] for everything else.
 
