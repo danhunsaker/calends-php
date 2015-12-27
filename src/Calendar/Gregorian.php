@@ -1,8 +1,10 @@
 <?php
 
-namespace Danhunsaker\Calends;
+namespace Danhunsaker\Calends\Calendar;
 
-class CalendsGregorian implements CalendarDefinitionInterface
+use Danhunsaker\Calends\Calends;
+
+class Gregorian implements DefinitionInterface
 {
     public static function toInternal($date)
     {

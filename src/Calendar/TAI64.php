@@ -1,8 +1,10 @@
 <?php
 
-namespace Danhunsaker\Calends;
+namespace Danhunsaker\Calends\Calendar;
 
-class CalendsTAI64 implements CalendarDefinitionInterface
+use Danhunsaker\Calends\Calends;
+
+class TAI64 implements DefinitionInterface
 {
     public static function toInternal($date)
     {

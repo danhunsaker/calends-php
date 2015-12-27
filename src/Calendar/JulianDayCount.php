@@ -1,8 +1,10 @@
 <?php
 
-namespace Danhunsaker\Calends;
+namespace Danhunsaker\Calends\Calendar;
 
-class CalendsJulianDayCount implements CalendarDefinitionInterface
+use Danhunsaker\Calends\Calends;
+
+class JulianDayCount implements DefinitionInterface
 {
     public static function toInternal($date)
     {

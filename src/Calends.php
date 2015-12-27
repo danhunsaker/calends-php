@@ -3,8 +3,10 @@
 namespace Danhunsaker\Calends;
 
 use RMiller\Caser\Cased;
+use Serializable;
+use JsonSerializable;
 
-class Calends
+class Calends implements Serializable, JsonSerializable
 {
     protected $internalTime = ['seconds' => 0];
 
@@ -17,9 +19,9 @@ class Calends
     {
         bcscale(18);
 
-        static::registerCalendar('unix', __NAMESPACE__ . '\\CalendsUnix');
-        static::registerCalendar('jdc', __NAMESPACE__ . '\\CalendsJulianDayCount');
-        static::registerCalendar('tai', __NAMESPACE__ . '\\CalendsTAI64');
+        static::registerCalendar('unix', __NAMESPACE__ . '\\Calendar\\Unix');
+        static::registerCalendar('jdc', __NAMESPACE__ . '\\Calendar\\JulianDayCount');
+        static::registerCalendar('tai', __NAMESPACE__ . '\\Calendar\\TAI64');
         $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
     }
 
@@ -62,7 +64,7 @@ class Calends
         $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
 
         if ( ! array_key_exists($calendar, static::$timeConverters['toInternal'])) {
-            $className = __NAMESPACE__ . '\\Calends' . Cased::fromCamelCase($calendar)->asPascalCase();
+            $className = __NAMESPACE__ . '\\Calendar\\' . Cased::fromCamelCase($calendar)->asPascalCase();
 
             if (class_exists($className)) {
                 static::registerCalendar($calendar, $className);
@@ -87,5 +89,20 @@ class Calends
     public function __toString()
     {
         return $this->getDate('tai');
+    }
+
+    public function serialize()
+    {
+        return $this->getDate('tai');
+    }
+
+    public function unserialize($str)
+    {
+        $this->__construct($str, 'tai');
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->__toString();
     }
 }

@@ -98,6 +98,11 @@ calendars. **Note, however, that only the TAI64NA *format* is used - the seconds
 represented are still UTC seconds, not TAI seconds**, as PHP currently lacks a
 reliable mechanism for calculating the associated offset between the two.
 
+For convenience, `Calends` implements the `Serializable` and `JsonSerializable`
+interfaces, which means you can `serialize()`, `unserialize()`, and
+`json_encode()` a `Calends` object safely, too - it will automatically convert
+itself to (and from, in the case of `unserialize()`) the `tai` date.
+
 ## Contributions
 
 Pull requests, bug reports, and so forth are all welcome on [GitHub][].

@@ -1,12 +1,11 @@
 <?php
 
-namespace Danhunsaker\Calends;
+namespace Danhunsaker\Calends\Calendar;
 
+use Danhunsaker\Calends\Calends;
 use DateTime;
-use IntlCalendar;
-use IntlDateFormatter;
 
-class CalendsJulian implements CalendarDefinitionInterface
+class Julian implements DefinitionInterface
 {
     public static function toInternal($date)
     {

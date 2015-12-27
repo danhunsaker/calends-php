@@ -1,8 +1,8 @@
 <?php
 
-namespace Danhunsaker\Calends;
+namespace Danhunsaker\Calends\Calendar;
 
-interface CalendarDefinitionInterface
+interface DefinitionInterface
 {
     public static function toInternal($date);
 
