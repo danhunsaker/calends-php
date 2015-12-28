@@ -23,7 +23,7 @@ composer require danhunsaker/calends
 - [x] Dates
 - [x] Conversion
 - [x] Storage
-- [ ] Compare
+- [x] Compare
 - [ ] Modify
 - [ ] Ranges
 - [ ] New Calendars
@@ -126,7 +126,48 @@ itself to (and from, in the case of `unserialize()`) the `tai` date.
 
 ### Compare
 
-* ***__TO DO__***
+Often it is useful to compare two dates to see which came first.  One good
+example of this is sorting.  Calends is designed with this in mind, supporting
+four different methods for doing date comparisons.  Since sorting is so common,
+we'll start with the method designed for that:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$times = [];
+for ($i = 0; $i < 10; $i++)
+{
+    $times[] =  new Calends(mt_rand(0 - mt_getrandmax(), mt_getrandmax()));
+}
+
+print_r($times);
+$sorted = usort($times, [Calends::class, 'compare']);
+print_r($sorted);
+```
+
+`Calends::compare()` accepts two `Calends` objects to compare, and returns -1 if
+the first is before the second, 0 if they are equal, and +1 if the first is
+after the second.  This is compatible with PHP's sorting functions and their
+expectations for the behavior of sorting callbacks.
+
+The other three methods provide more focused comparisons, returning `true` or
+`false` instead of lesser/equal/greater:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$epoch = new Calends(0);
+$now   = new Calends();
+
+print_r([
+    $epoch::isBefore($now),    // true
+    $epoch::isSame($now),      // false
+    $epoch::isAfter($now),     // false
+]);
+```
+
+Each of these methods accepts the `Calends` object to compare the current one
+to, and returns a boolean value, as mentioned above.
 
 ### Modify
 

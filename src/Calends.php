@@ -2,9 +2,9 @@
 
 namespace Danhunsaker\Calends;
 
+use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
-use JsonSerializable;
 
 class Calends implements Serializable, JsonSerializable
 {
@@ -49,16 +49,6 @@ class Calends implements Serializable, JsonSerializable
         return bcadd(bcsub($time['seconds'], bcpow(2, 62), 0), bcdiv(bcadd(bcdiv($time['atto'], bcpow(10, 9), 9), $time['nano'], 9), bcpow(10, 9), 18), 18);
     }
 
-    public function getInternalTime()
-    {
-        return $this->internalTime;
-    }
-
-    public function getDate($calendar = 'unix')
-    {
-        return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->internalTime);
-    }
-
     protected function getCalendar($calendar)
     {
         $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
@@ -86,6 +76,51 @@ class Calends implements Serializable, JsonSerializable
 
         static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
         static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
+    }
+
+    public function getInternalTime()
+    {
+        return $this->internalTime;
+    }
+
+    public function getDate($calendar = 'unix')
+    {
+        return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->internalTime);
+    }
+
+    public static function compare(Calends $a, Calends $b)
+    {
+        $a = $a->getInternalTime();
+        $b = $b->getInternalTime();
+
+        if ($a['seconds'] === $b['seconds']) {
+            if ($a['nano'] === $b['nano']) {
+                if ($a['atto'] === $b['atto']) {
+                    return 0;
+                } else {
+                    return gmp_sign(bcsub($a['atto'], $b['atto']));
+                }
+            } else {
+                return gmp_sign(bcsub($a['nano'], $b['nano']));
+            }
+        } else {
+            return gmp_sign(bcsub($a['seconds'], $b['seconds']));
+        }
+    }
+
+    public function isSame(Calends $compare)
+    {
+        return static::compare($this, $compare) === 0;
+    }
+
+    public function isBefore(Calends $compare)
+    {
+        return static::compare($this, $compare) === -1;
+    }
+
+    public function isAfter(Calends $compare)
+    {
+        return static::compare($this, $compare) === +1;
     }
 
     public function __invoke($calendar = 'unix')
