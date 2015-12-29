@@ -15,4 +15,9 @@ class Unix implements DefinitionInterface
     {
         return Calends::fromInternalToUnix($stamp);
     }
+
+    public static function offset($stamp, $offset)
+    {
+        return static::toInternal(bcadd(static::fromInternal($stamp), $offset));
+    }
 }

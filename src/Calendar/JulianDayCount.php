@@ -15,4 +15,9 @@ class JulianDayCount implements DefinitionInterface
     {
         return bcadd(bcdiv(Calends::fromInternalToUnix($stamp), 86400), 2440587.5);
     }
+
+    public static function offset($stamp, $offset)
+    {
+        return static::toInternal(bcadd(static::fromInternal($stamp), $offset));
+    }
 }

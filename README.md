@@ -1,4 +1,4 @@
-# Calends
+# Calends #
 
 [![Latest Version](https://img.shields.io/github/release/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
@@ -7,7 +7,7 @@
 
 Arbitrary calendar systems in PHP.
 
-## Installation
+## Installation ##
 
 Use Composer:
 
@@ -15,7 +15,7 @@ Use Composer:
 composer require danhunsaker/calends
 ```
 
-## Usage
+## Usage ##
 
 - [ ] Setup
   - [ ] Laravel
@@ -24,23 +24,23 @@ composer require danhunsaker/calends
 - [x] Conversion
 - [x] Storage
 - [x] Compare
-- [ ] Modify
-- [ ] Ranges
+- [x] Modify
+- [x] Ranges
 - [ ] New Calendars
   - [x] Class Definitions
   - [ ] Database Definitions
 
-### Setup
+### Setup ###
 
-#### Laravel
-
-* ***__TO DO__***
-
-#### Other Projects
+#### Laravel ####
 
 * ***__TO DO__***
 
-### Dates
+#### Other Projects ####
+
+* ***__TO DO__***
+
+### Dates ###
 
 Create a `Calends` object with the date and calendar system as arguments to the
 constructor:
@@ -55,21 +55,28 @@ $now = new Calends(null, 'unix');
 $now = new Calends(microtime(true));
 $now = new Calends(microtime(true), 'unix');
 
+// You can also use Calends::create() instead of new Calends(), which
+// can be pretty useful when using method chaining:
+$now = Calends::create();
+$now = Calends::create(null, 'unix');
+$now = Calends::create(microtime(true));
+$now = Calends::create(microtime(true), 'unix');
+
 // UNIX Epoch - the following are equivalent:
-$epoch = new Calends(0);
-$epoch = new Calends(0, 'unix');
-$epoch = new Calends(2440587.5, 'jdc');
-$epoch = new Calends('1970-01-01 00:00:00 UTC', 'gregorian');
+$epoch = Calends::create(0);
+$epoch = Calends::create(0, 'unix');
+$epoch = Calends::create(2440587.5, 'jdc');
+$epoch = Calends::create('1970-01-01 00:00:00 UTC', 'gregorian');
 ```
 
-### Conversion
+### Conversion ###
 
 Now you can convert that date to any other supported calendar system:
 
 ```php
 use Danhunsaker\Calends\Calends;
 
-$now = new Calends();
+$now = Calends::create();
 
 // Using getDate():
 $unix = $now->getDate('unix');     // 1451165670.329400000000000000
@@ -83,7 +90,7 @@ $gregorian = $now('gregorian');    // Sat Dec 26 14:34:30 2015
 $julianCalendar = $now('julian');  // 12/13/2015 14:34:30 GMT-07:00
 ```
 
-### Storage
+### Storage ###
 
 You can technically store Calends date values in any of the supported output
 formats, however this is not recommended for various reasons, performance among
@@ -93,7 +100,7 @@ them.  Instead, save and restore `Calends` objects using the built-in `tai`
 ```php
 use Danhunsaker\Calends\Calends;
 
-$now = new Calends();
+$now = Calends::create();
 
 $tai = $now->getDate('tai');       // 40000000567f07e613a23ec000000000
 $tai = $now('tai');                // 40000000567f07e613a23ec000000000
@@ -109,7 +116,7 @@ use Danhunsaker\Calends\Calends;
 
 // Retrieve the previously-stored value of $tai...
 
-$date = new Calends($tai, 'tai');
+$date = Calends::create($tai, 'tai');
 ```
 
 The external [TAI64NA][] format is used internally (or rather, an unserialized
@@ -122,9 +129,10 @@ reliable mechanism for calculating the associated offset between the two.
 For convenience, `Calends` implements the `Serializable` and `JsonSerializable`
 interfaces, which means you can `serialize()`, `unserialize()`, and
 `json_encode()` a `Calends` object safely, too - it will automatically convert
-itself to (and from, in the case of `unserialize()`) the `tai` date.
+itself to (and from, in the case of `unserialize()`) the `tai` date.  (More on
+this below, though...)
 
-### Compare
+### Compare ###
 
 Often it is useful to compare two dates to see which came first.  One good
 example of this is sorting.  Calends is designed with this in mind, supporting
@@ -137,7 +145,7 @@ use Danhunsaker\Calends\Calends;
 $times = [];
 for ($i = 0; $i < 10; $i++)
 {
-    $times[] =  new Calends(mt_rand(0 - mt_getrandmax(), mt_getrandmax()));
+    $times[] =  Calends::create(mt_rand(0 - mt_getrandmax(), mt_getrandmax()));
 }
 
 print_r($times);
@@ -150,14 +158,14 @@ the first is before the second, 0 if they are equal, and +1 if the first is
 after the second.  This is compatible with PHP's sorting functions and their
 expectations for the behavior of sorting callbacks.
 
-The other three methods provide more focused comparisons, returning `true` or
+The next three methods provide more focused comparisons, returning `true` or
 `false` instead of lesser/equal/greater:
 
 ```php
 use Danhunsaker\Calends\Calends;
 
-$epoch = new Calends(0);
-$now   = new Calends();
+$epoch = Calends::create(0);
+$now   = Calends::create();
 
 print_r([
     $epoch::isBefore($now),    // true
@@ -169,17 +177,134 @@ print_r([
 Each of these methods accepts the `Calends` object to compare the current one
 to, and returns a boolean value, as mentioned above.
 
-### Modify
+There's another method you can use to compare `Calends` objects, which returns
+the amount, in seconds, by which they are different, rather than just which
+direction they differ in:
 
-* ***__TO DO__***
+```php
+use Danhunsaker\Calends\Calends;
 
-### Ranges
+$epoch = Calends::create(0);
+$now   = Calends::create();
 
-* ***__TO DO__***
+echo $now->difference($epoch); // Seconds between $epoch and $now
+```
 
-### New Calendars
+### Modify ###
 
-#### Class Definitions
+`Calends` objects are immutable - that is, you cannot modify them directly.
+Instead, any action which would change the object's values actually creates and
+returns a whole new `Calends` object.  This has some advantages, such as
+preserving the original object, but can be a bit unexpected if you aren't aware
+of it.  The examples below take this into account.
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
+$tomorrow  = $now->add('1 day', 'gregorian');
+$yesterday = $now->subtract('1 day', 'gregorian');
+
+// This example will actually produce an entire range:
+$last24hrs = $now->setDate($yesterday->getDate());
+```
+
+### Ranges ###
+
+That last example actually introduces a feature of `Calends` objects we haven't
+previously touched on.  Every date value can be thought of as an instant in
+time - a range of time both starting and ending at the same time value.  The
+duration of such a range would be zero.  Calends takes advantage of this fact to
+treat every `Calends` object as a range as easily as a single point in time.
+That means times and ranges can coexist in a single class, allowing complex
+operations to be simplified considerably.
+
+It also means that not only are there several other methods you can use to
+perform range-related operations, but many of the methods you've already learned
+have additional ways they can be used when you want to work with ranges instead
+of simple dates.
+
+Let's start with the last example, and use it to introduce some other methods:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
+$tomorrow  = $now->add('1 day', 'gregorian');
+$yesterday = $now->subtract('1 day', 'gregorian');
+
+// setDate() and setEndDate() also accept a calendar, which defaults to 'unix'
+$last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
+$next24hrs = $now->setEndDate($tomorrow->getDate('gregorian'), 'gregorian');
+$next72hrs = $now->setDuration('72 hours', 'gregorian');
+
+// You can also create a full range in one step:
+$next7days = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
+$last7days = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
+
+// Of course, you'll want to be able to retrieve end dates and durations as well
+// as start dates:
+$endArray  = $next72hrs->getEndTime();             // Same as getInternalTime()
+$dateIn72  = $next72hrs->getEndDate('gregorian');
+$secsIn72  = $next72hrs->getDuration();            // In seconds
+
+// And what would a date range library be without range comparisons?
+print_r([
+    $now::isBefore($last24hrs),     // false
+    $now::endsBefore($last24hrs),   // true
+    $now::startsBefore($last24hrs), // false
+    $now::isSame($last24hrs),       // false
+    $now::isDuring($last24hrs),     // true
+    $now::contains($last24hrs),     // false
+    $now::endsAfter($last24hrs),    // false
+    $now::startsAfter($last24hrs),  // false
+    $now::isAfter($last24hrs),      // false
+]);
+
+// For that to work, we need a more flexible compare() method:
+$times = [];
+for ($i = 0; $i < 10; $i++)
+{
+    $times[] =  Calends::create(mt_rand(0 - mt_getrandmax(), mt_getrandmax()));
+}
+
+print_r($times);
+
+$sorted = usort($times, function($a, $b) {
+    return Calends::compare($a, $b, 'start');
+});
+print_r($sorted);             // Sorted by start date, which is the default
+
+$endSorted = usort($times, function($a, $b) {
+    return Calends::compare($a, $b, 'end');
+});
+print_r($endSorted);          // Sorted by end date
+
+$endStartSorted = usort($times, function($a, $b) {
+    return Calends::compare($a, $b, 'end-start');
+});
+print_r($endStartSorted);     // Ranges that start before others end are earlier
+                              // in this sort
+
+$startEndSorted = usort($times, function($a, $b) {
+    return Calends::compare($a, $b, 'start-end');
+});
+print_r($startEndSorted);     // Ranges that end before others start are earlier
+                              // in this sort
+
+// Which of course means we'd want the same flexibility for our difference()
+// method:
+echo $now->difference($next7days, 'start');           // 0
+echo $now->difference($next7days, 'end');             // 604800
+echo $last7days->difference($next7days, 'start-end'); // 1209600
+echo $last7days->difference($next7days, 'end-start'); // 0
+```
+
+### New Calendars ###
+
+#### Class Definitions ####
 
 There are two ways to provide new calendar definitions.  The first, and most
 flexible, is with a class implementing
@@ -197,7 +322,7 @@ Calends::registerCalendar('myCustomCalendar', MyCustomCalendar::class);
 This will make your calendar system available to all `Calends` objects
 throughout your project.
 
-#### Database Definitions
+#### Database Definitions ####
 
 The other way is by storing your definition in a database.  To use this
 approach, you need to include `illuminate/database` in your project.  (This
@@ -208,7 +333,7 @@ your project, without expecting them to write any code.
 
 * ***__TO DO:__*** implement database definitions, and document them here.
 
-## Contributions
+## Contributions ##
 
 Pull requests, bug reports, and so forth are all welcome on [GitHub][].
 

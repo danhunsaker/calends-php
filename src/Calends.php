@@ -2,19 +2,56 @@
 
 namespace Danhunsaker\Calends;
 
+use Danhunsaker\Calends\Calendar\DefinitionInterface as CalendarDefinition;
+use Danhunsaker\Calends\Calendar\ObjectDefinitionInterface as ObjectDefinition;
 use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
 
 class Calends implements Serializable, JsonSerializable
 {
+    /**
+     * Stores the internal time representation for the start date
+     *
+     * @var array
+     **/
     protected $internalTime = ['seconds' => 0];
 
+    /**
+     * Stores the duration of the object's date range in seconds
+     *
+     * @var string|int
+     **/
+    protected $duration = 0;
+
+    /**
+     * Stores the internal time representation for the end date
+     *
+     * @var array
+     **/
+    protected $endTime = ['seconds' => 0];
+
+    /**
+     * Stores all registered calendar definition functions
+     *
+     * @var array
+     **/
     protected static $timeConverters = [
         'toInternal'   => [],
         'fromInternal' => [],
+        'offset'       => [],
     ];
 
+    // Setup Functions
+
+    /**
+     * create a new Calends object
+     *
+     * The Calends constructor.
+     *
+     * @param mixed stamp Either a single date value to parse, or an array with start and end dates to parse
+     * @param string calendar The calendar system definition to parse $stamp with
+     **/
     public function __construct($stamp = null, $calendar = 'unix')
     {
         bcscale(18);
@@ -22,8 +59,68 @@ class Calends implements Serializable, JsonSerializable
         static::registerCalendar('unix', __NAMESPACE__ . '\\Calendar\\Unix');
         static::registerCalendar('jdc', __NAMESPACE__ . '\\Calendar\\JulianDayCount');
         static::registerCalendar('tai', __NAMESPACE__ . '\\Calendar\\TAI64');
-        $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
+
+        if (is_array($stamp)) {
+            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp['start']);
+            $this->endTime      = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp['end']);
+            $this->duration     = $this->difference($this, 'end-start');
+        } else {
+            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
+            $this->endTime      = $this->internalTime;
+            $this->duration     = 0;
+        }
     }
+
+    /**
+     * create a new Calends object
+     *
+     * Calls the Calends constructor in a static context rather than a
+     * `new Class` context.  Useful for method chaining.
+     *
+     * @param mixed stamp Either a single date value to parse, or an array with start and end dates to parse
+     * @param string calendar The calendar system definition to parse $stamp with
+     **/
+    public static function create($stamp = null, $calendar = 'unix')
+    {
+        return new static($stamp, $calendar);
+    }
+
+    protected function getCalendar($calendar)
+    {
+        $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
+
+        if ( ! array_key_exists($calendar, static::$timeConverters['toInternal'])) {
+            $className = __NAMESPACE__ . '\\Calendar\\' . Cased::fromCamelCase($calendar)->asPascalCase();
+
+            if (class_exists($className)) {
+                static::registerCalendar($calendar, $className);
+            } else {    // TODO: Implement Eloquent definitions, and check/register them before giving up
+                throw new UnknownCalendarException("Can't find the '{$calendar}' calendar!");
+            }
+        }
+
+        return $calendar;
+    }
+
+    public static function registerCalendar($calendar, $className)
+    {
+        $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
+
+        if (array_key_exists($calendar, static::$timeConverters['toInternal'])) {
+            return;
+        }
+
+        if ( ! ((is_string($className) && class_exists($className) && is_a($className, CalendarDefinition::class, true))
+            || (is_object($className) && is_a($className, ObjectDefinition::class)))) {
+            throw new InvalidCalendarException('Not a vaild calendar definition class name or instance: ' . var_export($className, true));
+        }
+
+        static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
+        static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
+        static::$timeConverters['offset'][$calendar]       = [$className, 'offset'];
+    }
+
+    // Conversion Functions
 
     public static function toInternalFromUnix($stamp)
     {
@@ -49,34 +146,7 @@ class Calends implements Serializable, JsonSerializable
         return bcadd(bcsub($time['seconds'], bcpow(2, 62), 0), bcdiv(bcadd(bcdiv($time['atto'], bcpow(10, 9), 9), $time['nano'], 9), bcpow(10, 9), 18), 18);
     }
 
-    protected function getCalendar($calendar)
-    {
-        $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
-
-        if ( ! array_key_exists($calendar, static::$timeConverters['toInternal'])) {
-            $className = __NAMESPACE__ . '\\Calendar\\' . Cased::fromCamelCase($calendar)->asPascalCase();
-
-            if (class_exists($className)) {
-                static::registerCalendar($calendar, $className);
-            } else {
-                throw new UnknownCalendarException("Can't find the '{$calendar}' calendar!");
-            }
-        }
-
-        return $calendar;
-    }
-
-    public static function registerCalendar($calendar, $className)
-    {
-        $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
-
-        if (array_key_exists($calendar, static::$timeConverters['toInternal'])) {
-            return;
-        }
-
-        static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
-        static::$timeConverters['fromInternal'][$calendar] = [$className, 'fromInternal'];
-    }
+    // Getters
 
     public function getInternalTime()
     {
@@ -88,40 +158,133 @@ class Calends implements Serializable, JsonSerializable
         return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->internalTime);
     }
 
-    public static function compare(Calends $a, Calends $b)
+    public function getDuration()
     {
-        $a = $a->getInternalTime();
-        $b = $b->getInternalTime();
+        return $this->duration;
+    }
 
-        if ($a['seconds'] === $b['seconds']) {
-            if ($a['nano'] === $b['nano']) {
-                if ($a['atto'] === $b['atto']) {
-                    return 0;
-                } else {
-                    return gmp_sign(bcsub($a['atto'], $b['atto']));
-                }
-            } else {
-                return gmp_sign(bcsub($a['nano'], $b['nano']));
-            }
-        } else {
-            return gmp_sign(bcsub($a['seconds'], $b['seconds']));
+    public function getEndTime()
+    {
+        return $this->endTime;
+    }
+
+    public function getEndDate($calendar = 'unix')
+    {
+        return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->endTime);
+    }
+
+    // Comparison Functions
+
+    protected function getTimesByMode($a, $b, $mode = 'start')
+    {
+        switch ($mode) {
+            case "start-end":
+                $times = [$a->internalTime, $b->endTime];
+                break;
+            case "end-start":
+                $times = [$a->endTime, $b->internalTime];
+                break;
+            case "end":
+                $times = [$a->endTime, $b->endTime];
+                break;
+            case "start":
+            default:
+                $times = [$a->internalTime, $b->internalTime];
+                break;
         }
+
+        return $times;
+    }
+
+    public function difference(Calends $compare, $mode = 'start')
+    {
+        list($a, $b) = $this->getTimesByMode($this, $compare, $mode);
+
+        return bcsub("{$a['seconds']}.{$a['nano']}{$a['atto']}", "{$b['seconds']}.{$b['nano']}{$b['atto']}");
+    }
+
+    public static function compare(Calends $a, Calends $b, $mode = 'start')
+    {
+        list($a, $b) = $this->getTimesByMode($a, $b, $mode);
+
+        return bccomp("{$a['seconds']}.{$a['nano']}{$a['atto']}", "{$b['seconds']}.{$b['nano']}{$b['atto']}");
     }
 
     public function isSame(Calends $compare)
     {
-        return static::compare($this, $compare) === 0;
+        return static::compare($this, $compare, 'start') === 0 && static::compare($this, $compare, 'end') === 0;
+    }
+
+    public function isDuring(Calends $compare)
+    {
+        return static::compare($this, $compare, 'start') >= 0 && static::compare($this, $compare, 'end') <= 0;
+    }
+
+    public function contains(Calends $compare)
+    {
+        return static::compare($this, $compare, 'start') <= 0 && static::compare($this, $compare, 'end') >= 0;
     }
 
     public function isBefore(Calends $compare)
     {
-        return static::compare($this, $compare) === -1;
+        return static::compare($this, $compare, 'end-start') === -1;
+    }
+
+    public function startsBefore(Calends $compare)
+    {
+        return static::compare($this, $compare, 'start') === -1;
+    }
+
+    public function endsBefore(Calends $compare)
+    {
+        return static::compare($this, $compare, 'end') === -1;
     }
 
     public function isAfter(Calends $compare)
     {
-        return static::compare($this, $compare) === +1;
+        return static::compare($this, $compare, 'start-end') === +1;
     }
+
+    public function startsAfter(Calends $compare)
+    {
+        return static::compare($this, $compare, 'start') === +1;
+    }
+
+    public function endsAfter(Calends $compare)
+    {
+        return static::compare($this, $compare, 'end') === +1;
+    }
+
+    // Modification Functions
+
+    public function add($offset, $calendar = 'unix')
+    {
+        return static::create(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset), $calendar);
+    }
+
+    public function subtract($offset, $calendar = 'unix')
+    {
+        return $this->add("-{$offset}", $calendar);
+    }
+
+    // Range Functions
+
+    public function setDate($date, $calendar = 'unix')
+    {
+        return static::create(['start' => $date, 'end' => $this->getEndDate($calendar)], $calendar);
+    }
+
+    public function setEndDate($date, $calendar = 'unix')
+    {
+        return static::create(['start' => $this->getDate($calendar), 'end' => $date], $calendar);
+    }
+
+    public function setDuration($duration, $calendar = 'unix')
+    {
+        return $this->setEndDate($this->add($duration, $calendar)->getDate('tai'), 'tai');
+    }
+
+    // "Magic" Functions
 
     public function __invoke($calendar = 'unix')
     {
@@ -135,16 +298,16 @@ class Calends implements Serializable, JsonSerializable
 
     public function serialize()
     {
-        return $this->getDate('tai');
+        return serialize($this->jsonSerialize());
     }
 
     public function unserialize($str)
     {
-        $this->__construct($str, 'tai');
+        $this->__construct(unserialize($str), 'tai');
     }
 
     public function jsonSerialize()
     {
-        return $this->__toString();
+        return $this->duration == 0 ? $this->getDate('tai') : ['start' => $this->getDate('tai'), 'end' => $this->getEndDate('tai')];
     }
 }

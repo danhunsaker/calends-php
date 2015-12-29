@@ -15,4 +15,9 @@ class Gregorian implements DefinitionInterface
     {
         return strftime('%c', Calends::fromInternalToUnix($stamp));
     }
+
+    public static function offset($stamp, $offset)
+    {
+        return Calends::toInternalFromUnix(strtotime($offset, Calends::fromInternalToUnix($stamp)));
+    }
 }

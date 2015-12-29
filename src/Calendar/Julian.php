@@ -18,4 +18,10 @@ class Julian implements DefinitionInterface
         $date = Calends::fromInternalToUnix($stamp);
         return jdtojulian(bcadd(bcdiv($date, 86400), 2440587.5)) . date(' H:i:s \G\M\TP', bcmod($date, 86400));
     }
+
+    public static function offset($stamp, $offset)
+    {
+        $date = new DateTime(static::fromInternal($stamp));
+        return static::toInternal('@' . $date->modify($offset)->getTimestamp());
+    }
 }

@@ -33,4 +33,9 @@ class TAI64 implements DefinitionInterface
              . str_pad(gmp_strval(gmp_init($stamp['nano'], 10), 16), 8, '0', STR_PAD_LEFT)
              . str_pad(gmp_strval(gmp_init($stamp['atto'], 10), 16), 8, '0', STR_PAD_LEFT);
     }
+
+    public static function offset($stamp, $offset)
+    {
+        return Calends::toInternalFromUnix(bcadd(Calends::fromInternalToUnix($stamp), Calends::fromInternalToUnix(static::toInternal($offset))));
+    }
 }

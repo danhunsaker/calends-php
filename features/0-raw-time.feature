@@ -6,7 +6,6 @@ Feature: Raw Time (No Calendar System)
   Rules:
   - Times are stored internally as TAI64NA second counts
   - Internal times are converted to other date formats only on user request
-  - Date math is performed entirely in TAI64NA second counts
 
   Scenario Outline: Input a timestamp
     Given an input timestamp of <input>
