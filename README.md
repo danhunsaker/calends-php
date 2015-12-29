@@ -19,7 +19,7 @@ composer require danhunsaker/calends
 
 - [ ] Setup
   - [ ] Laravel
-  - [ ] Vanilla PHP
+  - [ ] Other Projects
 - [x] Dates
 - [x] Conversion
 - [x] Storage
@@ -29,16 +29,17 @@ composer require danhunsaker/calends
 - [ ] New Calendars
   - [x] Class Definitions
   - [ ] Database Definitions
+  - [x] Object Definitions
 
 ### Setup ###
 
 #### Laravel ####
 
-* ***__TO DO__***
+* **_TO DO_**
 
 #### Other Projects ####
 
-* ***__TO DO__***
+* **_TO DO_**
 
 ### Dates ###
 
@@ -234,11 +235,15 @@ $now       = Calends::create();
 
 $tomorrow  = $now->add('1 day', 'gregorian');
 $yesterday = $now->subtract('1 day', 'gregorian');
+// Alternately:
+$tomorrow  = $now->addFromEnd('1 day', 'gregorian');
+$yesterday = $now->subtractFromEnd('1 day', 'gregorian');
 
 // setDate() and setEndDate() also accept a calendar, which defaults to 'unix'
 $last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
 $next24hrs = $now->setEndDate($tomorrow->getDate('gregorian'), 'gregorian');
 $next72hrs = $now->setDuration('72 hours', 'gregorian');
+$last72hrs = $now->setDurationFromEnd('72 hours', 'gregorian');
 
 // You can also create a full range in one step:
 $next7days = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
@@ -246,24 +251,50 @@ $last7days = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregor
 
 // Of course, you'll want to be able to retrieve end dates and durations as well
 // as start dates:
-$endArray  = $next72hrs->getEndTime();             // Same as getInternalTime()
-$dateIn72  = $next72hrs->getEndDate('gregorian');
+$endArray  = $next72hrs->getEndTime();             // Like getInternalTime()
+$dateIn72  = $next72hrs->getEndDate('gregorian');  // Like getDate()
 $secsIn72  = $next72hrs->getDuration();            // In seconds
+
+// While the new `Calends` object from setDate() inherits the end date of the
+// object that created it, and the new one from getEndDate() inherits the
+// creator's start date (meaning these new objects overlap), sometimes you want
+// to create new objects that instead abut the creating object.  Here's how:
+$followingWeek  = $next7days->next();
+$precedingWeek  = $last7days->previous();
+$followingMonth = $next7days->next('1 month', 'gregorian');
+$precedingMonth = $last7days->previous('1 month', 'gregorian');
+
+// If you want to work with composite ranges, we've got you covered:
+$bothMonths     = $precedingMonth->merge($followingMonth);      // 2.5 months
+$commonTime     = $precedingMonth->intersect($precedingWeek);   // 1 week
+$betweenMonths  = $precedingMonth->gap($followingMonth);        // 2 weeks
+
+// But keep in mind that an `InvalidCompositeRangeException` is thrown if you
+// call intersect() without an overlap, or gap() when an overlap exists:
+$invalidRange   = $precedingMonth->intersect($followingMonth);  // Exception
+$invalidRange   = $precedingMonth->gap($precedingWeek);         // Exception
 
 // And what would a date range library be without range comparisons?
 print_r([
-    $now::isBefore($last24hrs),     // false
-    $now::endsBefore($last24hrs),   // true
-    $now::startsBefore($last24hrs), // false
-    $now::isSame($last24hrs),       // false
-    $now::isDuring($last24hrs),     // true
-    $now::contains($last24hrs),     // false
-    $now::endsAfter($last24hrs),    // false
-    $now::startsAfter($last24hrs),  // false
-    $now::isAfter($last24hrs),      // false
+    $now::startsBefore($last24hrs),   // false
+    $now::isBefore($last24hrs),       // false
+    $now::endsBefore($last24hrs),     // true
+    $now::isSame($last24hrs),         // false
+    $now::startsDuring($last24hrs),   // true
+    $now::isDuring($last24hrs),       // true
+    $now::endsDuring($last24hrs),     // true
+    $now::contains($last24hrs),       // false
+    $now::overlaps($last24hrs),       // true
+    $now::abuts($last24hrs),          // true
+    $now::startsAfter($last24hrs),    // false
+    $now::isAfter($last24hrs),        // false
+    $now::endsAfter($last24hrs),      // false
+    $now::isLonger($last24hrs),       // false
+    $now::isShorter($last24hrs),      // true
+    $now::isSameDuration($last24hrs), // false
 ]);
 
-// For that to work, we need a more flexible compare() method:
+// For all of that to work, we need a more flexible compare() method:
 $times = [];
 for ($i = 0; $i < 10; $i++)
 {
@@ -294,12 +325,18 @@ $startEndSorted = usort($times, function($a, $b) {
 print_r($startEndSorted);     // Ranges that end before others start are earlier
                               // in this sort
 
+$endSorted = usort($times, function($a, $b) {
+    return Calends::compare($a, $b, 'duration');
+});
+print_r($endSorted);          // Sorted by duration
+
 // Which of course means we'd want the same flexibility for our difference()
 // method:
 echo $now->difference($next7days, 'start');           // 0
 echo $now->difference($next7days, 'end');             // 604800
 echo $last7days->difference($next7days, 'start-end'); // 1209600
 echo $last7days->difference($next7days, 'end-start'); // 0
+echo $last7days->difference($next7days, 'duration');  // 0
 ```
 
 ### New Calendars ###
@@ -322,6 +359,11 @@ Calends::registerCalendar('myCustomCalendar', MyCustomCalendar::class);
 This will make your calendar system available to all `Calends` objects
 throughout your project.
 
+Note that while Calends will automatically find and register class definitions
+in the `Danhunsaker\Calends\Calendar` namespace, it is considered bad form to
+create your classes there unless they're officially recognized by the main
+project, since a namespace implies official support and/or endorsement.
+
 #### Database Definitions ####
 
 The other way is by storing your definition in a database.  To use this
@@ -331,7 +373,22 @@ It takes a bit more work to use this approach, but it can be extremely useful in
 cases where you wish to allow your users to define their own calendar systems in
 your project, without expecting them to write any code.
 
-* ***__TO DO:__*** implement database definitions, and document them here.
+* **_TO DO:_** implement database definitions, and document them here.
+
+#### Object Definitions ####
+
+Of course, you could also implement the interface used by the Eloquent model
+([`Danhunsaker\Calends\Calendar\ObjectDefinitionInterface`](src/Calendar/ObjectDefinitionInterface.php))
+directly on *any* class you wanted to, and register instances of *that* to
+handle various calendars.  Just because the interface is designed for database
+use doesn't mean it can't be used elsewhere.  Using such classes would look
+something like this:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+Calends::registerCalendar('myCustomCalendar', new MyCustomCalendar());
+```
 
 ## Contributions ##
 

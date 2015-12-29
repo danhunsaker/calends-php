@@ -175,21 +175,29 @@ class Calends implements Serializable, JsonSerializable
 
     // Comparison Functions
 
+    protected function getInternalTimeAsString($time)
+    {
+        return "{$time['seconds']}.{$time['nano']}{$time['atto']}";
+    }
+
     protected function getTimesByMode($a, $b, $mode = 'start')
     {
         switch ($mode) {
+            case "duration":
+                $times = [$a->duration, $b->duration];
+                break;
             case "start-end":
-                $times = [$a->internalTime, $b->endTime];
+                $times = [$this->getInternalTimeAsString($a->internalTime), $this->getInternalTimeAsString($b->endTime)];
                 break;
             case "end-start":
-                $times = [$a->endTime, $b->internalTime];
+                $times = [$this->getInternalTimeAsString($a->endTime), $this->getInternalTimeAsString($b->internalTime)];
                 break;
             case "end":
-                $times = [$a->endTime, $b->endTime];
+                $times = [$this->getInternalTimeAsString($a->endTime), $this->getInternalTimeAsString($b->endTime)];
                 break;
             case "start":
             default:
-                $times = [$a->internalTime, $b->internalTime];
+                $times = [$this->getInternalTimeAsString($a->internalTime), $this->getInternalTimeAsString($b->internalTime)];
                 break;
         }
 
@@ -198,16 +206,16 @@ class Calends implements Serializable, JsonSerializable
 
     public function difference(Calends $compare, $mode = 'start')
     {
-        list($a, $b) = $this->getTimesByMode($this, $compare, $mode);
+        $times = $this->getTimesByMode($this, $compare, $mode);
 
-        return bcsub("{$a['seconds']}.{$a['nano']}{$a['atto']}", "{$b['seconds']}.{$b['nano']}{$b['atto']}");
+        return bcsub($times[0], $times[1]);
     }
 
     public static function compare(Calends $a, Calends $b, $mode = 'start')
     {
-        list($a, $b) = $this->getTimesByMode($a, $b, $mode);
+        $times = $this->getTimesByMode($a, $b, $mode);
 
-        return bccomp("{$a['seconds']}.{$a['nano']}{$a['atto']}", "{$b['seconds']}.{$b['nano']}{$b['atto']}");
+        return bccomp($times[0], $times[1]);
     }
 
     public function isSame(Calends $compare)
@@ -220,9 +228,29 @@ class Calends implements Serializable, JsonSerializable
         return static::compare($this, $compare, 'start') >= 0 && static::compare($this, $compare, 'end') <= 0;
     }
 
+    public function startsDuring(Calends $compare)
+    {
+        return static::compare($this, $compare, 'start') >= 0 && static::compare($this, $compare, 'start-end') <= 0;
+    }
+
+    public function endsDuring(Calends $compare)
+    {
+        return static::compare($this, $compare, 'end-start') >= 0 && static::compare($this, $compare, 'end') <= 0;
+    }
+
     public function contains(Calends $compare)
     {
         return static::compare($this, $compare, 'start') <= 0 && static::compare($this, $compare, 'end') >= 0;
+    }
+
+    public function overlaps(Calends $compare)
+    {
+        return $this->startsDuring($compare) || $this->endsDuring($compare) || $compare->startsDuring($this) || $compare->endsDuring($this);
+    }
+
+    public function abuts(Calends $compare)
+    {
+        return static::compare($this, $compare, 'start-end') === 0 || static::compare($this, $compare, 'end-start') === 0;
     }
 
     public function isBefore(Calends $compare)
@@ -255,6 +283,21 @@ class Calends implements Serializable, JsonSerializable
         return static::compare($this, $compare, 'end') === +1;
     }
 
+    public function isShorter(Calends $compare)
+    {
+        return static::compare($this, $compare, 'duration') === -1;
+    }
+
+    public function isSameDuration(Calends $compare)
+    {
+        return static::compare($this, $compare, 'duration') === 0;
+    }
+
+    public function isLonger(Calends $compare)
+    {
+        return static::compare($this, $compare, 'duration') === +1;
+    }
+
     // Modification Functions
 
     public function add($offset, $calendar = 'unix')
@@ -265,6 +308,34 @@ class Calends implements Serializable, JsonSerializable
     public function subtract($offset, $calendar = 'unix')
     {
         return $this->add("-{$offset}", $calendar);
+    }
+
+    public function addFromEnd($offset, $calendar = 'unix')
+    {
+        return static::create(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset), $calendar);
+    }
+
+    public function subtractFromEnd($offset, $calendar = 'unix')
+    {
+        return $this->addFromEnd("-{$offset}", $calendar);
+    }
+
+    public function next($offset = null, $calendar = 'unix')
+    {
+        if (is_null($offset)) {
+            $offset = $this->duration;
+        }
+
+        return static::create(['start' => $this->getEndDate($calendar), 'end' => $this->addFromEnd($duration, $calendar)->getDate($calendar)], $calendar);
+    }
+
+    public function previous($offset = null, $calendar = 'unix')
+    {
+        if (is_null($offset)) {
+            $offset = $this->duration;
+        }
+
+        return static::create(['start' => $this->subtract($duration, $calendar)->getDate($calendar), 'end' => $this->getDate($calendar)], $calendar);
     }
 
     // Range Functions
@@ -282,6 +353,43 @@ class Calends implements Serializable, JsonSerializable
     public function setDuration($duration, $calendar = 'unix')
     {
         return $this->setEndDate($this->add($duration, $calendar)->getDate('tai'), 'tai');
+    }
+
+    public function setDurationFromEnd($duration, $calendar = 'unix')
+    {
+        return $this->setDate($this->subtractFromEnd($duration, $calendar)->getDate('tai'), 'tai');
+    }
+
+    public function merge(Calends $composite)
+    {
+        $start = $this->startsBefore($composite) ? $this->getDate('tai') : $composite->getDate('tai');
+        $end   = $this->endsAfter($composite) ? $this->getEndDate('tai') : $composite->getEndDate('tai');
+
+        return static::create(['start' => $start, 'end' => $end], 'tai');
+    }
+
+    public function intersect(Calends $composite)
+    {
+        if ( ! $this->overlaps($composite)) {
+            throw new InvalidCompositeRangeException('The ranges given do not overlap - they have no intersection.');
+        }
+
+        $start = $this->startsDuring($composite) ? $this->getDate('tai') : $composite->getDate('tai');
+        $end   = $this->endsDuring($composite) ? $this->getEndDate('tai') : $composite->getEndDate('tai');
+
+        return static::create(['start' => $start, 'end' => $end], 'tai');
+    }
+
+    public function gap(Calends $composite)
+    {
+        if ($this->overlaps($composite)) {
+            throw new InvalidCompositeRangeException('The ranges given overlap - they have no gap.');
+        }
+
+        $start = $this->endsBefore($composite) ? $this->getEndDate('tai') : $composite->getEndDate('tai');
+        $end   = $this->startsAfter($composite) ? $this->getDate('tai') : $composite->getDate('tai');
+
+        return static::create(['start' => $start, 'end' => $end], 'tai');
     }
 
     // "Magic" Functions
