@@ -427,12 +427,12 @@ Calends::registerCalendar('myCustomCalendar', new MyCustomCalendar($params));
 Start by building a class that implements
 [`Danhunsaker\Calends\Converter\ConverterInterface`](src/Converter/ConverterInterface.php),
 just like the bulit-in converters do.  Once your converter class is available in
-your project, simply register it with `Calends::registerClassConverters()`:
+your project, simply register it with `Calends::registerClassConverter()`:
 
 ```php
 use Danhunsaker\Calends\Calends;
 
-Calends::registerClassConverters('myDateTimeClass', MyConverter::class);
+Calends::registerClassConverter('myDateTimeClass', MyConverter::class);
 ```
 
 Just like with new calendars, this will make your converter available to all

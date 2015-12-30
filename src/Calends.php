@@ -141,7 +141,7 @@ class Calends implements Serializable, JsonSerializable
         return $convert;
     }
 
-    public static function registerClassConverters($className, $conversionClass)
+    public static function registerClassConverter($className, $conversionClass)
     {
         if (array_key_exists($className, static::$timeConverters['import'])) {
             return;
