@@ -9,34 +9,39 @@ use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
 
+/**
+ * Arbitrary calendar systems in PHP
+ *
+ * This is the core class of the Calends library.  The entire "public API" of
+ * the library is contained in this class, so generally speaking, it will be the
+ * only one you need to use in your code, as the others are referenced
+ * internally from here as needed.
+ *
+ * @see https://github.com/danhunsaker/calends The official repo for the library
+ * @author Daniel Hunsaker <dan.hunsaker+calends@gmail.com>
+ * @copyright 2015-2016 Daniel Hunsaker
+ * @license MIT
+ */
 class Calends implements Serializable, JsonSerializable
 {
     /**
-     * Stores the internal time representation for the start date
-     *
-     * @var array
-     **/
+     * @var string[] $internalTime Stores the internal time representation for the start date
+     */
     protected $internalTime = ['seconds' => 0];
 
     /**
-     * Stores the duration of the object's date range in seconds
-     *
-     * @var string|int
-     **/
+     * @var integer|string $duration Stores the duration of the object's date range in seconds
+     */
     protected $duration = 0;
 
     /**
-     * Stores the internal time representation for the end date
-     *
-     * @var array
-     **/
+     * @var string[] $endTime Stores the internal time representation for the end date
+     */
     protected $endTime = ['seconds' => 0];
 
     /**
-     * Stores all registered calendar definition functions
-     *
-     * @var array
-     **/
+     * @var (callable[])[] $timeConverters Stores all registered calendar definition and class converter functions
+     */
     protected static $timeConverters = [
         'toInternal'   => [],
         'fromInternal' => [],
@@ -48,12 +53,18 @@ class Calends implements Serializable, JsonSerializable
     // Setup Functions
 
     /**
-     * create a new Calends object
+     * Create a new Calends object
      *
      * The Calends constructor.
      *
-     * @param mixed stamp Either a single date value to parse, or an array with start and end dates to parse
-     * @param string calendar The calendar system definition to parse $stamp with
+     * @api
+     *
+     * @param string|object|(string|object)[] $stamp Either a single date value
+     *        to parse, or an array with start and end dates to parse
+     * @param string $calendar The calendar system definition to parse $stamp
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
      **/
     public function __construct($stamp = null, $calendar = 'unix')
     {
@@ -75,20 +86,40 @@ class Calends implements Serializable, JsonSerializable
     }
 
     /**
-     * create a new Calends object
+     * Create a new Calends object
      *
      * Calls the Calends constructor in a static context rather than a
      * `new Class` context.  Useful for method chaining.
      *
-     * @param mixed stamp Either a single date value to parse, or an array with start and end dates to parse
-     * @param string calendar The calendar system definition to parse $stamp with
-     * @return Danhunsaker\Calends\Calends
+     * @api
+     *
+     * @param string|object|(string|object)[] $stamp Either a single date value
+     *        to parse, or an array with start and end dates to parse
+     * @param string $calendar The calendar system definition to parse $stamp
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
      **/
     public static function create($stamp = null, $calendar = 'unix')
     {
         return new static($stamp, $calendar);
     }
 
+    /**
+     * Canonicalize the calendar name and ensure it is available
+     *
+     * Transforms calendar names into camelCase, then ensures the appropriate
+     * calendar system class/object is registered.  Will throw an
+     * `UnknownCalendarException` for calendars it cannot find.
+     *
+     * @internal
+     *
+     * @param string $calendar The calendar system to retrieve
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string The canonical index for accessing $calendar functions
+     **/
     protected function getCalendar($calendar)
     {
         $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
@@ -106,6 +137,20 @@ class Calends implements Serializable, JsonSerializable
         return $calendar;
     }
 
+    /**
+     * Register a calendar system class/object
+     *
+     * Transforms $calendar to camelCase, then registers the appropriate methods
+     * from $className for later use.
+     *
+     * @api
+     *
+     * @param string $calendar The calendar system name to register
+     * @param string|object $className The calendar system class, or a calendar
+     *        system object instance, to register under $calendar
+     * @throws InvalidCalendarException
+     * @return void
+     **/
     public static function registerCalendar($calendar, $className)
     {
         $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
@@ -124,23 +169,51 @@ class Calends implements Serializable, JsonSerializable
         static::$timeConverters['offset'][$calendar]       = [$className, 'offset'];
     }
 
-    protected function getConverter($convert)
+    /**
+     * Resolve the converter name and ensure it is available
+     *
+     * If an object is passed, resolves its class name, or otherwise uses the
+     * passed value directly, to ensure the appropriate converter class is
+     * registered.  Will throw an `UnknownConverterException` for converters it
+     * cannot find.
+     *
+     * @internal
+     *
+     * @param string $converter The converter class to retrieve
+     * @throws InvalidConverterException
+     * @throws UnknownConverterException
+     * @return string The canonical index for accessing the $converter
+     **/
+    protected function getConverter($converter)
     {
-        if (is_object($convert)) $convert = get_class($convert);
+        if (is_object($converter)) $converter = get_class($converter);
 
-        if ( ! array_key_exists($convert, static::$timeConverters['import'])) {
-            $className = __NAMESPACE__ . "\\Converter\\{$convert}";
+        if ( ! array_key_exists($converter, static::$timeConverters['import'])) {
+            $className = __NAMESPACE__ . "\\Converter\\{$converter}";
 
             if (class_exists($className)) {
-                static::registerClassConverters($convert, $className);
+                static::registerClassConverters($converter, $className);
             } else {
-                throw new UnknownConverterException("Can't find the '{$convert}' converter!");
+                throw new UnknownConverterException("Can't find the '{$converter}' converter!");
             }
         }
 
-        return $convert;
+        return $converter;
     }
 
+    /**
+     * Register a converter class
+     *
+     * Registers the apprpriate methods from $conversionClass under $className.
+     *
+     * @api
+     *
+     * @param string $className The name of the converter to register
+     * @param string $conversionClass The converter class to register under
+     *        $className
+     * @throws InvalidConverterException
+     * @return void
+     **/
     public static function registerClassConverter($className, $conversionClass)
     {
         if (array_key_exists($className, static::$timeConverters['import'])) {
@@ -441,7 +514,7 @@ class Calends implements Serializable, JsonSerializable
 
     public function __invoke($calendar = 'unix')
     {
-        return $this->getDate($calendar);
+        return $this->duration == 0 ? $this->getDate($calendar) : ['start' => $this->getDate($calendar), 'end' => $this->getEndDate($calendar)];
     }
 
     public function __toString()
