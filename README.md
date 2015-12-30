@@ -30,6 +30,7 @@ composer require danhunsaker/calends
   - [x] Class Definitions
   - [ ] Database Definitions
   - [x] Object Definitions
+- [x] New Converters
 
 ### Setup ###
 
@@ -90,6 +91,29 @@ $julianDayCount = $now('jdc');     // 2457383.398962145833333333
 $gregorian = $now('gregorian');    // Sat Dec 26 14:34:30 2015
 $julianCalendar = $now('julian');  // 12/13/2015 14:34:30 GMT-07:00
 ```
+
+You may also be interested in converting a `Calends` object into a different
+kind of date/time object.  Gotcha covered there, too:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now = Calends::create();
+
+$dt = $now->convert('DateTime');
+```
+
+And lest you think we forgot to let you convert the other way, from other
+date/time objects into `Calends` objects, fear not:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now = Calends::import(new DateTime());
+```
+
+Supported conversions include `DateTime` (and its child, `Carbon`),
+`IntlCalendar`, and `Period`.  See below for how to add support for others.
 
 ### Storage ###
 
@@ -339,6 +363,14 @@ echo $last7days->difference($next7days, 'end-start'); // 0
 echo $last7days->difference($next7days, 'duration');  // 0
 ```
 
+Now, up in the Storage section, we said there'd be more on serializing `Calends`
+objects below.  Well, this is 'below'.  Because `Calends` objects are actually
+ranges, the value that gets serialized may not always be just a simple TAI64NA
+string.  If the end date doesn't match the start date, an array will be
+serialized instead, with both a `'start'` and an `'end'` key.  This allows even
+`Calends` ranges to be recovered correctly without difficulty.  Generally
+speaking, though, you shouldn't have to worry about this behavior much.
+
 ### New Calendars ###
 
 #### Class Definitions ####
@@ -359,10 +391,10 @@ Calends::registerCalendar('myCustomCalendar', MyCustomCalendar::class);
 This will make your calendar system available to all `Calends` objects
 throughout your project.
 
-Note that while Calends will automatically find and register class definitions
-in the `Danhunsaker\Calends\Calendar` namespace, it is considered bad form to
-create your classes there unless they're officially recognized by the main
-project, since a namespace implies official support and/or endorsement.
+> Note that while Calends will automatically find and register class definitions
+> in the `Danhunsaker\Calends\Calendar` namespace, it is considered bad form to
+> create your classes there unless they're officially recognized by the main
+> project, since a namespace implies official support and/or endorsement.
 
 #### Database Definitions ####
 
@@ -387,8 +419,29 @@ something like this:
 ```php
 use Danhunsaker\Calends\Calends;
 
-Calends::registerCalendar('myCustomCalendar', new MyCustomCalendar());
+Calends::registerCalendar('myCustomCalendar', new MyCustomCalendar($params));
 ```
+
+### New Converters ###
+
+Start by building a class that implements
+[`Danhunsaker\Calends\Converter\ConverterInterface`](src/Converter/ConverterInterface.php),
+just like the bulit-in converters do.  Once your converter class is available in
+your project, simply register it with `Calends::registerClassConverters()`:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+Calends::registerClassConverters('myDateTimeClass', MyConverter::class);
+```
+
+Just like with new calendars, this will make your converter available to all
+`Calends` objects throughout your project.
+
+> Note that while Calends will automatically find and register converters in the
+> `Danhunsaker\Calends\Converter` namespace, it is considered bad form to create
+> your classes there unless they're officially recognized by the main project,
+> since a namespace implies official support and/or endorsement.
 
 ## Contributions ##
 

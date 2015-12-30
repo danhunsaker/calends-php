@@ -3,6 +3,7 @@
 namespace Danhunsaker\Calends;
 
 use Danhunsaker\Calends\Calendar\DefinitionInterface as CalendarDefinition;
+use Danhunsaker\Calends\Converter\ConverterInterface as ConversionClass;
 use Danhunsaker\Calends\Calendar\ObjectDefinitionInterface as ObjectDefinition;
 use JsonSerializable;
 use RMiller\Caser\Cased;
@@ -40,6 +41,8 @@ class Calends implements Serializable, JsonSerializable
         'toInternal'   => [],
         'fromInternal' => [],
         'offset'       => [],
+        'import'       => [],
+        'convert'      => [],
     ];
 
     // Setup Functions
@@ -79,6 +82,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @param mixed stamp Either a single date value to parse, or an array with start and end dates to parse
      * @param string calendar The calendar system definition to parse $stamp with
+     * @return Danhunsaker\Calends\Calends
      **/
     public static function create($stamp = null, $calendar = 'unix')
     {
@@ -120,6 +124,37 @@ class Calends implements Serializable, JsonSerializable
         static::$timeConverters['offset'][$calendar]       = [$className, 'offset'];
     }
 
+    protected function getConverter($convert)
+    {
+        if (is_object($convert)) $convert = get_class($convert);
+
+        if ( ! array_key_exists($convert, static::$timeConverters['import'])) {
+            $className = __NAMESPACE__ . "\\Converter\\{$convert}";
+
+            if (class_exists($className)) {
+                static::registerClassConverters($convert, $className);
+            } else {
+                throw new UnknownConverterException("Can't find the '{$convert}' converter!");
+            }
+        }
+
+        return $convert;
+    }
+
+    public static function registerClassConverters($className, $conversionClass)
+    {
+        if (array_key_exists($className, static::$timeConverters['import'])) {
+            return;
+        }
+
+        if ( ! (((is_string($conversionClass) && class_exists($conversionClass)) || is_object($conversionClass)) && is_a($conversionClass, ConversionClass::class, true))) {
+            throw new InvalidConverterException('Not a vaild conversion class name or instance: ' . var_export($conversionClass, true));
+        }
+
+        static::$timeConverters['import'][$className]  = [$conversionClass, 'import'];
+        static::$timeConverters['convert'][$className] = [$conversionClass, 'convert'];
+    }
+
     // Conversion Functions
 
     public static function toInternalFromUnix($stamp)
@@ -144,6 +179,16 @@ class Calends implements Serializable, JsonSerializable
     public static function fromInternalToUnix($time)
     {
         return bcadd(bcsub($time['seconds'], bcpow(2, 62), 0), bcdiv(bcadd(bcdiv($time['atto'], bcpow(10, 9), 9), $time['nano'], 9), bcpow(10, 9), 18), 18);
+    }
+
+    public static function import($source)
+    {
+        return call_user_func(static::$timeConverters['import'][$this->getConverter($source)], $source);
+    }
+
+    public function convert($className)
+    {
+        return call_user_func(static::$timeConverters['convert'][$this->getConverter($className)], $this);
     }
 
     // Getters
