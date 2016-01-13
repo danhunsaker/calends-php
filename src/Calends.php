@@ -59,8 +59,9 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|(string|object)[] $stamp Either a single date value
-     *        to parse, or an array with start and end dates to parse
+     * @param string|object|float|integer|(string|object|float|integer)[] $stamp
+     *        Either a single date value to parse, or an array with start and
+     *        end dates to parse
      * @param string $calendar The calendar system definition to parse $stamp
      *        with
      * @throws InvalidCalendarException
@@ -93,8 +94,9 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|(string|object)[] $stamp Either a single date value
-     *        to parse, or an array with start and end dates to parse
+     * @param string|object|float|integer|(string|object|float|integer)[] $stamp
+     *        Either a single date value to parse, or an array with start and
+     *        end dates to parse
      * @param string $calendar The calendar system definition to parse $stamp
      *        with
      * @throws InvalidCalendarException
@@ -230,6 +232,15 @@ class Calends implements Serializable, JsonSerializable
 
     // Conversion Functions
 
+    /**
+     * Convert a Unix timestamp to an internal TAI array
+     *
+     * @internal
+     *
+     * @param string|float|integer $stamp Unix timestamp to convert into the
+     *        internal TAI array representation
+     * @return string[]
+     */
     public static function toInternalFromUnix($stamp)
     {
         $stamp = is_null($stamp) ? microtime(true) : $stamp;
@@ -249,16 +260,48 @@ class Calends implements Serializable, JsonSerializable
         return $time;
     }
 
+    /**
+     * Convert an internal TAI array to a Unix timestamp
+     *
+     * @internal
+     *
+     * @param string[] $stamp The internal TAI array representation to convert
+     *        into a Unix timestamp
+     * @return string|float|integer
+     */
     public static function fromInternalToUnix($time)
     {
         return bcadd(bcsub($time['seconds'], bcpow(2, 62), 0), bcdiv(bcadd(bcdiv($time['atto'], bcpow(10, 9), 9), $time['nano'], 9), bcpow(10, 9), 18), 18);
     }
 
+    /**
+     * Create a new instance of a Calends object from a different class
+     *
+     * @api
+     *
+     * @param object $source The object to convert from
+     * @throws InvalidConverterException
+     * @throws UnknownConverterException
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return Calends
+     */
     public static function import($source)
     {
         return call_user_func(static::$timeConverters['import'][$this->getConverter($source)], $source);
     }
 
+    /**
+     * Create a new instance of a different class from a Calends object
+     *
+     * @api
+     *
+     * @param string|object $className The name (or an instance) of the class to
+     *        convert to
+     * @throws InvalidConverterException
+     * @throws UnknownConverterException
+     * @return object
+     */
     public function convert($className)
     {
         return call_user_func(static::$timeConverters['convert'][$this->getConverter($className)], $this);
@@ -266,26 +309,67 @@ class Calends implements Serializable, JsonSerializable
 
     // Getters
 
+    /**
+     * Gets the internal TAI representation of the start time
+     *
+     * @api
+     *
+     * @return string[]
+     **/
     public function getInternalTime()
     {
         return $this->internalTime;
     }
 
+    /**
+     * Format the (start) date/time according to a calendar system
+     *
+     * @api
+     *
+     * @param string $calendar The calendar system definition to convert to
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer
+     **/
     public function getDate($calendar = 'unix')
     {
         return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->internalTime);
     }
 
+    /**
+     * Gets the number of seconds between the start and end times
+     *
+     * @api
+     *
+     * @return float|integer
+     **/
     public function getDuration()
     {
         return $this->duration;
     }
 
-    public function getEndTime()
+    /**
+     * Gets the internal TAI representation of the end time
+     *
+     * @api
+     *
+     * @return string[]
+     **/
+    public function getInternalEndTime()
     {
         return $this->endTime;
     }
 
+    /**
+     * Format the end date/time according to a calendar system
+     *
+     * @api
+     *
+     * @param string $calendar The calendar system definition to convert to
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer
+     **/
     public function getEndDate($calendar = 'unix')
     {
         return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->endTime);
@@ -293,12 +377,30 @@ class Calends implements Serializable, JsonSerializable
 
     // Comparison Functions
 
+    /**
+     * Collapses an internal TAI time to a single string value usable by BCMath
+     *
+     * @internal
+     *
+     * @param string[] $time The internal TAI representation to collapse
+     * @return string
+     **/
     protected function getInternalTimeAsString($time)
     {
         return "{$time['seconds']}.{$time['nano']}{$time['atto']}";
     }
 
-    protected function getTimesByMode($a, $b, $mode = 'start')
+    /**
+     * Retrieves the start time, end time, or duration from two Calends objects
+     *
+     * @internal
+     *
+     * @param Calends $a One of the two Calends objects to grab times from
+     * @param Calends $b One of the two Calends objects to grab times from
+     * @param string $mode One of start, end, start-end, end-start, or duration
+     * @return (string|float|integer)[]
+     **/
+    protected function getTimesByMode(Calends $a, Calends $b, $mode = 'start')
     {
         switch ($mode) {
             case "duration":
@@ -322,6 +424,15 @@ class Calends implements Serializable, JsonSerializable
         return $times;
     }
 
+    /**
+     * Retrieves the difference between the current Calends object and another
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to calculate the difference of
+     * @param string $mode One of start, end, start-end, end-start, or duration
+     * @return string|float|integer
+     **/
     public function difference(Calends $compare, $mode = 'start')
     {
         $times = $this->getTimesByMode($this, $compare, $mode);
@@ -329,6 +440,16 @@ class Calends implements Serializable, JsonSerializable
         return bcsub($times[0], $times[1]);
     }
 
+    /**
+     * Compares the start time, end time, or duration of two Calends objects
+     *
+     * @api
+     *
+     * @param Calends $a One of the two Calends objects to compare times from
+     * @param Calends $b One of the two Calends objects to compare times from
+     * @param string $mode One of start, end, start-end, end-start, or duration
+     * @return integer Values are -1 if a < b; 0 if a == b; +1 if a > b
+     **/
     public static function compare(Calends $a, Calends $b, $mode = 'start')
     {
         $times = $this->getTimesByMode($a, $b, $mode);
@@ -336,81 +457,215 @@ class Calends implements Serializable, JsonSerializable
         return bccomp($times[0], $times[1]);
     }
 
+    /**
+     * Checks whether the current object has the same value(s) as another
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isSame(Calends $compare)
     {
         return static::compare($this, $compare, 'start') === 0 && static::compare($this, $compare, 'end') === 0;
     }
 
+    /**
+     * Checks whether the current object fits entirely within another
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isDuring(Calends $compare)
     {
         return static::compare($this, $compare, 'start') >= 0 && static::compare($this, $compare, 'end') <= 0;
     }
 
+    /**
+     * Checks whether the current object has its start point between another's
+     * start and end points.
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function startsDuring(Calends $compare)
     {
         return static::compare($this, $compare, 'start') >= 0 && static::compare($this, $compare, 'start-end') <= 0;
     }
 
+    /**
+     * Checks whether the current object has its end point between another's
+     * start and end points.
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function endsDuring(Calends $compare)
     {
         return static::compare($this, $compare, 'end-start') >= 0 && static::compare($this, $compare, 'end') <= 0;
     }
 
+    /**
+     * Checks whether another object fits entirely within the current one
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function contains(Calends $compare)
     {
         return static::compare($this, $compare, 'start') <= 0 && static::compare($this, $compare, 'end') >= 0;
     }
 
+    /**
+     * Checks whether either of the current object's endpoints occur within
+     * another object's period, or vice-versa
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function overlaps(Calends $compare)
     {
         return $this->startsDuring($compare) || $this->endsDuring($compare) || $compare->startsDuring($this) || $compare->endsDuring($this);
     }
 
+    /**
+     * Checks whether neither of the current object's endpoints occur within
+     * another object's period, and vice-versa
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function abuts(Calends $compare)
     {
         return static::compare($this, $compare, 'start-end') === 0 || static::compare($this, $compare, 'end-start') === 0;
     }
 
+    /**
+     * Checks whether both of the current object's endpoints occur before
+     * another object's start point
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isBefore(Calends $compare)
     {
         return static::compare($this, $compare, 'end-start') === -1;
     }
 
+    /**
+     * Checks whether the current object's start point occurs before another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function startsBefore(Calends $compare)
     {
         return static::compare($this, $compare, 'start') === -1;
     }
 
+    /**
+     * Checks whether the current object's end point occurs before another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function endsBefore(Calends $compare)
     {
         return static::compare($this, $compare, 'end') === -1;
     }
 
+    /**
+     * Checks whether both of the current object's endpoints occur after
+     * another object's end point
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isAfter(Calends $compare)
     {
         return static::compare($this, $compare, 'start-end') === +1;
     }
 
+    /**
+     * Checks whether the current object's start point occurs after another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function startsAfter(Calends $compare)
     {
         return static::compare($this, $compare, 'start') === +1;
     }
 
+    /**
+     * Checks whether the current object's end point occurs after another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function endsAfter(Calends $compare)
     {
         return static::compare($this, $compare, 'end') === +1;
     }
 
+    /**
+     * Checks whether the current object's duration is less than another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isShorter(Calends $compare)
     {
         return static::compare($this, $compare, 'duration') === -1;
     }
 
+    /**
+     * Checks whether the current object's duration is equal to another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isSameDuration(Calends $compare)
     {
         return static::compare($this, $compare, 'duration') === 0;
     }
 
+    /**
+     * Checks whether the current object's duration is greater than another's
+     *
+     * @api
+     *
+     * @param Calends $compare The Calends object to compare
+     * @return boolean
+     **/
     public function isLonger(Calends $compare)
     {
         return static::compare($this, $compare, 'duration') === +1;
@@ -418,39 +673,121 @@ class Calends implements Serializable, JsonSerializable
 
     // Modification Functions
 
+    /**
+     * Create a new Calends object a given offset after the current start point
+     *
+     * @api
+     *
+     * @param string|object|float|integer|(string|object|float|integer)[] $offset
+     *        A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $offset
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function add($offset, $calendar = 'unix')
     {
         return static::create(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset), $calendar);
     }
 
+    /**
+     * Create a new Calends object a given offset before the current start point
+     *
+     * @api
+     *
+     * @param string|object|float|integer|(string|object|float|integer)[] $offset
+     *        A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $offset
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function subtract($offset, $calendar = 'unix')
     {
         return $this->add("-{$offset}", $calendar);
     }
 
+    /**
+     * Create a new Calends object a given offset after the current end point
+     *
+     * @api
+     *
+     * @param string|object|float|integer|(string|object|float|integer)[] $offset
+     *        A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $offset
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function addFromEnd($offset, $calendar = 'unix')
     {
         return static::create(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset), $calendar);
     }
 
+    /**
+     * Create a new Calends object a given offset before the current end point
+     *
+     * @api
+     *
+     * @param string|object|float|integer|(string|object|float|integer)[] $offset
+     *        A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $offset
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function subtractFromEnd($offset, $calendar = 'unix')
     {
         return $this->addFromEnd("-{$offset}", $calendar);
     }
 
+    /**
+     * Create a new Calends object with a range spanning a given offset, and
+     * starting at the current end point
+     *
+     * @api
+     *
+     * @param string|object|float|integer|(string|object|float|integer)[] $offset
+     *        A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $offset
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function next($offset = null, $calendar = 'unix')
     {
         if (is_null($offset)) {
             $offset = $this->duration;
+            $calendar = 'unix';
         }
 
         return static::create(['start' => $this->getEndDate($calendar), 'end' => $this->addFromEnd($duration, $calendar)->getDate($calendar)], $calendar);
     }
 
+    /**
+     * Create a new Calends object with a range spanning a given offset, and
+     * ending at the current start point
+     *
+     * @api
+     *
+     * @param string|object|float|integer|(string|object|float|integer)[] $offset
+     *        A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $offset
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function previous($offset = null, $calendar = 'unix')
     {
         if (is_null($offset)) {
             $offset = $this->duration;
+            $calendar = 'unix';
         }
 
         return static::create(['start' => $this->subtract($duration, $calendar)->getDate($calendar), 'end' => $this->getDate($calendar)], $calendar);

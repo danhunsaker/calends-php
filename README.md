@@ -82,7 +82,7 @@ $now = Calends::create();
 
 // Using getDate():
 $unix = $now->getDate('unix');     // 1451165670.329400000000000000
-// Or just use as a function - __invoke() calls getDate()
+// Or just use as a function - __invoke() calls getDate() (but see below...)
 $unix = $now('unix');              // 1451165670.329400000000000000
 // The default 'calendar' for getDate() is also 'unix'
 $unix = $now();                    // 1451165670.329400000000000000
@@ -262,43 +262,102 @@ $yesterday = $now->subtract('1 day', 'gregorian');
 // Alternately:
 $tomorrow  = $now->addFromEnd('1 day', 'gregorian');
 $yesterday = $now->subtractFromEnd('1 day', 'gregorian');
+```
 
-// setDate() and setEndDate() also accept a calendar, which defaults to 'unix'
+`setDate()` and `setEndDate()` also accept a calendar, which defaults to `unix`
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 $last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
 $next24hrs = $now->setEndDate($tomorrow->getDate('gregorian'), 'gregorian');
 $next72hrs = $now->setDuration('72 hours', 'gregorian');
 $last72hrs = $now->setDurationFromEnd('72 hours', 'gregorian');
+```
 
-// You can also create a full range in one step:
+You can also create a full range in one step:
+
+```php
+use Danhunsaker\Calends\Calends;
+
 $next7days = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
 $last7days = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
+```
 
-// Of course, you'll want to be able to retrieve end dates and durations as well
-// as start dates:
-$endArray  = $next72hrs->getEndTime();             // Like getInternalTime()
+Of course, you'll want to be able to retrieve end dates and durations as well as
+start dates:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
+$endArray  = $next72hrs->getInternalEndTime();     // Like getInternalTime()
 $dateIn72  = $next72hrs->getEndDate('gregorian');  // Like getDate()
 $secsIn72  = $next72hrs->getDuration();            // In seconds
+```
 
-// While the new `Calends` object from setDate() inherits the end date of the
-// object that created it, and the new one from getEndDate() inherits the
-// creator's start date (meaning these new objects overlap), sometimes you want
-// to create new objects that instead abut the creating object.  Here's how:
+Alternately, calling the `Calends` object as a function, when the duration is
+not 0, will return both the start *and* end points of the object (we mentioned
+we'd have more on this usage "below" - here it is!):
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
+$endpoints = $next72hrs('gregorian');          // ['start' => ..., 'end' => ...]
+```
+
+While the new `Calends` object from `setDate()` inherits the end date of the
+object that created it, and the new one from `setEndDate()` inherits the
+creator's start date (meaning these new objects overlap), sometimes you want to
+create new objects that instead abut the creating object.  Here's how:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 $followingWeek  = $next7days->next();
 $precedingWeek  = $last7days->previous();
 $followingMonth = $next7days->next('1 month', 'gregorian');
 $precedingMonth = $last7days->previous('1 month', 'gregorian');
+```
 
-// If you want to work with composite ranges, we've got you covered:
+If you want to work with composite ranges, we've got you covered:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 $bothMonths     = $precedingMonth->merge($followingMonth);      // 2.5 months
 $commonTime     = $precedingMonth->intersect($precedingWeek);   // 1 week
 $betweenMonths  = $precedingMonth->gap($followingMonth);        // 2 weeks
+```
 
-// But keep in mind that an `InvalidCompositeRangeException` is thrown if you
-// call intersect() without an overlap, or gap() when an overlap exists:
+But keep in mind that an `InvalidCompositeRangeException` is thrown if you call
+`intersect()` without an overlap, or `gap()` when an overlap exists:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 $invalidRange   = $precedingMonth->intersect($followingMonth);  // Exception
 $invalidRange   = $precedingMonth->gap($precedingWeek);         // Exception
+```
 
-// And what would a date range library be without range comparisons?
+And what would a date range library be without range comparisons?
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 print_r([
     $now::startsBefore($last24hrs),   // false
     $now::isBefore($last24hrs),       // false
@@ -317,8 +376,15 @@ print_r([
     $now::isShorter($last24hrs),      // true
     $now::isSameDuration($last24hrs), // false
 ]);
+```
 
-// For all of that to work, we need a more flexible compare() method:
+For all of that to work, we need a more flexible `compare()` method:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 $times = [];
 for ($i = 0; $i < 10; $i++)
 {
@@ -353,9 +419,16 @@ $endSorted = usort($times, function($a, $b) {
     return Calends::compare($a, $b, 'duration');
 });
 print_r($endSorted);          // Sorted by duration
+```
 
-// Which of course means we'd want the same flexibility for our difference()
-// method:
+Which of course means we'd want the same flexibility for our `difference()`
+method:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now       = Calends::create();
+
 echo $now->difference($next7days, 'start');           // 0
 echo $now->difference($next7days, 'end');             // 604800
 echo $last7days->difference($next7days, 'start-end'); // 1209600
