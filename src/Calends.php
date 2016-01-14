@@ -688,7 +688,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function add($offset, $calendar = 'unix')
     {
-        return static::create(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset), $calendar);
+        return $this->setDate(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset), $calendar);
     }
 
     /**
@@ -724,7 +724,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function addFromEnd($offset, $calendar = 'unix')
     {
-        return static::create(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset), $calendar);
+        return $this->setEndDate(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset), $calendar);
     }
 
     /**
@@ -812,7 +812,7 @@ class Calends implements Serializable, JsonSerializable
 
     public function setDurationFromEnd($duration, $calendar = 'unix')
     {
-        return $this->setDate($this->subtractFromEnd($duration, $calendar)->getDate('tai'), 'tai');
+        return $this->setDate($this->subtractFromEnd($duration, $calendar)->getEndDate('tai'), 'tai');
     }
 
     public function merge(Calends $composite)
@@ -861,7 +861,7 @@ class Calends implements Serializable, JsonSerializable
 
     public function serialize()
     {
-        return serialize($this->jsonSerialize());
+        return serialize($this('tai'));
     }
 
     public function unserialize($str)
@@ -871,6 +871,6 @@ class Calends implements Serializable, JsonSerializable
 
     public function jsonSerialize()
     {
-        return $this->duration == 0 ? $this->getDate('tai') : ['start' => $this->getDate('tai'), 'end' => $this->getEndDate('tai')];
+        return $this('tai');
     }
 }

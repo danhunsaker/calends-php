@@ -230,8 +230,6 @@ $now       = Calends::create();
 
 $tomorrow  = $now->add('1 day', 'gregorian');
 $yesterday = $now->subtract('1 day', 'gregorian');
-
-// This example will actually produce an entire range:
 $last24hrs = $now->setDate($yesterday->getDate());
 ```
 
@@ -250,7 +248,26 @@ perform range-related operations, but many of the methods you've already learned
 have additional ways they can be used when you want to work with ranges instead
 of simple dates.
 
-Let's start with the last example, and use it to introduce some other methods:
+Let's start with the last example, giving some more detail about what it's
+doing, and use it to introduce some other methods:
+
+```php
+use Danhunsaker\Calends\Calends;
+
+$now           = Calends::create();
+
+$tomorrow      = $now->add('1 day', 'gregorian');              // tomorrow to today
+                                                               // (duration: -1 day)
+$yesterday     = $now->subtract('1 day', 'gregorian');         // yesterday to today
+                                                               // (duration: 1 day)
+$endsTomorrow  = $now->addFromEnd('1 day', 'gregorian');       // today to tomorrow
+                                                               // (duration: 1 day)
+$endsYesterday = $now->subtractFromEnd('1 day', 'gregorian');  // today to yesterday
+                                                               // (duration: -1 day)
+```
+
+`setDate()` and `setEndDate()` also accept a calendar, which defaults to `unix`.
+Whichever endpoint isn't being set is copied over from the calling instance:
 
 ```php
 use Danhunsaker\Calends\Calends;
@@ -259,22 +276,15 @@ $now       = Calends::create();
 
 $tomorrow  = $now->add('1 day', 'gregorian');
 $yesterday = $now->subtract('1 day', 'gregorian');
-// Alternately:
-$tomorrow  = $now->addFromEnd('1 day', 'gregorian');
-$yesterday = $now->subtractFromEnd('1 day', 'gregorian');
-```
-
-`setDate()` and `setEndDate()` also accept a calendar, which defaults to `unix`
-
-```php
-use Danhunsaker\Calends\Calends;
-
-$now       = Calends::create();
 
 $last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
+             // yesterday to today
 $next24hrs = $now->setEndDate($tomorrow->getDate('gregorian'), 'gregorian');
+             // today to tomorrow
 $next72hrs = $now->setDuration('72 hours', 'gregorian');
+             // today to three days from now
 $last72hrs = $now->setDurationFromEnd('72 hours', 'gregorian');
+             // three days ago to today
 ```
 
 You can also create a full range in one step:
@@ -294,6 +304,8 @@ use Danhunsaker\Calends\Calends;
 
 $now       = Calends::create();
 
+$next72hrs = $now->setDuration('72 hours', 'gregorian');
+
 $endArray  = $next72hrs->getInternalEndTime();     // Like getInternalTime()
 $dateIn72  = $next72hrs->getEndDate('gregorian');  // Like getDate()
 $secsIn72  = $next72hrs->getDuration();            // In seconds
@@ -308,6 +320,8 @@ use Danhunsaker\Calends\Calends;
 
 $now       = Calends::create();
 
+$next72hrs = $now->setDuration('72 hours', 'gregorian');
+
 $endpoints = $next72hrs('gregorian');          // ['start' => ..., 'end' => ...]
 ```
 
@@ -319,7 +333,8 @@ create new objects that instead abut the creating object.  Here's how:
 ```php
 use Danhunsaker\Calends\Calends;
 
-$now       = Calends::create();
+$next7days      = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
+$last7days      = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
 
 $followingWeek  = $next7days->next();
 $precedingWeek  = $last7days->previous();
@@ -332,7 +347,11 @@ If you want to work with composite ranges, we've got you covered:
 ```php
 use Danhunsaker\Calends\Calends;
 
-$now       = Calends::create();
+$next7days      = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
+$last7days      = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
+$precedingWeek  = $last7days->previous();
+$followingMonth = $next7days->next('1 month', 'gregorian');
+$precedingMonth = $last7days->previous('1 month', 'gregorian');
 
 $bothMonths     = $precedingMonth->merge($followingMonth);      // 2.5 months
 $commonTime     = $precedingMonth->intersect($precedingWeek);   // 1 week
@@ -345,7 +364,11 @@ But keep in mind that an `InvalidCompositeRangeException` is thrown if you call
 ```php
 use Danhunsaker\Calends\Calends;
 
-$now       = Calends::create();
+$next7days      = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
+$last7days      = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
+$precedingWeek  = $last7days->previous();
+$followingMonth = $next7days->next('1 month', 'gregorian');
+$precedingMonth = $last7days->previous('1 month', 'gregorian');
 
 $invalidRange   = $precedingMonth->intersect($followingMonth);  // Exception
 $invalidRange   = $precedingMonth->gap($precedingWeek);         // Exception
@@ -358,23 +381,25 @@ use Danhunsaker\Calends\Calends;
 
 $now       = Calends::create();
 
+$last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
+
 print_r([
-    $now::startsBefore($last24hrs),   // false
-    $now::isBefore($last24hrs),       // false
-    $now::endsBefore($last24hrs),     // true
-    $now::isSame($last24hrs),         // false
-    $now::startsDuring($last24hrs),   // true
-    $now::isDuring($last24hrs),       // true
-    $now::endsDuring($last24hrs),     // true
-    $now::contains($last24hrs),       // false
-    $now::overlaps($last24hrs),       // true
-    $now::abuts($last24hrs),          // true
-    $now::startsAfter($last24hrs),    // false
-    $now::isAfter($last24hrs),        // false
-    $now::endsAfter($last24hrs),      // false
-    $now::isLonger($last24hrs),       // false
-    $now::isShorter($last24hrs),      // true
-    $now::isSameDuration($last24hrs), // false
+    $now->startsBefore($last24hrs),   // false
+    $now->isBefore($last24hrs),       // false
+    $now->endsBefore($last24hrs),     // true
+    $now->isSame($last24hrs),         // false
+    $now->startsDuring($last24hrs),   // true
+    $now->isDuring($last24hrs),       // true
+    $now->endsDuring($last24hrs),     // true
+    $now->contains($last24hrs),       // false
+    $now->overlaps($last24hrs),       // true
+    $now->abuts($last24hrs),          // true
+    $now->startsAfter($last24hrs),    // false
+    $now->isAfter($last24hrs),        // false
+    $now->endsAfter($last24hrs),      // false
+    $now->isLonger($last24hrs),       // false
+    $now->isShorter($last24hrs),      // true
+    $now->isSameDuration($last24hrs), // false
 ]);
 ```
 
@@ -383,22 +408,22 @@ For all of that to work, we need a more flexible `compare()` method:
 ```php
 use Danhunsaker\Calends\Calends;
 
-$now       = Calends::create();
-
-$times = [];
+$times          = [];
 for ($i = 0; $i < 10; $i++)
 {
-    $times[] =  Calends::create(mt_rand(0 - mt_getrandmax(), mt_getrandmax()));
+    $times[]    = Calends::create([
+        'start' => mt_rand(0 - mt_getrandmax(), mt_getrandmax()),
+        'end'   => mt_rand(0 - mt_getrandmax(), mt_getrandmax())
+    ]);
 }
-
 print_r($times);
 
-$sorted = usort($times, function($a, $b) {
+$sorted         = usort($times, function($a, $b) {
     return Calends::compare($a, $b, 'start');
 });
 print_r($sorted);             // Sorted by start date, which is the default
 
-$endSorted = usort($times, function($a, $b) {
+$endSorted      = usort($times, function($a, $b) {
     return Calends::compare($a, $b, 'end');
 });
 print_r($endSorted);          // Sorted by end date
@@ -415,10 +440,10 @@ $startEndSorted = usort($times, function($a, $b) {
 print_r($startEndSorted);     // Ranges that end before others start are earlier
                               // in this sort
 
-$endSorted = usort($times, function($a, $b) {
+$durationSorted = usort($times, function($a, $b) {
     return Calends::compare($a, $b, 'duration');
 });
-print_r($endSorted);          // Sorted by duration
+print_r($durationSorted);     // Sorted by duration
 ```
 
 Which of course means we'd want the same flexibility for our `difference()`
@@ -428,6 +453,9 @@ method:
 use Danhunsaker\Calends\Calends;
 
 $now       = Calends::create();
+
+$next7days      = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
+$last7days      = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
 
 echo $now->difference($next7days, 'start');           // 0
 echo $now->difference($next7days, 'end');             // 604800
