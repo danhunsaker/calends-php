@@ -3,8 +3,8 @@
 namespace Danhunsaker\Calends;
 
 use Danhunsaker\Calends\Calendar\DefinitionInterface as CalendarDefinition;
-use Danhunsaker\Calends\Converter\ConverterInterface as ConversionClass;
 use Danhunsaker\Calends\Calendar\ObjectDefinitionInterface as ObjectDefinition;
+use Danhunsaker\Calends\Converter\ConverterInterface as ConversionClass;
 use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
@@ -188,7 +188,9 @@ class Calends implements Serializable, JsonSerializable
      **/
     protected function getConverter($converter)
     {
-        if (is_object($converter)) $converter = get_class($converter);
+        if (is_object($converter)) {
+            $converter = get_class($converter);
+        }
 
         if ( ! array_key_exists($converter, static::$timeConverters['import'])) {
             $className = __NAMESPACE__ . "\\Converter\\{$converter}";
@@ -284,7 +286,7 @@ class Calends implements Serializable, JsonSerializable
      * @throws UnknownConverterException
      * @throws InvalidCalendarException
      * @throws UnknownCalendarException
-     * @return Calends
+     * @return self
      */
     public static function import($source)
     {
@@ -385,7 +387,7 @@ class Calends implements Serializable, JsonSerializable
      * @param string[] $time The internal TAI representation to collapse
      * @return string
      **/
-    protected function getInternalTimeAsString($time)
+    protected static function getInternalTimeAsString($time)
     {
         return "{$time['seconds']}.{$time['nano']}{$time['atto']}";
     }
@@ -400,24 +402,24 @@ class Calends implements Serializable, JsonSerializable
      * @param string $mode One of start, end, start-end, end-start, or duration
      * @return (string|float|integer)[]
      **/
-    protected function getTimesByMode(Calends $a, Calends $b, $mode = 'start')
+    protected static function getTimesByMode(Calends $a, Calends $b, $mode = 'start')
     {
         switch ($mode) {
             case "duration":
                 $times = [$a->duration, $b->duration];
                 break;
             case "start-end":
-                $times = [$this->getInternalTimeAsString($a->internalTime), $this->getInternalTimeAsString($b->endTime)];
+                $times = [static::getInternalTimeAsString($a->internalTime), static::getInternalTimeAsString($b->endTime)];
                 break;
             case "end-start":
-                $times = [$this->getInternalTimeAsString($a->endTime), $this->getInternalTimeAsString($b->internalTime)];
+                $times = [static::getInternalTimeAsString($a->endTime), static::getInternalTimeAsString($b->internalTime)];
                 break;
             case "end":
-                $times = [$this->getInternalTimeAsString($a->endTime), $this->getInternalTimeAsString($b->endTime)];
+                $times = [static::getInternalTimeAsString($a->endTime), static::getInternalTimeAsString($b->endTime)];
                 break;
             case "start":
             default:
-                $times = [$this->getInternalTimeAsString($a->internalTime), $this->getInternalTimeAsString($b->internalTime)];
+                $times = [static::getInternalTimeAsString($a->internalTime), static::getInternalTimeAsString($b->internalTime)];
                 break;
         }
 
@@ -435,7 +437,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function difference(Calends $compare, $mode = 'start')
     {
-        $times = $this->getTimesByMode($this, $compare, $mode);
+        $times = static::getTimesByMode($this, $compare, $mode);
 
         return bcsub($times[0], $times[1]);
     }
@@ -452,7 +454,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public static function compare(Calends $a, Calends $b, $mode = 'start')
     {
-        $times = $this->getTimesByMode($a, $b, $mode);
+        $times = static::getTimesByMode($a, $b, $mode);
 
         return bccomp($times[0], $times[1]);
     }
@@ -678,8 +680,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|float|integer|(string|object|float|integer)[] $offset
-     *        A date offset value to parse
+     * @param string|object|float|integer $offset A date offset value to parse
      * @param string $calendar The calendar system definition to parse $offset
      *        with
      * @throws InvalidCalendarException
@@ -696,8 +697,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|float|integer|(string|object|float|integer)[] $offset
-     *        A date offset value to parse
+     * @param string|object|float|integer $offset A date offset value to parse
      * @param string $calendar The calendar system definition to parse $offset
      *        with
      * @throws InvalidCalendarException
@@ -714,8 +714,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|float|integer|(string|object|float|integer)[] $offset
-     *        A date offset value to parse
+     * @param string|object|float|integer $offset A date offset value to parse
      * @param string $calendar The calendar system definition to parse $offset
      *        with
      * @throws InvalidCalendarException
@@ -732,8 +731,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|float|integer|(string|object|float|integer)[] $offset
-     *        A date offset value to parse
+     * @param string|object|float|integer $offset A date offset value to parse
      * @param string $calendar The calendar system definition to parse $offset
      *        with
      * @throws InvalidCalendarException
@@ -751,8 +749,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|float|integer|(string|object|float|integer)[] $offset
-     *        A date offset value to parse
+     * @param string|object|float|integer $offset A date offset value to parse
      * @param string $calendar The calendar system definition to parse $offset
      *        with
      * @throws InvalidCalendarException
@@ -762,7 +759,7 @@ class Calends implements Serializable, JsonSerializable
     public function next($offset = null, $calendar = 'unix')
     {
         if (is_null($offset)) {
-            $offset = $this->duration;
+            $offset   = $this->duration;
             $calendar = 'unix';
         }
 
@@ -775,8 +772,7 @@ class Calends implements Serializable, JsonSerializable
      *
      * @api
      *
-     * @param string|object|float|integer|(string|object|float|integer)[] $offset
-     *        A date offset value to parse
+     * @param string|object|float|integer $offset A date offset value to parse
      * @param string $calendar The calendar system definition to parse $offset
      *        with
      * @throws InvalidCalendarException
@@ -786,7 +782,7 @@ class Calends implements Serializable, JsonSerializable
     public function previous($offset = null, $calendar = 'unix')
     {
         if (is_null($offset)) {
-            $offset = $this->duration;
+            $offset   = $this->duration;
             $calendar = 'unix';
         }
 
@@ -795,26 +791,89 @@ class Calends implements Serializable, JsonSerializable
 
     // Range Functions
 
+    /**
+     * Create a new Calends object starting at a given date
+     *
+     * @api
+     *
+     * @param string|object|float|integer $date The new date of the start point
+     * @param string $calendar The calendar system definition to parse $date
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function setDate($date, $calendar = 'unix')
     {
         return static::create(['start' => $date, 'end' => $this->getEndDate($calendar)], $calendar);
     }
 
+    /**
+     * Create a new Calends object ending at a given date
+     *
+     * @api
+     *
+     * @param string|object|float|integer $date The new date of the end point
+     * @param string $calendar The calendar system definition to parse $date
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function setEndDate($date, $calendar = 'unix')
     {
         return static::create(['start' => $this->getDate($calendar), 'end' => $date], $calendar);
     }
 
+    /**
+     * Create a new Calends object spanning from the current start point for a
+     * given duration
+     *
+     * @api
+     *
+     * @param string|object|float|integer $duration A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $duration
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function setDuration($duration, $calendar = 'unix')
     {
         return $this->setEndDate($this->add($duration, $calendar)->getDate('tai'), 'tai');
     }
 
+    /**
+     * Create a new Calends object spanning for a given duration to the current
+     * end point
+     *
+     * @api
+     *
+     * @param string|object|float|integer $duration A date offset value to parse
+     * @param string $calendar The calendar system definition to parse $duration
+     *        with
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function setDurationFromEnd($duration, $calendar = 'unix')
     {
         return $this->setDate($this->subtractFromEnd($duration, $calendar)->getEndDate('tai'), 'tai');
     }
 
+    /**
+     * Merges two Calends objects
+     *
+     * Creates a new `Calends` object with the earlier start and later end
+     * points of the current object and another one
+     *
+     * @api
+     *
+     * @param Calends $composite The Calends object to merge
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function merge(Calends $composite)
     {
         $start = $this->startsBefore($composite) ? $this->getDate('tai') : $composite->getDate('tai');
@@ -823,6 +882,20 @@ class Calends implements Serializable, JsonSerializable
         return static::create(['start' => $start, 'end' => $end], 'tai');
     }
 
+    /**
+     * Gets the intersection of two Calends objects
+     *
+     * Creates a new `Calends` object with the overlapping time between the
+     * current object and another one
+     *
+     * @api
+     *
+     * @param Calends $composite The Calends object to intersect
+     * @throws InvalidCompositeRangeException
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function intersect(Calends $composite)
     {
         if ( ! $this->overlaps($composite)) {
@@ -835,6 +908,20 @@ class Calends implements Serializable, JsonSerializable
         return static::create(['start' => $start, 'end' => $end], 'tai');
     }
 
+    /**
+     * Gets the gap between two Calends objects
+     *
+     * Creates a new `Calends` object with the gap in time between the current
+     * object and another one
+     *
+     * @api
+     *
+     * @param Calends $composite The Calends object to get the gap from
+     * @throws InvalidCompositeRangeException
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return self
+     **/
     public function gap(Calends $composite)
     {
         if ($this->overlaps($composite)) {
@@ -849,26 +936,73 @@ class Calends implements Serializable, JsonSerializable
 
     // "Magic" Functions
 
+    /**
+     * Format the current date(s)/time(s) according to a calendar system
+     *
+     * @api
+     *
+     * @param string $calendar The calendar system definition to convert to
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer|(string|object|float|integer)[]
+     **/
     public function __invoke($calendar = 'unix')
     {
         return $this->duration == 0 ? $this->getDate($calendar) : ['start' => $this->getDate($calendar), 'end' => $this->getEndDate($calendar)];
     }
 
+    /**
+     * Convert the start date/time to the TAI64NA external format
+     *
+     * @api
+     *
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer
+     **/
     public function __toString()
     {
         return $this->getDate('tai');
     }
 
+    /**
+     * Serialize the current object to a string for later retrieval
+     *
+     * @api
+     *
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer|(string|object|float|integer)[]
+     **/
     public function serialize()
     {
         return serialize($this('tai'));
     }
 
+    /**
+     * Restores a serialized value into the current object
+     *
+     * @api
+     *
+     * @param string $str A serialized representation of a Calends object
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer|(string|object|float|integer)[]
+     **/
     public function unserialize($str)
     {
         $this->__construct(unserialize($str), 'tai');
     }
 
+    /**
+     * Serialize the current object into a JSON string for use elsewhere
+     *
+     * @api
+     *
+     * @throws InvalidCalendarException
+     * @throws UnknownCalendarException
+     * @return string|object|float|integer|(string|object|float|integer)[]
+     **/
     public function jsonSerialize()
     {
         return $this('tai');
