@@ -12,7 +12,8 @@ matrix:
     - php: '7.0'
     - php: hhvm
 install:
+  - echo 'error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - composer install --ignore-platform-reqs
 script:
-  - php vendor/bin/behat
-  - php vendor/bin/phpspec run -v
+  - php vendor/bin/behat --config=.travis-behat.yml
+  - php vendor/bin/phpspec run -v --config=.travis-phpspec.yml

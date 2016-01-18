@@ -161,8 +161,8 @@ class Calends implements Serializable, JsonSerializable
             return;
         }
 
-        if ( ! ((is_string($className) && class_exists($className) && is_a($className, CalendarDefinition::class, true))
-            || (is_object($className) && is_a($className, ObjectDefinition::class)))) {
+        if ( ! ((is_string($className) && class_exists($className) && is_a($className, get_class(CalendarDefinition), true))
+            || (is_object($className) && is_a($className, get_class(ObjectDefinition))))) {
             throw new InvalidCalendarException('Not a vaild calendar definition class name or instance: ' . var_export($className, true));
         }
 
@@ -224,7 +224,7 @@ class Calends implements Serializable, JsonSerializable
             return;
         }
 
-        if ( ! (((is_string($conversionClass) && class_exists($conversionClass)) || is_object($conversionClass)) && is_a($conversionClass, ConversionClass::class, true))) {
+        if ( ! (((is_string($conversionClass) && class_exists($conversionClass)) || is_object($conversionClass)) && is_a($conversionClass, get_class(ConversionClass), true))) {
             throw new InvalidConverterException('Not a vaild conversion class name or instance: ' . var_export($conversionClass, true));
         }
 
