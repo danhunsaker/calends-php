@@ -428,21 +428,25 @@ class CalendsSpec extends ObjectBehavior
 
     public function it_should_import_intl_calendar()
     {
+        if ( ! class_exists('\IntlCalendar')) return;
         $this::import(\IntlCalendar::createInstance(NULL, 'en_US@calendar=persian'))->shouldHaveType('Danhunsaker\Calends\Calends');
     }
 
     public function it_should_convert_intl_calendar()
     {
+        if ( ! class_exists('\IntlCalendar')) return;
         $this->convert('IntlCalendar')->shouldHaveKey('duration');
     }
 
     public function it_should_import_intl_gregorian_calendar()
     {
+        if ( ! class_exists('\IntlCalendar')) return;
         $this::import(\IntlCalendar::fromDateTime(date_create()))->shouldHaveType('Danhunsaker\Calends\Calends');
     }
 
     public function it_should_convert_intl_gregorian_calendar()
     {
+        if ( ! class_exists('\IntlCalendar')) return;
         $this->convert('IntlGregorianCalendar')->shouldHaveKey('duration');
     }
 

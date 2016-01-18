@@ -73,11 +73,11 @@ class Calends implements Serializable, JsonSerializable
         static::registerCalendar('tai', __NAMESPACE__ . '\\Calendar\\TAI64');
 
         if (is_array($stamp)) {
-            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp['start']);
-            $this->endTime      = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp['end']);
+            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp['start']);
+            $this->endTime      = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp['end']);
             $this->duration     = $this->difference($this, 'end-start');
         } else {
-            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][$this->getCalendar($calendar)], $stamp);
+            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp);
             $this->endTime      = $this->internalTime;
             $this->duration     = 0;
         }
@@ -119,7 +119,7 @@ class Calends implements Serializable, JsonSerializable
      * @throws UnknownCalendarException
      * @return string The canonical index for accessing $calendar functions
      **/
-    protected function getCalendar($calendar)
+    protected static function getCalendar($calendar)
     {
         $calendar = Cased::fromCamelCase($calendar)->asCamelCase();
 
@@ -183,14 +183,14 @@ class Calends implements Serializable, JsonSerializable
      * @throws UnknownConverterException
      * @return string The canonical index for accessing the $converter
      **/
-    protected function getConverter($converter)
+    protected static function getConverter($converter)
     {
         if (is_object($converter)) {
             $converter = get_class($converter);
         }
 
         if ( ! array_key_exists($converter, static::$timeConverters['import'])) {
-            $className = __NAMESPACE__ . "\\Converter\\" . array_pop(explode('\\', $converter));
+            $className = __NAMESPACE__ . "\\Converter\\" . @array_pop(explode('\\', $converter));
 
             if (class_exists($className)) {
                 static::registerClassConverter($converter, $className);
@@ -287,7 +287,7 @@ class Calends implements Serializable, JsonSerializable
      */
     public static function import($source)
     {
-        return call_user_func(static::$timeConverters['import'][self::getConverter($source)], $source);
+        return call_user_func(static::$timeConverters['import'][static::getConverter($source)], $source);
     }
 
     /**
@@ -303,7 +303,7 @@ class Calends implements Serializable, JsonSerializable
      */
     public function convert($className)
     {
-        return call_user_func(static::$timeConverters['convert'][$this->getConverter($className)], $this);
+        return call_user_func(static::$timeConverters['convert'][static::getConverter($className)], $this);
     }
 
     // Getters
@@ -332,7 +332,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function getDate($calendar = 'unix')
     {
-        return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->internalTime);
+        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar($calendar)], $this->internalTime);
     }
 
     /**
@@ -371,7 +371,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function getEndDate($calendar = 'unix')
     {
-        return call_user_func(static::$timeConverters['fromInternal'][$this->getCalendar($calendar)], $this->endTime);
+        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar($calendar)], $this->endTime);
     }
 
     // Comparison Functions
@@ -686,8 +686,8 @@ class Calends implements Serializable, JsonSerializable
     public function add($offset, $calendar = 'unix')
     {
         return $this->setDate(call_user_func(
-            static::$timeConverters['fromInternal'][$this->getCalendar($calendar)],
-            call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset)
+            static::$timeConverters['fromInternal'][static::getCalendar($calendar)],
+            call_user_func(static::$timeConverters['offset'][static::getCalendar($calendar)], $this->internalTime, $offset)
         ), $calendar);
     }
 
@@ -723,8 +723,8 @@ class Calends implements Serializable, JsonSerializable
     public function addFromEnd($offset, $calendar = 'unix')
     {
         return $this->setEndDate(call_user_func(
-            static::$timeConverters['fromInternal'][$this->getCalendar($calendar)],
-            call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset)
+            static::$timeConverters['fromInternal'][static::getCalendar($calendar)],
+            call_user_func(static::$timeConverters['offset'][static::getCalendar($calendar)], $this->endTime, $offset)
         ), $calendar);
     }
 

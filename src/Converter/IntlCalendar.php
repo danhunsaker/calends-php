@@ -28,7 +28,7 @@ class IntlCalendar implements ConverterInterface
      */
     public static function convert(Calends $cal)
     {
-        $source = array_pop(explode('\\', get_called_class()));
+        $source = @array_pop(explode('\\', get_called_class()));
 
         return [
             'start'    => $source::fromDateTime(\DateTime::createFromFormat('U.u', rtrim(rtrim($cal->getDate('unix'), '0'), '.'))),
