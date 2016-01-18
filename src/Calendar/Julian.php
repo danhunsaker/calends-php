@@ -30,7 +30,7 @@ class Julian implements DefinitionInterface
     public static function fromInternal($stamp)
     {
         $date = Calends::fromInternalToUnix($stamp);
-        return jdtojulian(bcadd(bcdiv($date, 86400), 2440587.5)) . date(' H:i:s \G\M\TP', bcmod($date, 86400));
+        return date_create(jdtojulian(bcadd(bcdiv($date, 86400), 2440587.5)))->format('D, d M Y') . ' ' . date_create_from_format('U.u', bcadd(0, $date, 6))->format('H:i:s.u P');
     }
 
     /**

@@ -14,10 +14,10 @@ Feature: Gregorian Calendar handling
     Then the return value should be <output>
 
     Examples:
-      | input                            | intype    | outtype   | output                           |
-      | 1970-01-01 00:00:00              | gregorian | unix      | 0                                |
-      | 1970-01-01 00:00:00              | gregorian | jdc       | 2440587.5                        |
-      | 1970-01-01 00:00:00              | gregorian | tai       | 40000000000000000000000000000000 |
-      | 0                                | unix      | gregorian | Thu Jan  1 00:00:00 1970         |
-      | 2440587.5                        | jdc       | gregorian | Thu Jan  1 00:00:00 1970         |
-      | 40000000000000000000000000000000 | tai       | gregorian | Thu Jan  1 00:00:00 1970         |
+      | input                            | intype    | outtype   | output                                  |
+      | 1970-01-01 00:00:00              | gregorian | unix      | 0                                       |
+      | 1970-01-01 00:00:00              | gregorian | jdc       | 2440587.5                               |
+      | 1970-01-01 00:00:00              | gregorian | tai       | 40000000000000000000000000000000        |
+      | 0                                | unix      | gregorian | Thu, 01 Jan 1970 00:00:00.000000 +00:00 |
+      | 2440587.5                        | jdc       | gregorian | Thu, 01 Jan 1970 00:00:00.000000 +00:00 |
+      | 40000000000000000000000000000000 | tai       | gregorian | Thu, 01 Jan 1970 00:00:00.000000 +00:00 |

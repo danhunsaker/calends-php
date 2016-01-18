@@ -19,7 +19,7 @@ class Carbon implements ConverterInterface
     /**
      * {@inheritdoc}
      */
-    public static function import(Source $source)
+    public static function import($source)
     {
         return Calends::create($source->timestamp, 'unix');
     }

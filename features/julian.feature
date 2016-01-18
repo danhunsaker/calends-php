@@ -14,10 +14,10 @@ Feature: Julian Calendar handling
     Then the return value should be <output>
 
     Examples:
-      | input                            | intype | outtype | output                           |
-      | 1969-12-18 00:00:00              | julian | unix    | 0                                |
-      | 1969-12-18 00:00:00              | julian | jdc     | 2440587.5                        |
-      | 1969-12-18 00:00:00              | julian | tai     | 40000000000000000000000000000000 |
-      | 0                                | unix   | julian  | 12/18/1969 00:00:00 GMT+00:00    |
-      | 2440587.5                        | jdc    | julian  | 12/18/1969 00:00:00 GMT+00:00    |
-      | 40000000000000000000000000000000 | tai    | julian  | 12/18/1969 00:00:00 GMT+00:00    |
+      | input                            | intype | outtype | output                                  |
+      | 1969-12-18 00:00:00              | julian | unix    | 0                                       |
+      | 1969-12-18 00:00:00              | julian | jdc     | 2440587.5                               |
+      | 1969-12-18 00:00:00              | julian | tai     | 40000000000000000000000000000000        |
+      | 0                                | unix   | julian  | Thu, 18 Dec 1969 00:00:00.000000 +00:00 |
+      | 2440587.5                        | jdc    | julian  | Thu, 18 Dec 1969 00:00:00.000000 +00:00 |
+      | 40000000000000000000000000000000 | tai    | julian  | Thu, 18 Dec 1969 00:00:00.000000 +00:00 |

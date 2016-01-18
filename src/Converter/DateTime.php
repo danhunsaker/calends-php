@@ -19,7 +19,7 @@ class DateTime implements ConverterInterface
     /**
      * {@inheritdoc}
      */
-    public static function import(Source $source)
+    public static function import($source)
     {
         return Calends::create($source->getTimestamp(), 'unix');
     }
@@ -30,9 +30,9 @@ class DateTime implements ConverterInterface
     public static function convert(Calends $cal)
     {
         return [
-            'start'    => new Source("@{$cal->getDate('unix')}"),
+            'start'    => Source::createFromFormat('U.u', rtrim($cal->getDate('unix'), '0') . '0'),
             'duration' => new DateInterval("PT{$cal->getDuration()}S"),
-            'end'      => new Source("@{$cal->getEndDate('unix')}"),
+            'end'      => Source::createFromFormat('U.u', rtrim($cal->getEndDate('unix'), '0') . '0'),
         ];
     }
 }

@@ -193,10 +193,10 @@ class Calends implements Serializable, JsonSerializable
         }
 
         if ( ! array_key_exists($converter, static::$timeConverters['import'])) {
-            $className = __NAMESPACE__ . "\\Converter\\{$converter}";
+            $className = __NAMESPACE__ . "\\Converter\\" . array_pop(explode('\\', $converter));
 
             if (class_exists($className)) {
-                static::registerClassConverters($converter, $className);
+                static::registerClassConverter($converter, $className);
             } else {
                 throw new UnknownConverterException("Can't find the '{$converter}' converter!");
             }
@@ -290,7 +290,7 @@ class Calends implements Serializable, JsonSerializable
      */
     public static function import($source)
     {
-        return call_user_func(static::$timeConverters['import'][$this->getConverter($source)], $source);
+        return call_user_func(static::$timeConverters['import'][self::getConverter($source)], $source);
     }
 
     /**
@@ -420,7 +420,6 @@ class Calends implements Serializable, JsonSerializable
             case "start":
             default:
                 $times = [static::getInternalTimeAsString($a->internalTime), static::getInternalTimeAsString($b->internalTime)];
-                break;
         }
 
         return $times;
@@ -496,7 +495,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function startsDuring(Calends $compare)
     {
-        return static::compare($this, $compare, 'start') >= 0 && static::compare($this, $compare, 'start-end') <= 0;
+        return static::compare($this, $compare, 'start') >= 0 && (static::compare($this, $compare, 'start-end') < 0 || ($this->duration == 0 && static::compare($this, $compare, 'start-end') === 0));
     }
 
     /**
@@ -510,7 +509,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function endsDuring(Calends $compare)
     {
-        return static::compare($this, $compare, 'end-start') >= 0 && static::compare($this, $compare, 'end') <= 0;
+        return static::compare($this, $compare, 'end') <= 0 && (static::compare($this, $compare, 'end-start') > 0 || ($this->duration == 0 && static::compare($this, $compare, 'end-start') === 0));
     }
 
     /**
@@ -537,7 +536,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function overlaps(Calends $compare)
     {
-        return $this->startsDuring($compare) || $this->endsDuring($compare) || $compare->startsDuring($this) || $compare->endsDuring($this);
+        return $this->startsDuring($compare) || $compare->startsDuring($this) || $this->endsDuring($compare) || $compare->endsDuring($this);
     }
 
     /**
@@ -551,7 +550,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function abuts(Calends $compare)
     {
-        return static::compare($this, $compare, 'start-end') === 0 || static::compare($this, $compare, 'end-start') === 0;
+        return (static::compare($this, $compare, 'start-end') === 0 || static::compare($this, $compare, 'end-start') === 0) && ! ($this->contains($compare) || $compare->contains($this));
     }
 
     /**
@@ -565,7 +564,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function isBefore(Calends $compare)
     {
-        return static::compare($this, $compare, 'end-start') === -1;
+        return static::compare($this, $compare, 'end-start') <= 0 && static::compare($this, $compare, 'start') === -1;
     }
 
     /**
@@ -605,7 +604,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function isAfter(Calends $compare)
     {
-        return static::compare($this, $compare, 'start-end') === +1;
+        return static::compare($this, $compare, 'start-end') >= 0 && static::compare($this, $compare, 'end') === +1;
     }
 
     /**
@@ -689,7 +688,10 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function add($offset, $calendar = 'unix')
     {
-        return $this->setDate(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset), $calendar);
+        return $this->setDate(call_user_func(
+            static::$timeConverters['fromInternal'][$this->getCalendar($calendar)],
+            call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->internalTime, $offset)
+        ), $calendar);
     }
 
     /**
@@ -723,7 +725,10 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function addFromEnd($offset, $calendar = 'unix')
     {
-        return $this->setEndDate(call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset), $calendar);
+        return $this->setEndDate(call_user_func(
+            static::$timeConverters['fromInternal'][$this->getCalendar($calendar)],
+            call_user_func(static::$timeConverters['offset'][$this->getCalendar($calendar)], $this->endTime, $offset)
+        ), $calendar);
     }
 
     /**
@@ -763,7 +768,7 @@ class Calends implements Serializable, JsonSerializable
             $calendar = 'unix';
         }
 
-        return static::create(['start' => $this->getEndDate($calendar), 'end' => $this->addFromEnd($duration, $calendar)->getDate($calendar)], $calendar);
+        return static::create(['start' => $this->getEndDate($calendar), 'end' => $this->addFromEnd($offset, $calendar)->getEndDate($calendar)], $calendar);
     }
 
     /**
@@ -786,7 +791,7 @@ class Calends implements Serializable, JsonSerializable
             $calendar = 'unix';
         }
 
-        return static::create(['start' => $this->subtract($duration, $calendar)->getDate($calendar), 'end' => $this->getDate($calendar)], $calendar);
+        return static::create(['start' => $this->subtract($offset, $calendar)->getDate($calendar), 'end' => $this->getDate($calendar)], $calendar);
     }
 
     // Range Functions

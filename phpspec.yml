@@ -17,7 +17,6 @@ rerunner:
 code_coverage:
   whitelist:
     - src
-    - laravel
   format:
     - html
     - clover

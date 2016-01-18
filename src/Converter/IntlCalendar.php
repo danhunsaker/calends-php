@@ -4,7 +4,6 @@ namespace Danhunsaker\Calends\Converter;
 
 use Danhunsaker\Calends\Calends;
 use DateInterval;
-use IntlCalendar as Source;
 
 /**
  * Convert between Calends and IntlCalendar objects
@@ -19,7 +18,7 @@ class IntlCalendar implements ConverterInterface
     /**
      * {@inheritdoc}
      */
-    public static function import(Source $source)
+    public static function import($source)
     {
         return Calends::create($source->getTime() / 1000, 'unix');
     }
@@ -29,10 +28,12 @@ class IntlCalendar implements ConverterInterface
      */
     public static function convert(Calends $cal)
     {
+        $source = array_pop(explode('\\', get_called_class()));
+
         return [
-            'start'    => Source::fromDateTime("@{$cal->getDate('unix')}"),
+            'start'    => $source::fromDateTime(\DateTime::createFromFormat('U.u', rtrim(rtrim($cal->getDate('unix'), '0'), '.'))),
             'duration' => new DateInterval("PT{$cal->getDuration()}S"),
-            'end'      => Source::fromDateTime("@{$cal->getEndDate('unix')}"),
+            'end'      => $source::fromDateTime(\DateTime::createFromFormat('U.u', rtrim(rtrim($cal->getEndDate('unix'), '0'), '.'))),
         ];
     }
 }

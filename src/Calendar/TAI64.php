@@ -53,6 +53,6 @@ class TAI64 implements DefinitionInterface
      */
     public static function offset($stamp, $offset)
     {
-        return Calends::toInternalFromUnix(bcadd(Calends::fromInternalToUnix($stamp), Calends::fromInternalToUnix(static::toInternal($offset))));
+        return Calends::toInternalFromUnix(bcadd(Calends::fromInternalToUnix($stamp), bcadd(Calends::fromInternalToUnix(static::toInternal($offset)), 0x4000000000000000)));
     }
 }

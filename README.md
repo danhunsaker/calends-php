@@ -278,7 +278,7 @@ $tomorrow  = $now->add('1 day', 'gregorian');
 $yesterday = $now->subtract('1 day', 'gregorian');
 
 $last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
-             // yesterday to today
+             // yesterday to today; same as $yesterday
 $next24hrs = $now->setEndDate($tomorrow->getDate('gregorian'), 'gregorian');
              // today to tomorrow
 $next72hrs = $now->setDuration('72 hours', 'gregorian');
@@ -381,20 +381,20 @@ use Danhunsaker\Calends\Calends;
 
 $now       = Calends::create();
 
-$last24hrs = $now->setDate($yesterday->getDate('gregorian'), 'gregorian');
+$last24hrs = $now->subtract('1 day', 'gregorian');
 
 print_r([
     $now->startsBefore($last24hrs),   // false
     $now->isBefore($last24hrs),       // false
-    $now->endsBefore($last24hrs),     // true
+    $now->endsBefore($last24hrs),     // false
     $now->isSame($last24hrs),         // false
     $now->startsDuring($last24hrs),   // true
     $now->isDuring($last24hrs),       // true
     $now->endsDuring($last24hrs),     // true
     $now->contains($last24hrs),       // false
     $now->overlaps($last24hrs),       // true
-    $now->abuts($last24hrs),          // true
-    $now->startsAfter($last24hrs),    // false
+    $now->abuts($last24hrs),          // false
+    $now->startsAfter($last24hrs),    // true
     $now->isAfter($last24hrs),        // false
     $now->endsAfter($last24hrs),      // false
     $now->isLonger($last24hrs),       // false
