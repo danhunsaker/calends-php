@@ -2,9 +2,6 @@
 
 namespace Danhunsaker\Calends;
 
-use Danhunsaker\Calends\Calendar\DefinitionInterface as CalendarDefinition;
-use Danhunsaker\Calends\Calendar\ObjectDefinitionInterface as ObjectDefinition;
-use Danhunsaker\Calends\Converter\ConverterInterface as ConversionClass;
 use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
@@ -161,8 +158,8 @@ class Calends implements Serializable, JsonSerializable
             return;
         }
 
-        if ( ! ((is_string($className) && class_exists($className) && is_a($className, get_class(CalendarDefinition), true))
-            || (is_object($className) && is_a($className, get_class(ObjectDefinition))))) {
+        if ( ! ((is_string($className) && class_exists($className) && is_a($className, 'Danhunsaker\Calends\Calendar\DefinitionInterface', true))
+            || (is_object($className) && is_a($className, 'Danhunsaker\Calends\Calendar\ObjectDefinitionInterface')))) {
             throw new InvalidCalendarException('Not a vaild calendar definition class name or instance: ' . var_export($className, true));
         }
 
@@ -224,7 +221,7 @@ class Calends implements Serializable, JsonSerializable
             return;
         }
 
-        if ( ! (((is_string($conversionClass) && class_exists($conversionClass)) || is_object($conversionClass)) && is_a($conversionClass, get_class(ConversionClass), true))) {
+        if ( ! (((is_string($conversionClass) && class_exists($conversionClass)) || is_object($conversionClass)) && is_a($conversionClass, 'Danhunsaker\Calends\Converter\ConverterInterface', true))) {
             throw new InvalidConverterException('Not a vaild conversion class name or instance: ' . var_export($conversionClass, true));
         }
 
