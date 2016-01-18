@@ -12,7 +12,6 @@
     "require": {
         "php": "^5.4|^7.0",
         "ext-bcmath": "*",
-        "ext-calendar": "*",
         "ext-date": "*",
         "ext-gmp": "*",
         "ext-intl": "*",
