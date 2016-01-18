@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "33903246531e6fbd36c543d866760669",
-    "content-hash": "8d5ed2d4738524a2b5a99a86e4a2dbe5",
+    "hash": "8e16a8c7836b34ac0acda49f5aefb906",
+    "content-hash": "2a2389553d869db2bf92a3d5a949b5dc",
     "packages": [
         {
             "name": "rmiller/caser",
@@ -2861,7 +2861,12 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^5.4|^7.0"
+        "php": "^5.4|^7.0",
+        "ext-bcmath": "*",
+        "ext-calendar": "*",
+        "ext-date": "*",
+        "ext-gmp": "*",
+        "ext-intl": "*"
     },
     "platform-dev": []
 }

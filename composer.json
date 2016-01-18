@@ -11,6 +11,11 @@
     ],
     "require": {
         "php": "^5.4|^7.0",
+        "ext-bcmath": "*",
+        "ext-calendar": "*",
+        "ext-date": "*",
+        "ext-gmp": "*",
+        "ext-intl": "*",
         "rmiller/caser": "^0.1.0"
     },
     "require-dev": {
