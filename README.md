@@ -1,5 +1,7 @@
 # Calends #
 
+[![Join the chat at https://gitter.im/danhunsaker/calends](https://badges.gitter.im/danhunsaker/calends.svg)](https://gitter.im/danhunsaker/calends?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Latest Version](https://img.shields.io/github/release/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Build Status](https://img.shields.io/travis/danhunsaker/calends/master.svg?style=flat-square)](https://travis-ci.org/danhunsaker/calends)
