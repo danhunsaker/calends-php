@@ -17,4 +17,4 @@ install:
 script:
   - php vendor/bin/behat --config=.travis-behat.yml
   - php vendor/bin/phpspec run -v --config=.travis-phpspec.yml
-  - phpunit -v --colors --tap -c .travis-phpunit.xml
+  - phpunit -v --color -c .travis-phpunit.xml
