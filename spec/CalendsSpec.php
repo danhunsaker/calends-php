@@ -9,96 +9,57 @@ class CalendsSpec extends ObjectBehavior
 {
     public function it_is_initializable()
     {
+        // Standard constructor
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
+
+        // static ::create() method
+        $this::create()->shouldHaveType('Danhunsaker\Calends\Calends');
+
+        // With array
+        $this::create(['start' => 0, 'end' => 0])->shouldHaveType('Danhunsaker\Calends\Calends');
     }
 
-    public function it_is_initializable_with_array()
+    public function it_should_support_calendars()
     {
-        $this->beConstructedWith(['start' => 0, 'end' => 0]);
-        $this->shouldHaveType('Danhunsaker\Calends\Calends');
-    }
-
-    public function it_is_initializable_through_create()
-    {
-        $this->beConstructedThrough('create', [['start' => 0, 'end' => 0]]);
-        $this->shouldHaveType('Danhunsaker\Calends\Calends');
-    }
-
-    public function it_should_auto_register_calendars()
-    {
+        // Autoload
         $this->beConstructedWith('now', 'gregorian');
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
-    }
 
-    public function it_should_throw_exception_for_unknown_calendars()
-    {
-        $this->beConstructedWith('now', 'invalid');
-        $this->shouldThrow('Danhunsaker\Calends\UnknownCalendarException')->duringInstantiation();
-    }
+        // Don't complain about duplicates
+        $this->registerCalendar('gregorian', 'Danhunsaker\Calends\Calendar\Gregorian')->shouldBeNull();
 
-    public function it_should_throw_exception_for_invalid_calendars()
-    {
+        // Throw exceptions on invalid or unknown calendars
+        $this->shouldThrow('Danhunsaker\Calends\UnknownCalendarException')->during('create', ['now', 'invalid']);
         $this->shouldThrow('Danhunsaker\Calends\InvalidCalendarException')->during('registerCalendar', ['invalid', 'NonExistentClass']);
     }
 
-    public function it_should_throw_exception_for_unknown_converters()
+    public function it_should_support_converters()
     {
+        // Autoload
+        $this->convert('Carbon\Carbon')->shouldHaveKey('duration');
+
+        // Don't complain about duplicates
+        $this->registerConverter('Carbon\Carbon', 'Danhunsaker\Calends\Converter\Carbon')->shouldBeNull();
+
+        // Throw exceptions on invalid or unknown converters
         $this->shouldThrow('Danhunsaker\Calends\UnknownConverterException')->during('convert', ['invalid']);
+        $this->shouldThrow('Danhunsaker\Calends\InvalidConverterException')->during('registerConverter', ['invalid', 'NonExistentClass']);
     }
 
-    public function it_should_throw_exception_for_invalid_converters()
-    {
-        $this->shouldThrow('Danhunsaker\Calends\InvalidConverterException')->during('registerClassConverter', ['invalid', 'NonExistentClass']);
-    }
-
-    public function it_should_not_complain_about_duplicate_converters()
-    {
-        $this->convert('Carbon')->shouldHaveKey('duration');
-        $this->registerClassConverter('Carbon', 'Danhunsaker\Calends\Converter\Carbon')->shouldBeNull();
-    }
-
-    public function it_should_get_internal_time()
+    public function it_should_get_time_values()
     {
         $this->getInternalTime()->shouldHaveKey('seconds');
-    }
-
-    public function it_should_get_date()
-    {
         $this->getDate()->shouldBeString();
-    }
-
-    public function it_should_get_duration()
-    {
         $this->getDuration()->shouldBeLike('0');
-    }
-
-    public function it_should_get_internal_end_time()
-    {
         $this->getInternalEndTime()->shouldHaveKey('seconds');
-    }
-
-    public function it_should_get_end_date()
-    {
         $this->getEndDate()->shouldBeString();
     }
 
-    public function it_should_to_internal_from_unix()
+    public function it_should_convert_between_internal_and_unix()
     {
         $this::toInternalFromUnix(0)->shouldHaveKey('seconds');
-    }
-
-    public function it_should_wrap_below_min_to_internal_from_unix()
-    {
         $this::toInternalFromUnix(bcsub(-1, bcpow(2, 62)))->shouldHaveKeyWithValue('seconds', '0');
-    }
-
-    public function it_should_wrap_above_max_to_internal_from_unix()
-    {
         $this::toInternalFromUnix(bcsub(bcpow(2, 63), bcpow(2, 62)))->shouldHaveKeyWithValue('seconds', bcsub(bcpow(2, 63), 1, 0));
-    }
-
-    public function it_should_from_internal_to_unix()
-    {
         $this::fromInternalToUnix(['seconds' => 0, 'nano' => 0, 'atto' => 0])->shouldBeString();
     }
 
@@ -231,46 +192,7 @@ class CalendsSpec extends ObjectBehavior
         $this->isSameDuration($next48hrs)->shouldBe(false);
     }
 
-    public function it_should_subtract_from_end()
-    {
-        $subtracted = $this->subtractFromEnd('50', 'unix');
-        $subtracted->shouldHaveType('Danhunsaker\Calends\Calends');
-        $subtracted->getEndDate()->shouldBeLike(bcsub($this->getWrappedObject()->getEndDate(), 50));
-    }
-
-    public function it_should_set_duration()
-    {
-        $newObj = $this->setDuration('50', 'unix');
-        $newObj->shouldHaveType('Danhunsaker\Calends\Calends');
-        $newObj->getEndDate()->shouldBeLike(bcadd($this->getWrappedObject()->getDate(), 50));
-    }
-
-    public function it_should_set_duration_from_end()
-    {
-        $newObj = $this->setDurationFromEnd('50', 'unix');
-        $newObj->shouldHaveType('Danhunsaker\Calends\Calends');
-        $newObj->getDate()->shouldBeLike(bcsub($this->getWrappedObject()->getEndDate(), 50));
-    }
-
-    public function it_should_merge()
-    {
-        bcscale(18);
-
-        $time  = microtime(true);
-        $start = bcsub($time, bcmod($time, 86400), 0);
-        $end   = bcadd($start, 86400);
-        $this->beConstructedWith(['start' => $start, 'end' => $end]);
-
-        $today     = $this->getWrappedObject();
-        $last24hrs = $today->previous('1 day', 'gregorian');
-
-        $merged = $this->merge($last24hrs);
-        $merged->shouldHaveType('Danhunsaker\Calends\Calends');
-        $merged->getDate()->shouldBeLike($last24hrs->getDate());
-        $merged->getEndDate()->shouldBeLike($this->getWrappedObject()->getEndDate());
-    }
-
-    public function it_should_intersect()
+    public function it_should_modify_dates()
     {
         bcscale(18);
 
@@ -282,6 +204,23 @@ class CalendsSpec extends ObjectBehavior
         $today     = $this->getWrappedObject();
         $next24hrs = $today->setDate($time)->setEndDate(bcadd($time, 86400));
         $yesterday = $today->previous('1 day', 'gregorian');
+
+        $subtracted = $this->subtractFromEnd('50', 'unix');
+        $subtracted->shouldHaveType('Danhunsaker\Calends\Calends');
+        $subtracted->getEndDate()->shouldBeLike(bcsub($this->getWrappedObject()->getEndDate(), 50));
+
+        $duration = $this->setDuration('50', 'unix');
+        $duration->shouldHaveType('Danhunsaker\Calends\Calends');
+        $duration->getEndDate()->shouldBeLike(bcadd($this->getWrappedObject()->getDate(), 50));
+
+        $endDuration = $this->setDurationFromEnd('50', 'unix');
+        $endDuration->shouldHaveType('Danhunsaker\Calends\Calends');
+        $endDuration->getDate()->shouldBeLike(bcsub($this->getWrappedObject()->getEndDate(), 50));
+
+        $merged = $this->merge($yesterday);
+        $merged->shouldHaveType('Danhunsaker\Calends\Calends');
+        $merged->getDate()->shouldBeLike($yesterday->getDate());
+        $merged->getEndDate()->shouldBeLike($this->getWrappedObject()->getEndDate());
 
         $this->shouldThrow('Danhunsaker\Calends\InvalidCompositeRangeException')->duringIntersect($yesterday);
 
@@ -289,20 +228,6 @@ class CalendsSpec extends ObjectBehavior
         $intersection->shouldHaveType('Danhunsaker\Calends\Calends');
         $intersection->getDate()->shouldBeLike($next24hrs->getDate());
         $intersection->getEndDate()->shouldBeLike($this->getWrappedObject()->getEndDate());
-    }
-
-    public function it_should_gap()
-    {
-        bcscale(18);
-
-        $time  = microtime(true);
-        $start = bcsub($time, bcmod($time, 86400), 0);
-        $end   = bcadd($start, 86400);
-        $this->beConstructedWith(['start' => $start, 'end' => $end]);
-
-        $today     = $this->getWrappedObject();
-        $next24hrs = $today->setDate($time)->setEndDate(bcadd($time, 86400));
-        $yesterday = $today->previous('1 day', 'gregorian');
 
         $this->shouldThrow('Danhunsaker\Calends\InvalidCompositeRangeException')->duringGap($next24hrs);
 
@@ -326,17 +251,9 @@ class CalendsSpec extends ObjectBehavior
         $this->beConstructedWith('1970-01-01 00:00:00.000000 +00:00', 'gregorian');
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
-    }
 
-    public function it_should_calculate_gregorian()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->add('1 day', 'gregorian')->getDate('unix')->shouldBeLike('86400');
-    }
 
-    public function it_should_output_gregorian()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->getDate('gregorian')->shouldBeLike('Thu, 01 Jan 1970 00:00:00.000000 +00:00');
     }
 
@@ -345,17 +262,9 @@ class CalendsSpec extends ObjectBehavior
         $this->beConstructedWith('1969-12-18 00:00:00.000000 +00:00', 'julian');
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
-    }
 
-    public function it_should_calculate_julian()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->add('1 day', 'julian')->getDate('unix')->shouldBeLike('86400');
-    }
 
-    public function it_should_output_julian()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->getDate('julian')->shouldBeLike('Thu, 18 Dec 1969 00:00:00.000000 +00:00');
     }
 
@@ -364,17 +273,9 @@ class CalendsSpec extends ObjectBehavior
         $this->beConstructedWith('2440587.5', 'jdc');
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
-    }
 
-    public function it_should_calculate_jdc()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->add('1', 'jdc')->getDate('unix')->shouldBeLike('86400');
-    }
 
-    public function it_should_output_jdc()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->getDate('jdc')->shouldBeLike('2440587.5');
     }
 
@@ -383,83 +284,52 @@ class CalendsSpec extends ObjectBehavior
         $this->beConstructedWith('4000000000000000', 'tai');
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
-    }
 
-    public function it_should_calculate_tai()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->add('0000000000015180', 'tai')->getDate('unix')->shouldBeLike('86400');
-    }
 
-    public function it_should_output_tai()
-    {
-        $this->beConstructedWith('0', 'unix');
         $this->getDate('tai')->shouldBeLike('40000000000000000000000000000000');
-    }
 
-    public function it_should_wrap_above_max_tai()
-    {
-        $this->beConstructedWith('8000000000000000', 'tai');
-        $this->shouldHaveType('Danhunsaker\Calends\Calends');
-        $this->getDate('tai')->shouldBeLike('7fffffffffffffff3b9ac9ff3b9ac9ff');
-    }
-
-    public function it_should_import_datetime()
-    {
-        $this->beConstructedThrough('import', [date_create()]);
-        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this::create('8000000000000000', 'tai')->getDate('tai')->shouldBeLike('7fffffffffffffff3b9ac9ff3b9ac9ff');
     }
 
     public function it_should_convert_datetime()
     {
-        $this->convert('DateTime')->shouldHaveKey('duration');
-    }
-
-    public function it_should_import_carbon()
-    {
-        $this->beConstructedThrough('import', [new \Carbon\Carbon]);
+        $this->beConstructedThrough('import', [date_create()]);
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
+
+        $this->convert('DateTime')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_carbon()
     {
-        $this->convert('Carbon\Carbon')->shouldHaveKey('duration');
-    }
+        $this->beConstructedThrough('import', [new \Carbon\Carbon]);
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
 
-    public function it_should_import_intl_calendar()
-    {
-        if ( ! class_exists('\IntlCalendar')) return;
-        $this::import(\IntlCalendar::createInstance(NULL, 'en_US@calendar=persian'))->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->convert('Carbon\Carbon')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_intl_calendar()
     {
         if ( ! class_exists('\IntlCalendar')) return;
-        $this->convert('IntlCalendar')->shouldHaveKey('duration');
-    }
+        $this::import(\IntlCalendar::createInstance(NULL, 'en_US@calendar=persian'))->shouldHaveType('Danhunsaker\Calends\Calends');
 
-    public function it_should_import_intl_gregorian_calendar()
-    {
-        if ( ! class_exists('\IntlCalendar')) return;
-        $this::import(\IntlCalendar::fromDateTime(date_create()))->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->convert('IntlCalendar')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_intl_gregorian_calendar()
     {
         if ( ! class_exists('\IntlCalendar')) return;
-        $this->convert('IntlGregorianCalendar')->shouldHaveKey('duration');
-    }
+        $this::import(\IntlCalendar::fromDateTime(date_create()))->shouldHaveType('Danhunsaker\Calends\Calends');
 
-    public function it_should_import_period()
-    {
-        if (version_compare(phpversion(), '5.5') < 0) return;
-        $this->beConstructedThrough('import', [new \League\Period\Period(\DateTimeImmutable::createFromFormat('U.u', microtime(true)), \DateTimeImmutable::createFromFormat('U.u', microtime(true)))]);
-        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->convert('IntlGregorianCalendar')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_period()
     {
         if (version_compare(phpversion(), '5.5') < 0) return;
+        $this->beConstructedThrough('import', [new \League\Period\Period(\DateTimeImmutable::createFromFormat('U.u', microtime(true)), \DateTimeImmutable::createFromFormat('U.u', microtime(true)))]);
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+
         $this->convert('League\Period\Period')->shouldHaveType('League\Period\Period');
     }
 }

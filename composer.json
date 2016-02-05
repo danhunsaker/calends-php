@@ -28,7 +28,7 @@
         "nesbot/carbon": "^1.21",
         "phpspec/phpspec": "^2.4",
         "phpunit/phpunit": "^5.0",
-        "rmiller/behat-spec": "^0.2.0"
+        "rmiller/behat-spec": "^0.3"
     },
     "suggest": {
         "illuminate/database": "Pulls calendar definitions from a database using Laravel's Eloquent ORM."

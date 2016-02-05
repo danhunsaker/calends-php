@@ -21,5 +21,5 @@ code_coverage:
     - html
     - clover
   output:
-    html: coverage
-    clover: coverage.xml
+    html: coverage/phpspec
+    clover: coverage/phpspec.xml

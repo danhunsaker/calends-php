@@ -6,4 +6,5 @@ default:
         - FeatureContext
   extensions:
     RMiller\BehatSpec\BehatExtension:
-      path:  vendor/bin/phpspec
+      path: vendor/bin/phpspec
+      config: phpspec.yml

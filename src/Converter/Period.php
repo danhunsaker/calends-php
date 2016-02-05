@@ -32,7 +32,7 @@ class Period implements ConverterInterface
      */
     public static function convert(Calends $cal)
     {
-        return new Source(DateTimeImmutable::createFromFormat('U.u', rtrim(rtrim($cal->getDate('unix'), '0'), '.')),
-                          DateTimeImmutable::createFromFormat('U.u', rtrim(rtrim($cal->getEndDate('unix'), '0'), '.')));
+        return new Source(DateTimeImmutable::createFromFormat('U.u', bcadd($cal->getDate('unix'), 0, 6)),
+                          DateTimeImmutable::createFromFormat('U.u', bcadd($cal->getEndDate('unix'), 0, 6)));
     }
 }

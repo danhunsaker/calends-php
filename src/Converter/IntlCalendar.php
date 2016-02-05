@@ -4,6 +4,7 @@ namespace Danhunsaker\Calends\Converter;
 
 use Danhunsaker\Calends\Calends;
 use DateInterval;
+use IntlTimeZone;
 
 /**
  * Convert between Calends and IntlCalendar objects
@@ -15,6 +16,11 @@ use DateInterval;
  */
 class IntlCalendar implements ConverterInterface
 {
+    /**
+     * @var string $locale The locale to use when creating new IntlCalendar objects
+     */
+    public static $locale = null;
+
     /**
      * {@inheritdoc}
      */
@@ -30,10 +36,16 @@ class IntlCalendar implements ConverterInterface
     {
         $source = @array_pop(explode('\\', get_called_class()));
 
+        $start = $source::createInstance(IntlTimeZone::getGMT(), static::$locale);
+        $start->setTime(bcmul($cal->getDate('unix'), 1000, 15));
+
+        $end   = $source::createInstance(IntlTimeZone::getGMT(), static::$locale);
+        $end->setTime(bcmul($cal->getEndDate('unix'), 1000, 15));
+
         return [
-            'start'    => $source::fromDateTime(\DateTime::createFromFormat('U.u', rtrim(rtrim($cal->getDate('unix'), '0'), '.'))),
+            'start'    => $start,
             'duration' => new DateInterval("PT{$cal->getDuration()}S"),
-            'end'      => $source::fromDateTime(\DateTime::createFromFormat('U.u', rtrim(rtrim($cal->getEndDate('unix'), '0'), '.'))),
+            'end'      => $end,
         ];
     }
 }

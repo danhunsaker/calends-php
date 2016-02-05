@@ -66,8 +66,6 @@ class Calends implements Serializable, JsonSerializable
      **/
     public function __construct($stamp = null, $calendar = 'unix')
     {
-        bcscale(18);
-
         static::registerCalendar('unix', __NAMESPACE__ . '\\Calendar\\Unix');
         static::registerCalendar('jdc', __NAMESPACE__ . '\\Calendar\\JulianDayCount');
         static::registerCalendar('tai', __NAMESPACE__ . '\\Calendar\\TAI64');
@@ -160,7 +158,7 @@ class Calends implements Serializable, JsonSerializable
 
         if ( ! ((is_string($className) && class_exists($className) && is_a($className, 'Danhunsaker\Calends\Calendar\DefinitionInterface', true))
             || (is_object($className) && is_a($className, 'Danhunsaker\Calends\Calendar\ObjectDefinitionInterface')))) {
-            throw new InvalidCalendarException('Not a vaild calendar definition class name or instance: ' . var_export($className, true));
+            throw new InvalidCalendarException('Not a valid calendar definition class name or instance: ' . var_export($className, true));
         }
 
         static::$timeConverters['toInternal'][$calendar]   = [$className, 'toInternal'];
@@ -193,7 +191,7 @@ class Calends implements Serializable, JsonSerializable
             $className = __NAMESPACE__ . "\\Converter\\" . @array_pop(explode('\\', $converter));
 
             if (class_exists($className)) {
-                static::registerClassConverter($converter, $className);
+                static::registerConverter($converter, $className);
             } else {
                 throw new UnknownConverterException("Can't find the '{$converter}' converter!");
             }
@@ -215,14 +213,14 @@ class Calends implements Serializable, JsonSerializable
      * @throws InvalidConverterException
      * @return void
      **/
-    public static function registerClassConverter($className, $conversionClass)
+    public static function registerConverter($className, $conversionClass)
     {
         if (array_key_exists($className, static::$timeConverters['import'])) {
             return;
         }
 
         if ( ! (((is_string($conversionClass) && class_exists($conversionClass)) || is_object($conversionClass)) && is_a($conversionClass, 'Danhunsaker\Calends\Converter\ConverterInterface', true))) {
-            throw new InvalidConverterException('Not a vaild conversion class name or instance: ' . var_export($conversionClass, true));
+            throw new InvalidConverterException('Not a valid conversion class name or instance: ' . var_export($conversionClass, true));
         }
 
         static::$timeConverters['import'][$className]  = [$conversionClass, 'import'];
@@ -386,7 +384,9 @@ class Calends implements Serializable, JsonSerializable
      **/
     protected static function getInternalTimeAsString($time)
     {
-        return "{$time['seconds']}.{$time['nano']}{$time['atto']}";
+        $frac = str_pad($time['nano'], 9, '0', STR_PAD_LEFT) . str_pad($time['atto'], 9, '0', STR_PAD_LEFT);
+
+        return "{$time['seconds']}.{$frac}";
     }
 
     /**
@@ -1010,3 +1010,5 @@ class Calends implements Serializable, JsonSerializable
         return $this('tai');
     }
 }
+
+bcscale(18);
