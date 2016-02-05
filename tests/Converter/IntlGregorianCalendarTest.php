@@ -16,6 +16,8 @@ class IntlGregorianCalendarTest extends \PHPUnit_Framework_TestCase
      */
     public function testImport()
     {
+        if ( ! class_exists('\IntlCalendar')) return;
+
         $date = IntlGregorianCalendar::createInstance();
         $date->clear();
 
@@ -29,6 +31,8 @@ class IntlGregorianCalendarTest extends \PHPUnit_Framework_TestCase
      */
     public function testConvert()
     {
+        if ( ! class_exists('\IntlCalendar')) return;
+
         $date = IntlGregorianCalendar::createInstance();
         $date->clear();
 
