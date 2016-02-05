@@ -1,8 +1,10 @@
 # Calends #
 
-[![Latest Version](https://img.shields.io/github/release/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Build Status](https://img.shields.io/travis/danhunsaker/calends/master.svg?style=flat-square)](https://travis-ci.org/danhunsaker/calends)
+[![Software License](https://img.shields.io/packagist/l/danhunsaker/calends.svg?style=flat-square)](LICENSE)
+[![Gitter](https://img.shields.io/gitter/room/danhunsaker/calends.svg?style=flat-square)](https://gitter.im/danhunsaker/calends)
+
+[![Latest Version](https://img.shields.io/github/tag/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
+[![Build Status](https://img.shields.io/travis/danhunsaker/calends.svg?style=flat-square)](https://travis-ci.org/danhunsaker/calends)
 [![Total Downloads](https://img.shields.io/packagist/dt/danhunsaker/calends.svg?style=flat-square)](https://packagist.org/packages/danhunsaker/calends)
 
 Arbitrary calendar systems in PHP.
