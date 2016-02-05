@@ -21,7 +21,7 @@ class Calends extends RealClass
         return parent::getInternalTimeAsString($time);
     }
 
-    public static function getTimesByMode(Calends $a, Calends $b, $mode = 'start')
+    public static function getTimesByMode(RealClass $a, RealClass $b, $mode = 'start')
     {
         return parent::getTimesByMode($a, $b, $mode);
     }
