@@ -257,6 +257,17 @@ class CalendsSpec extends ObjectBehavior
         $this->getDate('gregorian')->shouldBeLike('Thu, 01 Jan 1970 00:00:00.000000 +00:00');
     }
 
+    public function it_should_recognize_hebrew()
+    {
+        $this->beConstructedWith('5730-04-22 00:00:00.000000 +00:00', 'hebrew');
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->getDate('unix')->shouldBeLike('0');
+
+        $this->add('1 day', 'hebrew')->getDate('unix')->shouldBeLike('86400');
+
+        $this->getDate('hebrew')->shouldBeLike('22 Tebeth 5730 00:00:00.000000 +00:00');
+    }
+
     public function it_should_recognize_julian()
     {
         $this->beConstructedWith('1969-12-18 00:00:00.000000 +00:00', 'julian');
@@ -300,12 +311,28 @@ class CalendsSpec extends ObjectBehavior
         $this->convert('DateTime')->shouldHaveKey('duration');
     }
 
+    public function it_should_convert_moment()
+    {
+        $this->beConstructedThrough('import', [new \Moment\Moment()]);
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+
+        $this->convert('Moment\Moment')->shouldHaveKey('duration');
+    }
+
     public function it_should_convert_carbon()
     {
         $this->beConstructedThrough('import', [new \Carbon\Carbon]);
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
 
         $this->convert('Carbon\Carbon')->shouldHaveKey('duration');
+    }
+
+    public function it_should_convert_date()
+    {
+        $this->beConstructedThrough('import', [new \Jenssegers\Date\Date]);
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+
+        $this->convert('Jenssegers\Date\Date')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_intl_calendar()

@@ -4,17 +4,17 @@ namespace Danhunsaker\Calends\Converter;
 
 use Danhunsaker\Calends\Calends;
 use DateInterval;
-use DateTime as Source;
+use Moment\Moment as Source;
 
 /**
- * Convert between Calends and DateTime objects
+ * Convert between Calends and Moment objects
  *
  * @see https://github.com/danhunsaker/calends The official repo for the library
  * @author Daniel Hunsaker <dan.hunsaker+calends@gmail.com>
  * @copyright 2015-2016 Daniel Hunsaker
  * @license MIT
  */
-class DateTime implements ConverterInterface
+class Moment implements ConverterInterface
 {
     /**
      * {@inheritdoc}

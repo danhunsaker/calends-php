@@ -2,26 +2,26 @@
 
 namespace Danhunsaker\Calends\Converter;
 
+use Carbon\CarbonInterval;
 use Danhunsaker\Calends\Calends;
-use DateInterval;
-use DateTime as Source;
+use Jenssegers\Date\Date as Source;
 
 /**
- * Convert between Calends and DateTime objects
+ * Convert between Calends and Date objects
  *
  * @see https://github.com/danhunsaker/calends The official repo for the library
  * @author Daniel Hunsaker <dan.hunsaker+calends@gmail.com>
  * @copyright 2015-2016 Daniel Hunsaker
  * @license MIT
  */
-class DateTime implements ConverterInterface
+class Date implements ConverterInterface
 {
     /**
      * {@inheritdoc}
      */
     public static function import($source)
     {
-        return Calends::create($source->getTimestamp(), 'unix');
+        return Calends::create($source->timestamp, 'unix');
     }
 
     /**
@@ -30,9 +30,9 @@ class DateTime implements ConverterInterface
     public static function convert(Calends $cal)
     {
         return [
-            'start'    => Source::createFromFormat('U.u', bcadd($cal->getDate('unix'), 0, 6)),
-            'duration' => new DateInterval("PT{$cal->getDuration()}S"),
-            'end'      => Source::createFromFormat('U.u', bcadd($cal->getEndDate('unix'), 0, 6)),
+            'start'    => Source::createFromTimestamp($cal->getDate('unix')),
+            'duration' => CarbonInterval::seconds($cal->getDuration()),
+            'end'      => Source::createFromTimestamp($cal->getEndDate('unix')),
         ];
     }
 }

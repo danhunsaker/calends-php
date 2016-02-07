@@ -686,9 +686,9 @@ class Calends implements Serializable, JsonSerializable
     public function add($offset, $calendar = 'unix')
     {
         return $this->setDate(call_user_func(
-            static::$timeConverters['fromInternal'][static::getCalendar($calendar)],
+            static::$timeConverters['fromInternal'][static::getCalendar('tai')],
             call_user_func(static::$timeConverters['offset'][static::getCalendar($calendar)], $this->internalTime, $offset)
-        ), $calendar);
+        ), 'tai');
     }
 
     /**
@@ -723,9 +723,9 @@ class Calends implements Serializable, JsonSerializable
     public function addFromEnd($offset, $calendar = 'unix')
     {
         return $this->setEndDate(call_user_func(
-            static::$timeConverters['fromInternal'][static::getCalendar($calendar)],
+            static::$timeConverters['fromInternal'][static::getCalendar('tai')],
             call_user_func(static::$timeConverters['offset'][static::getCalendar($calendar)], $this->endTime, $offset)
-        ), $calendar);
+        ), 'tai');
     }
 
     /**
@@ -765,7 +765,7 @@ class Calends implements Serializable, JsonSerializable
             $calendar = 'unix';
         }
 
-        return static::create(['start' => $this->getEndDate($calendar), 'end' => $this->addFromEnd($offset, $calendar)->getEndDate($calendar)], $calendar);
+        return static::create(['start' => $this->getEndDate('tai'), 'end' => $this->addFromEnd($offset, $calendar)->getEndDate('tai')], 'tai');
     }
 
     /**
@@ -788,7 +788,7 @@ class Calends implements Serializable, JsonSerializable
             $calendar = 'unix';
         }
 
-        return static::create(['start' => $this->subtract($offset, $calendar)->getDate($calendar), 'end' => $this->getDate($calendar)], $calendar);
+        return static::create(['start' => $this->subtract($offset, $calendar)->getDate('tai'), 'end' => $this->getDate('tai')], 'tai');
     }
 
     // Range Functions
