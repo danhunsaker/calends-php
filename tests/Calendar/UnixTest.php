@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Tests\Calendar;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calendar\Unix;
 
 /**
@@ -14,7 +15,7 @@ class UnixTest extends \PHPUnit_Framework_TestCase
      */
     public function testToInternal()
     {
-        $this->assertEquals(['seconds' => bcpow(2, 62), 'nano' => 0, 'atto' => 0], Unix::toInternal(0));
+        $this->assertEquals(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], Unix::toInternal(0));
     }
 
     /**
@@ -22,7 +23,7 @@ class UnixTest extends \PHPUnit_Framework_TestCase
      */
     public function testFromInternal()
     {
-        $this->assertEquals(0, Unix::fromInternal(['seconds' => bcpow(2, 62), 'nano' => 0, 'atto' => 0]));
+        $this->assertEquals(0, Unix::fromInternal(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0]));
     }
 
     /**
@@ -30,6 +31,6 @@ class UnixTest extends \PHPUnit_Framework_TestCase
      */
     public function testOffset()
     {
-        $this->assertEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => 0, 'atto' => 0], Unix::offset(['seconds' => bcpow(2, 62), 'nano' => 0, 'atto' => 0], 86400));
+        $this->assertEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => 0, 'atto' => 0], Unix::offset(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], 86400));
     }
 }

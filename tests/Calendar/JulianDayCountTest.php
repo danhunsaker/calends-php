@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Tests\Calendar;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calendar\JulianDayCount;
 
 /**
@@ -14,7 +15,7 @@ class JulianDayCountTest extends \PHPUnit_Framework_TestCase
      */
     public function testToInternal()
     {
-        $this->assertEquals(['seconds' => bcpow(2, 62), 'nano' => 0, 'atto' => 0], JulianDayCount::toInternal(2440587.5));
+        $this->assertEquals(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], JulianDayCount::toInternal(2440587.5));
     }
 
     /**
@@ -22,7 +23,7 @@ class JulianDayCountTest extends \PHPUnit_Framework_TestCase
      */
     public function testFromInternal()
     {
-        $this->assertEquals(2440587.5, JulianDayCount::fromInternal(['seconds' => bcpow(2, 62), 'nano' => 0, 'atto' => 0]));
+        $this->assertEquals(2440587.5, JulianDayCount::fromInternal(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0]));
     }
 
     /**
@@ -30,6 +31,6 @@ class JulianDayCountTest extends \PHPUnit_Framework_TestCase
      */
     public function testOffset()
     {
-        $this->assertEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => 0, 'atto' => 0], JulianDayCount::offset(['seconds' => bcpow(2, 62), 'nano' => 0, 'atto' => 0], 1));
+        $this->assertEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => 0, 'atto' => 0], JulianDayCount::offset(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], 1));
     }
 }

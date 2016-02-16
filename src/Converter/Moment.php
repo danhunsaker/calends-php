@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Converter;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calends;
 use DateInterval;
 use Moment\Moment as Source;
@@ -30,9 +31,9 @@ class Moment implements ConverterInterface
     public static function convert(Calends $cal)
     {
         return [
-            'start'    => Source::createFromFormat('U.u', bcadd($cal->getDate('unix'), 0, 6)),
+            'start'    => Source::createFromFormat('U.u', BC::add($cal->getDate('unix'), 0, 6)),
             'duration' => new DateInterval("PT{$cal->getDuration()}S"),
-            'end'      => Source::createFromFormat('U.u', bcadd($cal->getEndDate('unix'), 0, 6)),
+            'end'      => Source::createFromFormat('U.u', BC::add($cal->getEndDate('unix'), 0, 6)),
         ];
     }
 }

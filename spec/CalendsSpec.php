@@ -2,6 +2,8 @@
 
 namespace spec\Danhunsaker\Calends;
 
+use Danhunsaker\BC;
+use Danhunsaker\Calends\Tests\TestHelpers;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -58,18 +60,18 @@ class CalendsSpec extends ObjectBehavior
     public function it_should_convert_between_internal_and_unix()
     {
         $this::toInternalFromUnix(0)->shouldHaveKey('seconds');
-        $this::toInternalFromUnix(bcsub(-1, bcpow(2, 62)))->shouldHaveKeyWithValue('seconds', '0');
-        $this::toInternalFromUnix(bcsub(bcpow(2, 63), bcpow(2, 62)))->shouldHaveKeyWithValue('seconds', bcsub(bcpow(2, 63), 1, 0));
+        $this::toInternalFromUnix(BC::sub(-1, BC::pow(2, 62)))->shouldHaveKeyWithValue('seconds', '0');
+        $this::toInternalFromUnix(BC::sub(BC::pow(2, 63), BC::pow(2, 62)))->shouldHaveKeyWithValue('seconds', BC::sub(BC::pow(2, 63), 1, 0));
         $this::fromInternalToUnix(['seconds' => 0, 'nano' => 0, 'atto' => 0])->shouldBeString();
     }
 
     public function it_should_compare_correctly()
     {
-        bcscale(18);
+        BC::scale(18);
 
         $time  = microtime(true);
-        $start = bcsub($time, bcmod($time, 86400), 0);
-        $end   = bcadd($start, 86400);
+        $start = BC::sub($time, BC::mod($time, 86400), 0);
+        $end   = BC::add($start, 86400);
         $this->beConstructedWith(['start' => $start, 'end' => $end]);
 
         $today     = $this->getWrappedObject();
@@ -194,28 +196,28 @@ class CalendsSpec extends ObjectBehavior
 
     public function it_should_modify_dates()
     {
-        bcscale(18);
+        BC::scale(18);
 
         $time  = microtime(true);
-        $start = bcsub($time, bcmod($time, 86400), 0);
-        $end   = bcadd($start, 86400);
+        $start = BC::sub($time, BC::mod($time, 86400), 0);
+        $end   = BC::add($start, 86400);
         $this->beConstructedWith(['start' => $start, 'end' => $end]);
 
         $today     = $this->getWrappedObject();
-        $next24hrs = $today->setDate($time)->setEndDate(bcadd($time, 86400));
+        $next24hrs = $today->setDate($time)->setEndDate(BC::add($time, 86400));
         $yesterday = $today->previous('1 day', 'gregorian');
 
         $subtracted = $this->subtractFromEnd('50', 'unix');
         $subtracted->shouldHaveType('Danhunsaker\Calends\Calends');
-        $subtracted->getEndDate()->shouldBeLike(bcsub($this->getWrappedObject()->getEndDate(), 50));
+        $subtracted->getEndDate()->shouldBeLike(BC::sub($this->getWrappedObject()->getEndDate(), 50));
 
         $duration = $this->setDuration('50', 'unix');
         $duration->shouldHaveType('Danhunsaker\Calends\Calends');
-        $duration->getEndDate()->shouldBeLike(bcadd($this->getWrappedObject()->getDate(), 50));
+        $duration->getEndDate()->shouldBeLike(BC::add($this->getWrappedObject()->getDate(), 50));
 
         $endDuration = $this->setDurationFromEnd('50', 'unix');
         $endDuration->shouldHaveType('Danhunsaker\Calends\Calends');
-        $endDuration->getDate()->shouldBeLike(bcsub($this->getWrappedObject()->getEndDate(), 50));
+        $endDuration->getDate()->shouldBeLike(BC::sub($this->getWrappedObject()->getEndDate(), 50));
 
         $merged = $this->merge($yesterday);
         $merged->shouldHaveType('Danhunsaker\Calends\Calends');
@@ -266,6 +268,7 @@ class CalendsSpec extends ObjectBehavior
         $this->add('1 day', 'hebrew')->getDate('unix')->shouldBeLike('86400');
 
         $this->getDate('hebrew')->shouldBeLike('22 Tebeth 5730 00:00:00.000000 +00:00');
+        $this::create('5731-04-22 00:00:00.000000 +00:00', 'hebrew')->getDate('hebrew')->shouldBeLike('22 Tebeth 5731 00:00:00.000000 +00:00');
     }
 
     public function it_should_recognize_julian()

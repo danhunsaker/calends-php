@@ -13,7 +13,7 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
-        //
+        $this->publishes([__DIR__ . '/database/migrations/' => database_path('migrations')], 'migrations');
     }
 
     /**
@@ -24,5 +24,15 @@ class ServiceProvider extends IlluminateServiceProvider
     public function register()
     {
         //
+    }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return array('Calends\Calends', 'calends');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Calendar;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calends;
 
 /**
@@ -35,6 +36,6 @@ class Unix implements DefinitionInterface
      */
     public static function offset($stamp, $offset)
     {
-        return static::toInternal(bcadd(static::fromInternal($stamp), $offset));
+        return static::toInternal(BC::add(static::fromInternal($stamp), $offset, 18));
     }
 }

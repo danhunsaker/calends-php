@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Converter;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calends;
 use DateInterval;
 use IntlTimeZone;
@@ -37,10 +38,10 @@ class IntlCalendar implements ConverterInterface
         $source = @array_pop(explode('\\', get_called_class()));
 
         $start = $source::createInstance(IntlTimeZone::getGMT(), static::$locale);
-        $start->setTime(bcmul($cal->getDate('unix'), 1000, 15));
+        $start->setTime(BC::mul($cal->getDate('unix'), 1000, 15));
 
         $end   = $source::createInstance(IntlTimeZone::getGMT(), static::$locale);
-        $end->setTime(bcmul($cal->getEndDate('unix'), 1000, 15));
+        $end->setTime(BC::mul($cal->getEndDate('unix'), 1000, 15));
 
         return [
             'start'    => $start,

@@ -3,12 +3,10 @@
     "description": "Arbitrary calendar systems in PHP.",
     "keywords": ["date", "time", "calendar"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Daniel Hunsaker",
-            "email": "danhunsaker@gmail.com"
-        }
-    ],
+    "authors": [{
+        "name": "Daniel Hunsaker",
+        "email": "danhunsaker@gmail.com"
+    }],
     "require": {
         "php": "^5.4|^7.0",
         "ext-bcmath": "*",
@@ -16,24 +14,28 @@
         "ext-date": "*",
         "ext-gmp": "*",
         "ext-intl": "*",
-        "rmiller/caser": "^0.1.0"
+        "rmiller/caser": "^0.1.0",
+        "danhunsaker/bcmath": "^1.0"
     },
     "require-dev": {
         "behat/behat": "^3.0",
         "coduo/phpspec-data-provider-extension": "^1.0",
+        "fightbulc/moment": "^1.17",
         "henrikbjorn/phpspec-code-coverage": "^2.0",
         "illuminate/database": "^5.1",
-        "jeremeamia/superclosure": "^2.2",
+        "jenssegers/date": "^3.1",
         "league/period": "^3.0",
         "nesbot/carbon": "^1.21",
         "phpspec/phpspec": "^2.4",
         "phpunit/phpunit": "^5.0",
-        "rmiller/behat-spec": "^0.3",
-        "jenssegers/date": "^3.1",
-        "fightbulc/moment": "^1.17"
+        "rmiller/behat-spec": "^0.3"
     },
     "suggest": {
-        "illuminate/database": "Pulls calendar definitions from a database using Laravel's Eloquent ORM."
+        "fightbulc/moment": "Required to convert to/from Moment\\Moment objects (^1.17)",
+        "illuminate/database": "Pulls calendar definitions from a database using Laravel's Eloquent ORM. (^5.1)",
+        "jenssegers/date": "Required to convert to/from Jenssegers\\Date\\Date objects (^3.1)",
+        "league/period": "Required to convert to/from League\\Period\\Period objects (^3.0)",
+        "nesbot/carbon": "Required to convert to/from Carbon\\Carbon objects (^1.21)"
     },
     "autoload": {
         "psr-4": {

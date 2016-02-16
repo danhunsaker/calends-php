@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Calendar;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calends;
 
 /**
@@ -19,7 +20,7 @@ class JulianDayCount implements DefinitionInterface
      */
     public static function toInternal($date)
     {
-        return Calends::toInternalFromUnix(bcmul(bcsub($date, 2440587.5), 86400));
+        return Calends::toInternalFromUnix(BC::mul(BC::sub($date, 2440587.5, 18), 86400, 18));
     }
 
     /**
@@ -27,7 +28,7 @@ class JulianDayCount implements DefinitionInterface
      */
     public static function fromInternal($stamp)
     {
-        return bcadd(bcdiv(Calends::fromInternalToUnix($stamp), 86400), 2440587.5);
+        return BC::add(BC::div(Calends::fromInternalToUnix($stamp), 86400, 18), 2440587.5, 18);
     }
 
     /**
@@ -35,6 +36,6 @@ class JulianDayCount implements DefinitionInterface
      */
     public static function offset($stamp, $offset)
     {
-        return static::toInternal(bcadd(static::fromInternal($stamp), $offset));
+        return static::toInternal(BC::add(static::fromInternal($stamp), $offset, 18));
     }
 }

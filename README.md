@@ -3,7 +3,7 @@
 [![Software License](https://img.shields.io/packagist/l/danhunsaker/calends.svg?style=flat-square)](LICENSE)
 [![Gitter](https://img.shields.io/gitter/room/danhunsaker/calends.svg?style=flat-square)](https://gitter.im/danhunsaker/calends)
 
-[![Latest Version](https://img.shields.io/github/tag/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
+[![Latest Version](https://img.shields.io/github/release/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
 [![Build Status](https://img.shields.io/travis/danhunsaker/calends.svg?style=flat-square)](https://travis-ci.org/danhunsaker/calends)
 [![Total Downloads](https://img.shields.io/packagist/dt/danhunsaker/calends.svg?style=flat-square)](https://packagist.org/packages/danhunsaker/calends)
 
@@ -114,11 +114,12 @@ use Danhunsaker\Calends\Calends;
 $now = Calends::import(new DateTime());
 ```
 
-Supported conversions include `DateTime` (and its child, `Carbon`),
-`IntlCalendar` (which of course means `IntlGregorianCalendar`, too), and
-`Period`.  Of course, since `IntlCalendar` and `Period` both require at least
-PHP 5.5, you won't be able to convert to/from these in 5.4.  But see below for
-how to add support for other date/time classes.
+Supported conversions include `DateTime` (plus a few derivatives, like
+`Carbon\Carbon`, `Jenssegers\Date\Date`, and `Moment\Moment`), `IntlCalendar`
+(which of course means `IntlGregorianCalendar`, too), and
+`League\Period\Period`.  Of course, since `IntlCalendar` and `Period` both
+require at least PHP 5.5, you won't be able to convert to/from these in 5.4.
+But see below for how to add support for other date/time classes.
 
 ### Storage ###
 

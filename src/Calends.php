@@ -2,6 +2,8 @@
 
 namespace Danhunsaker\Calends;
 
+use Danhunsaker\BC;
+// use Danhunsaker\Calends\Eloquent\Calendar;
 use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
@@ -243,16 +245,16 @@ class Calends implements Serializable, JsonSerializable
         $stamp = is_null($stamp) ? microtime(true) : $stamp;
 
         $time = [];
-        if (bccomp($stamp, bcsub(0, bcpow(2, 62))) === -1) {
-            $stamp = bcsub(0, bcpow(2, 62));
-        } elseif (bccomp($stamp, bcsub(bcpow(2, 63), bcpow(2, 62))) >= 0) {
-            $stamp = bcsub(bcsub(bcpow(2, 63), bcpow(2, 62)), bcpow(10, -18));
+        if (BC::comp($stamp, BC::sub(0, BC::pow(2, 62, 18), 18), 18) === -1) {
+            $stamp = BC::sub(0, BC::pow(2, 62, 18), 18);
+        } elseif (BC::comp($stamp, BC::sub(BC::pow(2, 63, 18), BC::pow(2, 62, 18), 18), 18) >= 0) {
+            $stamp = BC::sub(BC::sub(BC::pow(2, 63, 18), BC::pow(2, 62, 18), 18), BC::pow(10, -18, 18), 18);
         }
-        $unix_seconds = bcdiv($stamp, 1, 0);
+        $unix_seconds = BC::div($stamp, 1, 0);
 
-        $time['seconds'] = bcadd($unix_seconds, bcpow(2, 62), 0);
-        $time['nano']    = gmp_strval(gmp_abs(bcmul(bcsub($stamp, $unix_seconds), bcpow(10, 9), 0)), 10);
-        $time['atto']    = gmp_strval(gmp_abs(bcmul(bcsub(bcmul(bcsub($stamp, $unix_seconds), bcpow(10, 9), 9), bcmul(bccomp($unix_seconds, 0), $time['nano'])), bcpow(10, 9), 0)), 10);
+        $time['seconds'] = BC::add($unix_seconds, BC::pow(2, 62, 18), 0);
+        $time['nano']    = gmp_strval(gmp_abs(BC::mul(BC::sub($stamp, $unix_seconds, 18), BC::pow(10, 9, 18), 0)), 10);
+        $time['atto']    = gmp_strval(gmp_abs(BC::mul(BC::sub(BC::mul(BC::sub($stamp, $unix_seconds, 18), BC::pow(10, 9, 18), 9), BC::mul(BC::comp($unix_seconds, 0, 18), $time['nano'], 18), 18), BC::pow(10, 9, 18), 0)), 10);
 
         return $time;
     }
@@ -268,7 +270,7 @@ class Calends implements Serializable, JsonSerializable
      */
     public static function fromInternalToUnix($time)
     {
-        return bcadd(bcsub($time['seconds'], bcpow(2, 62), 0), bcdiv(bcadd(bcdiv($time['atto'], bcpow(10, 9), 9), $time['nano'], 9), bcpow(10, 9), 18), 18);
+        return BC::add(BC::sub($time['seconds'], BC::pow(2, 62, 18), 0), BC::div(BC::add(BC::div($time['atto'], BC::pow(10, 9, 18), 9), $time['nano'], 9), BC::pow(10, 9, 18), 18), 18);
     }
 
     /**
@@ -435,7 +437,7 @@ class Calends implements Serializable, JsonSerializable
     {
         $times = static::getTimesByMode($this, $compare, $mode);
 
-        return bcsub($times[0], $times[1]);
+        return BC::sub($times[0], $times[1], 18);
     }
 
     /**
@@ -452,7 +454,7 @@ class Calends implements Serializable, JsonSerializable
     {
         $times = static::getTimesByMode($a, $b, $mode);
 
-        return bccomp($times[0], $times[1]);
+        return BC::comp($times[0], $times[1], 18);
     }
 
     /**
@@ -1010,5 +1012,3 @@ class Calends implements Serializable, JsonSerializable
         return $this('tai');
     }
 }
-
-bcscale(18);

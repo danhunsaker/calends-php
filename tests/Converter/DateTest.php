@@ -3,7 +3,7 @@
 namespace Danhunsaker\Calends\Tests\Converter;
 
 use Danhunsaker\Calends\Calends;
-use Danhunsaker\Calends\Converter\Carbon as Converter;
+use Danhunsaker\Calends\Converter\Date as Converter;
 use Jenssegers\Date\Date;
 
 /**

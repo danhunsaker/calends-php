@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Converter;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calends;
 use League\Period\Period as Source;
 use DateTimeImmutable;
@@ -32,7 +33,7 @@ class Period implements ConverterInterface
      */
     public static function convert(Calends $cal)
     {
-        return new Source(DateTimeImmutable::createFromFormat('U.u', bcadd($cal->getDate('unix'), 0, 6)),
-                          DateTimeImmutable::createFromFormat('U.u', bcadd($cal->getEndDate('unix'), 0, 6)));
+        return new Source(DateTimeImmutable::createFromFormat('U.u', BC::add($cal->getDate('unix'), 0, 6)),
+                          DateTimeImmutable::createFromFormat('U.u', BC::add($cal->getEndDate('unix'), 0, 6)));
     }
 }

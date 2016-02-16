@@ -2,6 +2,8 @@
 
 namespace Danhunsaker\Calends\Tests;
 
+use Danhunsaker\BC;
+
 /**
  * @coversDefaultClass Danhunsaker\Calends\Calends
  */
@@ -16,9 +18,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test2 = new Calends(['start' => 0, 'end' => 0], 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test1);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
         $this->assertAttributeEquals('0', 'duration', $test1);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test2);
         $this->assertEquals($test1, $test2);
     }
@@ -32,9 +34,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test2 = Calends::create(['start' => 0, 'end' => 0], 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test1);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
         $this->assertAttributeEquals('0', 'duration', $test1);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test2);
         $this->assertEquals($test1, $test2);
     }
@@ -103,11 +105,11 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
     public function testToInternalFromUnix()
     {
         $zero = Calends::toInternalFromUnix(0);
-        $minWrap = Calends::toInternalFromUnix(bcsub(-1, bcpow(2, 62)));
-        $maxWrap = Calends::toInternalFromUnix(bcsub(bcpow(2, 63), bcpow(2, 62)));
+        $minWrap = Calends::toInternalFromUnix(BC::sub(-1, BC::pow(2, 62)));
+        $maxWrap = Calends::toInternalFromUnix(BC::sub(BC::pow(2, 63), BC::pow(2, 62)));
 
         $this->assertArrayHasKey('seconds', $zero);
-        $this->assertEquals(bcpow(2, 62), $zero['seconds']);
+        $this->assertEquals(BC::pow(2, 62), $zero['seconds']);
         $this->assertArrayHasKey('nano', $zero);
         $this->assertEquals(0, $zero['nano']);
         $this->assertArrayHasKey('atto', $zero);
@@ -121,7 +123,7 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(0, $minWrap['atto']);
 
         $this->assertArrayHasKey('seconds', $maxWrap);
-        $this->assertEquals(bcsub(bcpow(2, 63), 1), $maxWrap['seconds']);
+        $this->assertEquals(BC::sub(BC::pow(2, 63), 1), $maxWrap['seconds']);
         $this->assertArrayHasKey('nano', $maxWrap);
         $this->assertEquals(999999999, $maxWrap['nano']);
         $this->assertArrayHasKey('atto', $maxWrap);
@@ -133,7 +135,7 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
      */
     public function testFromInternalToUnix()
     {
-        $test = Calends::fromInternalToUnix(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0']);
+        $test = Calends::fromInternalToUnix(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0']);
 
         $this->assertEquals(0, $test);
     }
@@ -146,9 +148,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::import(date_create('@0'));
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals('0', 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -174,7 +176,7 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->getInternalTime();
 
         $this->assertArrayHasKey('seconds', $test);
-        $this->assertEquals(bcpow(2, 62), $test['seconds']);
+        $this->assertEquals(BC::pow(2, 62), $test['seconds']);
         $this->assertArrayHasKey('nano', $test);
         $this->assertEquals('0', $test['nano']);
         $this->assertArrayHasKey('atto', $test);
@@ -189,7 +191,7 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->getInternalEndTime();
 
         $this->assertArrayHasKey('seconds', $test);
-        $this->assertEquals(bcpow(2, 62), $test['seconds']);
+        $this->assertEquals(BC::pow(2, 62), $test['seconds']);
         $this->assertArrayHasKey('nano', $test);
         $this->assertEquals('0', $test['nano']);
         $this->assertArrayHasKey('atto', $test);
@@ -508,9 +510,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->add(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(-86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -521,9 +523,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->subtract(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcsub(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::sub(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -534,9 +536,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->addFromEnd(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -547,9 +549,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->subtractFromEnd(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(-86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcsub(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::sub(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -561,14 +563,14 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test2 = $test1->next();
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test1);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
         $this->assertAttributeEquals(86400, 'duration', $test1);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test2);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test2);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test2);
         $this->assertAttributeEquals(86400, 'duration', $test2);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 172800), 'nano' => '0', 'atto' => '0'], 'endTime', $test2);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 172800), 'nano' => '0', 'atto' => '0'], 'endTime', $test2);
     }
 
     /**
@@ -580,14 +582,14 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test2 = $test1->previous();
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test1);
-        $this->assertAttributeEquals(['seconds' => bcsub(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::sub(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test1);
         $this->assertAttributeEquals(86400, 'duration', $test1);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test1);
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test2);
-        $this->assertAttributeEquals(['seconds' => bcsub(bcpow(2, 62), 172800), 'nano' => '0', 'atto' => '0'], 'internalTime', $test2);
+        $this->assertAttributeEquals(['seconds' => BC::sub(BC::pow(2, 62), 172800), 'nano' => '0', 'atto' => '0'], 'internalTime', $test2);
         $this->assertAttributeEquals(86400, 'duration', $test2);
-        $this->assertAttributeEquals(['seconds' => bcsub(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test2);
+        $this->assertAttributeEquals(['seconds' => BC::sub(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test2);
     }
 
     /**
@@ -598,9 +600,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->setDate(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(-86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -611,9 +613,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->setEndDate(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -624,9 +626,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->setDuration(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -637,9 +639,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->setDurationFromEnd(86400, 'unix');
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcsub(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::sub(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -650,9 +652,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(0, 'unix')->merge(Calends::create(86400, 'unix'));
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
     }
 
     /**
@@ -663,9 +665,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(['start' => -86400, 'end' => 86400], 'unix')->intersect(Calends::create(['start' => 0, 'end' => 172800], 'unix'));
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
 
         $this->setExpectedException('Danhunsaker\Calends\InvalidCompositeRangeException', "The ranges given do not overlap - they have no intersection.");
         $test->intersect(Calends::create(172800, 'unix'));
@@ -679,9 +681,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         $test = Calends::create(['start' => -86400, 'end' => 0], 'unix')->gap(Calends::create(['start' => 86400, 'end' => 172800], 'unix'));
 
         $this->assertInstanceOf('Danhunsaker\Calends\Calends', $test);
-        $this->assertAttributeEquals(['seconds' => bcpow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::pow(2, 62), 'nano' => '0', 'atto' => '0'], 'internalTime', $test);
         $this->assertAttributeEquals(86400, 'duration', $test);
-        $this->assertAttributeEquals(['seconds' => bcadd(bcpow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
+        $this->assertAttributeEquals(['seconds' => BC::add(BC::pow(2, 62), 86400), 'nano' => '0', 'atto' => '0'], 'endTime', $test);
 
         $this->setExpectedException('Danhunsaker\Calends\InvalidCompositeRangeException', "The ranges given overlap - they have no gap.");
         $test->gap(Calends::create(43200, 'unix'));

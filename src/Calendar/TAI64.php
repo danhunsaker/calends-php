@@ -2,6 +2,7 @@
 
 namespace Danhunsaker\Calends\Calendar;
 
+use Danhunsaker\BC;
 use Danhunsaker\Calends\Calends;
 
 /**
@@ -27,9 +28,9 @@ class TAI64 implements DefinitionInterface
             'atto'    => gmp_strval(gmp_init('0x' . substr($date, 24, 8), 16), 10),
         ];
 
-        if (bccomp($time['seconds'], bcpow(2, 63)) >= 0) {
+        if (BC::comp($time['seconds'], BC::pow(2, 63, 18), 18) >= 0) {
             $time = [
-                'seconds' => bcsub(bcpow(2, 63), 1, 0),
+                'seconds' => BC::sub(BC::pow(2, 63, 18), 1, 0),
                 'nano'    => '999999999',
                 'atto'    => '999999999',
             ];
@@ -53,6 +54,6 @@ class TAI64 implements DefinitionInterface
      */
     public static function offset($stamp, $offset)
     {
-        return Calends::toInternalFromUnix(bcadd(Calends::fromInternalToUnix($stamp), bcadd(Calends::fromInternalToUnix(static::toInternal($offset)), 0x4000000000000000)));
+        return Calends::toInternalFromUnix(BC::add(Calends::fromInternalToUnix($stamp), BC::add(Calends::fromInternalToUnix(static::toInternal($offset)), 0x4000000000000000, 18), 18));
     }
 }
