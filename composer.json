@@ -21,7 +21,7 @@
         "coduo/phpspec-data-provider-extension": "^1.0",
         "fightbulc/moment": "^1.17",
         "henrikbjorn/phpspec-code-coverage": "^2.0|^1.0",
-        "illuminate/database": "^5.1",
+        "illuminate/database": "^5.0",
         "jenssegers/date": "^3.1",
         "league/period": "^3.0",
         "nesbot/carbon": "^1.21",
