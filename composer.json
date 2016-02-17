@@ -9,11 +9,11 @@
     }],
     "require": {
         "php": "^5.4|^7.0",
-        "ext-calendar": "*",
         "ext-date": "*",
         "ext-gmp": "*",
         "ext-intl": "*",
         "danhunsaker/bcmath": "^1.0",
+        "fisharebest/ext-calendar": "^2.2",
         "rmiller/caser": "^0.1.0"
     },
     "require-dev": {
