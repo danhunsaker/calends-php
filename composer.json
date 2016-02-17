@@ -23,7 +23,7 @@
         "henrikbjorn/phpspec-code-coverage": "^2.0|^1.0",
         "illuminate/database": "^5.0",
         "jenssegers/date": "^3.1",
-        "league/period": "^3.0",
+        "league/period": "^2.5|^3.0",
         "nesbot/carbon": "^1.21",
         "phpspec/phpspec": "^2.4",
         "phpunit/phpunit": "^4.0|^5.0",
@@ -31,9 +31,9 @@
     },
     "suggest": {
         "fightbulc/moment": "Required to convert to/from Moment\\Moment objects (^1.17)",
-        "illuminate/database": "Pulls calendar definitions from a database using Laravel's Eloquent ORM. (^5.1)",
+        "illuminate/database": "Pulls calendar definitions from a database using Laravel's Eloquent ORM. (^5.0)",
         "jenssegers/date": "Required to convert to/from Jenssegers\\Date\\Date objects (^3.1)",
-        "league/period": "Required to convert to/from League\\Period\\Period objects (^3.0)",
+        "league/period": "Required to convert to/from League\\Period\\Period objects (^2.5|^3.0)",
         "nesbot/carbon": "Required to convert to/from Carbon\\Carbon objects (^1.21)"
     },
     "autoload": {
