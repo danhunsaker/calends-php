@@ -12,6 +12,7 @@
         "ext-date": "*",
         "ext-gmp": "*",
         "ext-intl": "*",
+        "bossa/phpspec2-expect": "^1.0",
         "danhunsaker/bcmath": "^1.0",
         "fisharebest/ext-calendar": "^2.2",
         "rmiller/caser": "^0.1.0"

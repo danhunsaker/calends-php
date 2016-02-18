@@ -244,8 +244,8 @@ class CalendsSpec extends ObjectBehavior
         $this->__toString()->shouldBeString();
         $this->serialize()->shouldBeString();
         $this->jsonSerialize()->shouldBeString();
-        $serialized = serialize($this);
-        unserialize($serialized)->shouldHaveType('Danhunsaker\Calends\Calends');
+        $serialized = serialize($this->getWrappedObject());
+        expect(unserialize($serialized))->shouldHaveType('Danhunsaker\Calends\Calends');
     }
 
     public function it_should_recognize_gregorian()
@@ -356,8 +356,7 @@ class CalendsSpec extends ObjectBehavior
 
     public function it_should_convert_period()
     {
-        if (version_compare(phpversion(), '5.5') < 0) return;
-        $this->beConstructedThrough('import', [new \League\Period\Period(\DateTimeImmutable::createFromFormat('U.u', microtime(true)), \DateTimeImmutable::createFromFormat('U.u', microtime(true)))]);
+        $this->beConstructedThrough('import', [new \League\Period\Period(\DateTimeImmutable::createFromFormat('U.u', (string) microtime(true)), \DateTimeImmutable::createFromFormat('U.u', (string) microtime(true)))]);
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
 
         $this->convert('League\Period\Period')->shouldHaveType('League\Period\Period');
