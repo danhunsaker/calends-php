@@ -43,7 +43,7 @@ class Hebrew implements DefinitionInterface
     public static function toInternal($date)
     {
         $greg = new DateTime(str_replace(['6L', '7L'], ['06', '07'], str_ireplace(array_values(static::$months), array_keys(static::$months), $date)));
-        return Calends::toInternalFromUnix(BC::add(BC::mul(BC::sub(\jewishtojd($greg->format('n'), $greg->format('j'), $greg->format('Y')), 2440587, 18), 86400, 18), BC::mod($greg->getTimestamp(), 86400, 18), 18));
+        return Calends::toInternalFromUnix(BC::add(BC::mul(BC::sub(\JewishToJD($greg->format('n'), $greg->format('j'), $greg->format('Y')), 2440587, 18), 86400, 18), BC::mod($greg->getTimestamp(), 86400, 18), 18));
     }
 
     /**
@@ -52,8 +52,8 @@ class Hebrew implements DefinitionInterface
     public static function fromInternal($stamp)
     {
         $date            = Calends::fromInternalToUnix($stamp);
-        list($m, $d, $y) = explode('/', \jdtojewish(BC::add(BC::div($date, 86400, 18), 2440587, 18)));
-        if (\jewishtojd(6, 1, $y) == \jewishtojd(7, 1, $y)) {
+        list($m, $d, $y) = explode('/', \jdtojewish(BC::add(BC::div($date, 86400, 18), 2440587.5, 0)));
+        if (\JewishToJD(6, 1, $y) == \JewishToJD(7, 1, $y)) {
             $m = ($m == 6 ? '6L' : ($m == 7 ? '7L' : $m));
         }
         return "{$d} " . static::$months[str_pad($m, 2, '0', STR_PAD_LEFT)] . " {$y} " . date_create_from_format('U.u', BC::add(BC::mod($date, 86400, 18), 0, 6))->format('H:i:s.u P');
