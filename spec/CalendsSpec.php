@@ -356,8 +356,7 @@ class CalendsSpec extends ObjectBehavior
 
     public function it_should_convert_period()
     {
-        if (class_exists('DateTimeImmutable')) $dtClass = '\\DateTimeImmutable';
-        else $dtClass = '\\DateTime';
+        $dtClass = class_exists('\\DateTimeImmutable') ? '\\DateTimeImmutable' : '\\DateTime';
 
         $this->beConstructedThrough('import', [new \League\Period\Period($dtClass::createFromFormat('U.u', (string) microtime(true)), $dtClass::createFromFormat('U.u', (string) microtime(true)))]);
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
