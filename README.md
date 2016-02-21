@@ -117,8 +117,8 @@ $now = Calends::import(new DateTime());
 Supported conversions include `DateTime` (plus a few derivatives, like
 `Carbon\Carbon`, `Jenssegers\Date\Date`, and `Moment\Moment`), `IntlCalendar`
 (which of course means `IntlGregorianCalendar`, too), and
-`League\Period\Period`.  Of course, since `IntlCalendar` and `Period` both
-require at least PHP 5.5, you won't be able to convert to/from these in 5.4.
+`League\Period\Period`.  Of course, since `IntlCalendar` requires at least PHP
+5.5, you won't be able to convert to/from it or `IntlGregorianCalendar` in 5.4.
 But see below for how to add support for other date/time classes.
 
 ### Storage ###

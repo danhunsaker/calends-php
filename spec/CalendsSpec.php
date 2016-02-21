@@ -81,16 +81,6 @@ class CalendsSpec extends ObjectBehavior
         $next48hrs = $today->next('2 day', 'gregorian');
         $this48hrs = $next48hrs->previous();
 
-        // echo "\n";
-        // var_export($today());
-        // echo "\n";
-        // var_export($now());
-        // echo "\n";
-        // var_export($last24hrs());
-        // echo "\n";
-        // var_export($next48hrs());
-        // echo "\n";
-
         $this->startsBefore($today)->shouldBe(false);
         $this->isBefore($today)->shouldBe(false);
         $this->endsBefore($today)->shouldBe(false);
@@ -306,12 +296,21 @@ class CalendsSpec extends ObjectBehavior
         $this::create('8000000000000000', 'tai')->getDate('tai')->shouldBeLike('7fffffffffffffff3b9ac9ff3b9ac9ff');
     }
 
-    public function it_should_convert_datetime()
+    public function it_should_convert_date_time()
     {
         $this->beConstructedThrough('import', [date_create()]);
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
 
         $this->convert('DateTime')->shouldHaveKey('duration');
+    }
+
+    public function it_should_convert_date_time_immutable()
+    {
+        if ( ! class_exists('\DateTimeImmutable')) return;
+        $this->beConstructedThrough('import', [new \DateTimeImmutable()]);
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+
+        $this->convert('DateTimeImmutable')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_moment()

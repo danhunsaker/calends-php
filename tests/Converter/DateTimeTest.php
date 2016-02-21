@@ -16,7 +16,7 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
      */
     public function testImport()
     {
-        $test = Converter::import(date_create('@0'));
+        $test = Converter::import(new DateTime('@0'));
 
         $this->assertEquals(Calends::create(0, 'unix'), $test);
     }
@@ -28,6 +28,6 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     {
         $test = Converter::convert(Calends::create(0, 'unix'));
 
-        $this->assertEquals(['start' => date_create('@0'), 'duration' => new \DateInterval('PT0S'), 'end' => date_create('@0')], $test);
+        $this->assertEquals(['start' => new DateTime('@0'), 'duration' => new \DateInterval('PT0S'), 'end' => new DateTime('@0')], $test);
     }
 }

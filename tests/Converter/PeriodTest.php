@@ -16,9 +16,9 @@ class PeriodTest extends \PHPUnit_Framework_TestCase
      */
     public function testImport()
     {
-        if (version_compare(phpversion(), '5.5') < 0) return;
+        $dtClass = class_exists('\\DateTimeImmutable') ? '\\DateTimeImmutable' : '\\DateTime';
 
-        $test = Converter::import(Period::createFromDuration('@0', 0));
+        $test = Converter::import(new Period($dtClass::createFromFormat('U.u', '0.000000'), $dtClass::createFromFormat('U.u', '0.000000')));
 
         $this->assertEquals(Calends::create(0, 'unix'), $test);
     }
@@ -28,10 +28,10 @@ class PeriodTest extends \PHPUnit_Framework_TestCase
      */
     public function testConvert()
     {
-        if (version_compare(phpversion(), '5.5') < 0) return;
+        $dtClass = class_exists('\\DateTimeImmutable') ? '\\DateTimeImmutable' : '\\DateTime';
 
         $test = Converter::convert(Calends::create(0, 'unix'));
 
-        $this->assertEquals(Period::createFromDuration('@0', 0), $test);
+        $this->assertEquals(new Period($dtClass::createFromFormat('U.u', '0.000000'), $dtClass::createFromFormat('U.u', '0.000000')), $test);
     }
 }
