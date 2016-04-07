@@ -7,14 +7,20 @@ php:
   - '7.0'
   - hhvm
 env:
+  global:
+    - DB_USER=root
+    - DB_PASS=''
   matrix:
     - PREFER_LOWEST="--prefer-lowest"
     - PREFER_LOWEST=""
 matrix:
   allow_failures:
     - php: hhvm
+services:
+  - mysql
 before_install:
   - composer self-update
+  - mysql -u root -e 'CREATE DATABASE IF NOT EXISTS `database`;'
 install:
   - if [[ "$(phpenv version-name)" != "hhvm" ]]; then echo 'error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
   - travis_retry composer update --no-interaction --prefer-source $PREFER_LOWEST
