@@ -80,7 +80,6 @@ class Unit extends Model
             $scaled = BC::parse("{$value} " . ($this->scale_inverse ? '/' : '*') . " {$this->scale_amount}", null, 18);
         } else {
             $lengths  = $this->lengths()->get();
-            $lAmounts = $lengths->pluck('scale_amount', 'unit_value')->all();
             $lCount   = $lengths->count();
             $lSum     = $lengths->sum('scale_amount');
 
@@ -91,11 +90,11 @@ class Unit extends Model
 
             $adjustment = BC::mul($adjLoops, $lSum, 18);
 
-            for ($lNum = $this->unix_epoch ?: 0; BC::comp($lNum, $adjUnits) < 0; $lNum = BC::add($lNum, 1, 0)) {
-                $adjustment = BC::add($adjustment, $lAmounts[BC::parse("(({$lNum} - {offset}) % {$lCount}) + {offset}", ['offset' => $this->uses_zero ? 0 : 1], 0)], 18);
+            for ($lNum = $this->unix_epoch ?: 0; BC::comp($lNum, $adjUnits) < 0; $lNum = BC::parse("({$lNum} + 1) % {$lCount}", null, 0)) {
+                $adjustment = BC::add($adjustment, $lengths[$lNum]->scale_amount, 18);
             }
 
-            $scaled = BC::parse("{$adjustment} + ({$adjRemains} * {lAmount})", ['lAmount' => $lAmounts[BC::parse("(({$lNum} + {$lCount} - {offset}) % {$lCount}) + {offset}", ['offset' => $this->uses_zero ? 0 : 1], 0)]]);
+            $scaled = BC::parse("{$adjustment} + ({$adjRemains} * {lAmount})", ['lAmount' => $lengths[BC::parse("({$lNum} - 1 + {$lCount}) % {$lCount}", null, 0)]->scale_amount], 18);
         }
 
         return $scaled;
