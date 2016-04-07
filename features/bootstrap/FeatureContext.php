@@ -6,6 +6,7 @@ use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Danhunsaker\Calends\Calends;
+use Danhunsaker\Calends\Tests\TestHelpers;
 
 /**
  * Defines application features from the specific context.
@@ -80,6 +81,14 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function anInputTimestampOf($stamp)
     {
         $this->input = $stamp;
+    }
+
+    /**
+     * @Given the eloquent sample calendar
+     */
+    public function theEloquentSampleCalendar()
+    {
+        TestHelpers::ensureEloquentSampleCalendar();
     }
 
     /**

@@ -11,6 +11,8 @@ class CalendsSpec extends ObjectBehavior
 {
     public function it_is_initializable()
     {
+        TestHelpers::ensureEloquentSampleCalendar();
+
         // Standard constructor
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
 
@@ -296,6 +298,19 @@ class CalendsSpec extends ObjectBehavior
         $this::create('8000000000000000', 'tai')->getDate('tai')->shouldBeLike('7fffffffffffffff3b9ac9ff3b9ac9ff');
     }
 
+    public function it_should_recognize_eloquent()
+    {
+        TestHelpers::ensureEloquentSampleCalendar();
+
+        $this->beConstructedWith('', 'eloquent');
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->getDate('unix')->shouldBeLike('0');
+
+        $this->add('6 days 1 week 13 minutes 2 year', 'eloquent')->getDate('unix')->shouldBeLike('64195980');
+
+        // $this->getDate('eloquent')->shouldBeLike('1970-01-01 00:00:00.000000 +00:00');
+    }
+
     public function it_should_convert_date_time()
     {
         $this->beConstructedThrough('import', [date_create()]);
@@ -306,7 +321,9 @@ class CalendsSpec extends ObjectBehavior
 
     public function it_should_convert_date_time_immutable()
     {
-        if ( ! class_exists('\DateTimeImmutable')) return;
+        if ( ! class_exists('\DateTimeImmutable')) {
+            return;
+        }
         $this->beConstructedThrough('import', [new \DateTimeImmutable()]);
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
 
@@ -339,15 +356,19 @@ class CalendsSpec extends ObjectBehavior
 
     public function it_should_convert_intl_calendar()
     {
-        if ( ! class_exists('\IntlCalendar')) return;
-        $this::import(\IntlCalendar::createInstance(NULL, 'en_US@calendar=persian'))->shouldHaveType('Danhunsaker\Calends\Calends');
+        if ( ! class_exists('\IntlCalendar')) {
+            return;
+        }
+        $this::import(\IntlCalendar::createInstance(null, 'en_US@calendar=persian'))->shouldHaveType('Danhunsaker\Calends\Calends');
 
         $this->convert('IntlCalendar')->shouldHaveKey('duration');
     }
 
     public function it_should_convert_intl_gregorian_calendar()
     {
-        if ( ! class_exists('\IntlCalendar')) return;
+        if ( ! class_exists('\IntlCalendar')) {
+            return;
+        }
         $this::import(\IntlCalendar::fromDateTime(date_create()))->shouldHaveType('Danhunsaker\Calends\Calends');
 
         $this->convert('IntlGregorianCalendar')->shouldHaveKey('duration');

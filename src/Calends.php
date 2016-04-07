@@ -3,7 +3,7 @@
 namespace Danhunsaker\Calends;
 
 use Danhunsaker\BC;
-// use Danhunsaker\Calends\Eloquent\Calendar;
+use Danhunsaker\Calends\Eloquent\Calendar;
 use JsonSerializable;
 use RMiller\Caser\Cased;
 use Serializable;
@@ -128,7 +128,9 @@ class Calends implements Serializable, JsonSerializable
 
             if (class_exists($className)) {
                 static::registerCalendar($calendar, $className);
-            } else {    // TODO: Implement Eloquent definitions, and check/register them before giving up
+            } elseif (class_exists('Illuminate\Database\Eloquent\Model') && is_a($class = Calendar::where('name', 'like', $calendar)->first(), 'Illuminate\Database\Eloquent\Model')) {
+                static::registerCalendar($calendar, $class);
+            } else {
                 throw new UnknownCalendarException("Can't find the '{$calendar}' calendar!");
             }
         }

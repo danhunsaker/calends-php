@@ -19,9 +19,9 @@ composer require danhunsaker/calends
 
 ## Usage ##
 
-- [ ] Setup
-  - [ ] Laravel
-  - [ ] Other Projects
+- [x] Setup
+  - [x] Laravel
+  - [x] Other Projects
 - [x] Dates
 - [x] Conversion
 - [x] Storage
@@ -38,11 +38,86 @@ composer require danhunsaker/calends
 
 #### Laravel ####
 
-* **_TO DO_**
+A Laravel service provider is included.  Add it to your app's service providers
+list, publish the migrations for Eloquent calendars, run the migrations, and
+enjoy!
+
+In `config/app.php`:
+
+```php
+    'providers' => [
+        // ...
+        Danhunsaker\Calends\Laravel\ServiceProvider::class,
+        // ...
+    ],
+```
+
+Then on the command line:
+
+```bash
+php artisan vendor:publish --tag=migrations --provider=Danhunsaker\\Calends\\Laravel\\ServiceProvider
+php artisan migrate
+```
+
+Note that this is entirely optional - you can easily skip the service provider
+and migrations, and use Calends without the Eloquent calendar support.  This
+will limit you to calendars defined as PHP classes, but if you don't need
+support for dynamically- and/or user-defined calendars, that shouldn't be a
+concern.
+
+You can also register the class as a Facade:
+
+```php
+    'aliases' => [
+        // ...
+        'Calends' => Danhunsaker\Calends\Calends::class,
+        // ...
+    ],    
+```
+
+There isn't any major difference in usage between the Facade and the regular
+class; this is mostly just a convenience option.
 
 #### Other Projects ####
 
-* **_TO DO_**
+Once you have installed Calends, using it is generally as easy as creating a new
+`Calends` object and manipulating it from there.  If you want to use custom
+calendar systems or class converters, be sure to register them first (details
+below), but otherwise, everything should work just fine out of the box.
+
+The main situation where you'd want to do more setup is with Eloquent calendars.
+You'll need to ensure you have `illuminate/database` installed in your project,
+that it is properly configured to connect to the right database, and that the
+database is properly initialized with the tables Calends needs to store calendar
+definitions.
+
+Check `extra/calends-init-db.php` for the appropriate environment variables to
+set for DB access, and ensure they are properly set up.  There are many ways to
+do this, depending on how your project will be run, so consult your web server
+or shell documentation for more details on how to proceed.  You'll also need to
+set these in your command line shell, so we'll show one way to do that below
+(but still check `extra/calends-init-db.php`, because we won't be setting all of
+them).  Once your environment is set up, `include()` or `require()` that file
+somewhere in your project's initialization code:
+
+```php
+require_once('vendor/danhunsaker/calends/extra/calends-init-db.php');
+```
+
+Finally, on the command line:
+
+```bash
+export DB_DRIVER='mysql'
+export DB_HOST='localhost'
+export DB_USER='username'
+export DB_PASS='password'
+export DB_NAME='database'
+php vendor/danhunsaker/calends/extra/non-laravel-migrate.php
+```
+
+That should be it - your database is now set up, and your project is configured
+to properly connect to it so that Eloquent calendars will work correctly without
+further effort on your part.
 
 ### Dates ###
 

@@ -46,6 +46,8 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetCalendar()
     {
+        TestHelpers::ensureEloquentSampleCalendar();
+
         // Retrieves the canonical calendar name
         $this->assertEquals('unix', Calends::getCalendar('unix'));
 
