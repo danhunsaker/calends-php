@@ -14,9 +14,4 @@ class UnitLength extends Model
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit');
     }
 
-    public function scaleTo()
-    {
-        return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit');
-    }
-
 }

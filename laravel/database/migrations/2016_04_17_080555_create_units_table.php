@@ -15,8 +15,7 @@ class CreateUnitsTable extends Migration
         Schema::create('units', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('calendar_id')->unsigned();
-            $table->string('singular_name');
-            $table->string('plural_name');
+            $table->string('internal_name');
             $table->bigInteger('scale_amount')->nullable();
             $table->boolean('scale_inverse');
             $table->integer('scale_to')->unsigned();

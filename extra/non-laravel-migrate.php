@@ -11,7 +11,7 @@ $autoloader = function () {
 };
 
 $progress = function($message) {
-    if ( ! (defined('MIGRATE_SILENTLY') || MIGRATE_SILENTLY))
+    if ( ! (defined('MIGRATE_SILENTLY') && MIGRATE_SILENTLY))
     {
         file_put_contents('php://stdout', $message);
     }

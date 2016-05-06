@@ -1,7 +1,5 @@
 <?php
 
-
-
 class Schema
 {
     protected static $schema = null;

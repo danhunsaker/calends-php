@@ -82,12 +82,13 @@ class Calendar extends Model implements Definition
 
         foreach ($matches as $match) {
             $unitMatch = $this->units()
-                              ->where('singular_name', 'like', $match['unit'])
-                              ->orWhere('plural_name', 'like', $match['unit'])->get();
+                              ->leftJoin('unit_names', 'unit_names.unit_id', '=', 'units.id')
+                              ->where('internal_name', 'like', $match['unit'])
+                              ->orWhere('unit_name',   'like', $match['unit'])->get();
 
             if ($unitMatch->count() > 0) {
                 list($unitName, $unitValue) = $unitMatch->first()->reduceAuxiliary($match['value']);
-                $units[$unitName] = BC::add($unitValue, Arr::get($units, $unitName, 0), 18);
+                $units[$unitName]           = BC::add($unitValue, Arr::get($units, $unitName, 0), 18);
             }
         }
 
@@ -115,7 +116,7 @@ class Calendar extends Model implements Definition
     protected function tsToUnits($seconds)
     {
         $unit = $this->units()->where('scale_to', 0)->first();
-        return $this->addUnits($this->getEpochUnitArray(true), [$unit->singular_name => BC::mul($seconds, $unit->scale_inverse ? BC::div(1, $unit->scale_amount, 18) : $unit->scale_amount, 18)]);
+        return $this->addUnits($this->getEpochUnitArray(true), [$unit->internal_name => BC::mul($seconds, $unit->scale_inverse ? BC::div(1, $unit->scale_amount, 18) : $unit->scale_amount, 18)]);
     }
 
     /**
@@ -143,7 +144,7 @@ class Calendar extends Model implements Definition
 
         // Perform carryover
         $coreUnit = $this->units()->where('scale_to', 0)->first();
-        $sum = $coreUnit->carryOver($sum);
+        $sum      = $coreUnit->carryOver($sum);
 
         return $sum;
     }
@@ -157,9 +158,8 @@ class Calendar extends Model implements Definition
     {
         $unitArray = [];
 
-        foreach($this->units()->where('is_auxiliary', 0)->get() as $unit)
-        {
-            $unitArray[$unit->singular_name] = $positive ? $unit->unix_epoch : BC::mul(BC::sub($unit->unix_epoch, $unit->uses_zero ? 0 : 1, 18), -1, 18);
+        foreach ($this->units()->where('is_auxiliary', 0)->get() as $unit) {
+            $unitArray[$unit->internal_name] = $positive ? $unit->unix_epoch : BC::mul(BC::sub($unit->unix_epoch, $unit->uses_zero ? 0 : 1, 18), -1, 18);
         }
 
         return $unitArray;

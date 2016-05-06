@@ -50,13 +50,13 @@ class Unit extends Model
                 }
             }
 
-            if (array_key_exists($this->singular_name, $unitArray)) {
-                $myVal  = BC::sub(Arr::get($unitArray, $this->singular_name, $this->uses_zero ? 0 : 1), $this->uses_zero ? 0 : 1, 18);
+            if (array_key_exists($this->internal_name, $unitArray)) {
+                $myVal  = BC::sub(Arr::get($unitArray, $this->internal_name, $this->uses_zero ? 0 : 1), $this->uses_zero ? 0 : 1, 18);
                 $scaled = $this->scaleReduce($myVal);
 
                 if ($this->scale_to != 0) {
-                    $unitArray[$this->scaleMeTo->singular_name] = BC::add(Arr::get($unitArray, $this->scaleMeTo->singular_name, 0), $scaled, 18);
-                    unset($unitArray[$this->singular_name]);
+                    $unitArray[$this->scaleMeTo->internal_name] = BC::add(Arr::get($unitArray, $this->scaleMeTo->internal_name, 0), $scaled, 18);
+                    unset($unitArray[$this->internal_name]);
                     $scaled = null;
                 }
             }
@@ -68,7 +68,7 @@ class Unit extends Model
     public function reduceAuxiliary($value)
     {
         if ( ! $this->is_auxiliary) {
-            return [$this->singular_name, $value];
+            return [$this->internal_name, $value];
         } else {
             return $this->scaleMeTo->reduceAuxiliary($this->scaleReduce($value));
         }
@@ -102,12 +102,12 @@ class Unit extends Model
 
     public function carryOver(array $unitArray)
     {
-        $myVal       = $this->is_auxiliary ? 0 : BC::sub(Arr::get($unitArray, $this->singular_name, $this->uses_zero ? 0 : 1), $this->uses_zero ? 0 : 1, 18);
+        $myVal       = $this->is_auxiliary ? 0 : BC::sub(Arr::get($unitArray, $this->internal_name, $this->uses_zero ? 0 : 1), $this->uses_zero ? 0 : 1, 18);
         $exprInverse = '({myVal} * {scale}) %% {scale}';
         $exprNormal  = '({myVal} - ({myVal} %% {scale})) / {scale}';
 
         foreach ($this->scalesToMe()->get() as $unit) {
-            $unitVal        = BC::sub(Arr::get($unitArray, $unit->singular_name, $unit->uses_zero ? 0 : 1), $unit->uses_zero ? 0 : 1, 18);
+            $unitVal        = BC::sub(Arr::get($unitArray, $unit->internal_name, $unit->uses_zero ? 0 : 1), $unit->uses_zero ? 0 : 1, 18);
             $unitAdjustment = 0;
             $myAdjustment   = 0;
 
@@ -145,10 +145,10 @@ class Unit extends Model
                 }
             }
 
-            $unitArray[$unit->singular_name] = BC::add(BC::add($unitVal, $unitAdjustment, 18), $unit->uses_zero ? 0 : 1, 18);
+            $unitArray[$unit->internal_name] = BC::add(BC::add($unitVal, $unitAdjustment, 18), $unit->uses_zero ? 0 : 1, 18);
 
             if ( ! $unit->is_auxiliary) {
-                $unitArray[$this->singular_name] = $myVal = BC::add(BC::sub($myVal, $myAdjustment, 18), $this->uses_zero ? 0 : 1, 18);
+                $unitArray[$this->internal_name] = $myVal = BC::add(BC::sub($myVal, $myAdjustment, 18), $this->uses_zero ? 0 : 1, 18);
             }
 
             $unitArray = $unit->carryOver($unitArray);

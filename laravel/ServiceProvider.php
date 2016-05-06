@@ -33,6 +33,6 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function provides()
     {
-        return array('Calends\Calends', 'calends');
+        return array('Danhunsaker\Calends\Calends', 'calends');
     }
 }

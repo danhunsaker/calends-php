@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUnitLengthsTable extends Migration
+class CreateCalendarsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,12 +12,11 @@ class CreateUnitLengthsTable extends Migration
      */
     public function up()
     {
-        Schema::create('unit_lengths', function (Blueprint $table) {
+        Schema::create('calendars', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('unit_id')->unsigned();
-            $table->bigInteger('unit_value');
-            $table->bigInteger('scale_amount');
-            $table->integer('scale_to')->unsigned();
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
+            $table->integer('default_format')->unsigned()->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +29,6 @@ class CreateUnitLengthsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('unit_lengths');
+        Schema::drop('calendars');
     }
 }
