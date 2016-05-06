@@ -7,3 +7,11 @@ suites:
     spec_prefix: spec
 extensions:
   - Coduo\PhpSpec\DataProvider\DataProviderExtension
+  - PhpSpec\Extension\CodeCoverageExtension
+code_coverage:
+  whitelist:
+    - src
+  format:
+    - clover
+  output:
+    clover: phpspec-coverage.xml
