@@ -125,7 +125,7 @@ class Unit extends Model
                 $unitAdjustment = BC::parse($unitExpr, ['myVal' => $myVal, 'scale' => $unit->scale_amount], 18);
                 $myAdjustment   = BC::parse($myExpr, ['adjust' => $unitAdjustment, 'scale' => $unit->scale_amount], 18);
             } else {
-                $lengths = $unit->lengths()->where('scale_to', $this->id)->get();
+                $lengths  = $unit->lengths()->get();
                 $lCount   = $lengths->count();
                 $lSum     = $lengths->sum('scale_amount');
 
