@@ -28,3 +28,5 @@ script:
   - vendor/bin/behat -v --config=.travis-behat.yml
   - vendor/bin/phpspec run -v --config=.travis-phpspec.yml
   - vendor/bin/phpunit -v --color -c .travis-phpunit.xml
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

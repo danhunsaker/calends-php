@@ -6,4 +6,12 @@
                 <directory>tests/</directory>
             </testsuite>
         </testsuites>
+        <filter>
+            <whitelist>
+                <directory suffix=".php">src/</directory>
+            </whitelist>
+        </filter>
+        <logging>
+            <log target="phpunit-coverage.xml" type="coverage-clover" />
+        </logging>
     </phpunit>
