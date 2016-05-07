@@ -5,7 +5,7 @@
 
 [![Latest Version](https://img.shields.io/github/release/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
 [![Build Status](https://img.shields.io/travis/danhunsaker/calends.svg?style=flat-square)](https://travis-ci.org/danhunsaker/calends)
-[![codecov](https://codecov.io/gh/danhunsaker/calends/branch/master/graph/badge.svg)](https://codecov.io/gh/danhunsaker/calends)
+[![Codecov](https://img.shields.io/codecov/c/github/danhunsaker/calends.svg?style=flat-square)](https://codecov.io/gh/danhunsaker/calends)
 [![Total Downloads](https://img.shields.io/packagist/dt/danhunsaker/calends.svg?style=flat-square)](https://packagist.org/packages/danhunsaker/calends)
 
 Arbitrary calendar systems in PHP.
