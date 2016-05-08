@@ -2,9 +2,9 @@
 
 namespace Danhunsaker\Calends\Tests\Converter;
 
+use Carbon\Carbon;
 use Danhunsaker\Calends\Calends;
 use Danhunsaker\Calends\Converter\Carbon as Converter;
-use Carbon\Carbon;
 
 /**
  * @coversDefaultClass Danhunsaker\Calends\Converter\Carbon

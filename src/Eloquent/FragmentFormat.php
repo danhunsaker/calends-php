@@ -23,5 +23,4 @@ class FragmentFormat extends Model
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\FragmentText');
     }
-
 }

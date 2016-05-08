@@ -13,5 +13,4 @@ class EraRange extends Model
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Era');
     }
-
 }

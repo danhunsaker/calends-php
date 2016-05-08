@@ -13,4 +13,6 @@ use DateInterval;
  * @copyright 2015-2016 Daniel Hunsaker
  * @license MIT
  */
-class IntlGregorianCalendar extends IntlCalendar {}
+class IntlGregorianCalendar extends IntlCalendar
+{
+}

@@ -17,7 +17,9 @@ class IntlCalendarTest extends \PHPUnit_Framework_TestCase
      */
     public function testImport()
     {
-        if ( ! class_exists('\IntlCalendar')) return;
+        if ( ! class_exists('\IntlCalendar')) {
+            return;
+        }
 
         $date = IntlCalendar::createInstance(IntlTimeZone::getGMT(), 'en_US@calendar=persian');
         $date->setTime(0);
@@ -32,13 +34,15 @@ class IntlCalendarTest extends \PHPUnit_Framework_TestCase
      */
     public function testConvert()
     {
-        if ( ! class_exists('\IntlCalendar')) return;
+        if ( ! class_exists('\IntlCalendar')) {
+            return;
+        }
 
         $date = IntlCalendar::createInstance(IntlTimeZone::getGMT(), 'en_US@calendar=persian');
         $date->setTime(0);
 
         Converter::$locale = 'en_US@calendar=persian';
-        $test = Converter::convert(Calends::create(0, 'unix'));
+        $test              = Converter::convert(Calends::create(0, 'unix'));
 
         $this->assertEquals(['start' => $date, 'duration' => new \DateInterval('PT0S'), 'end' => $date], $test);
     }

@@ -106,7 +106,7 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
      */
     public function testToInternalFromUnix()
     {
-        $zero = Calends::toInternalFromUnix(0);
+        $zero    = Calends::toInternalFromUnix(0);
         $minWrap = Calends::toInternalFromUnix(BC::sub(-1, BC::pow(2, 62)));
         $maxWrap = Calends::toInternalFromUnix(BC::sub(BC::pow(2, 63), BC::pow(2, 62)));
 

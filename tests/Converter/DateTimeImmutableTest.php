@@ -17,7 +17,9 @@ class DateTimeImmutableTest extends \PHPUnit_Framework_TestCase
      */
     public function testImport()
     {
-        if ( ! class_exists('\DateTimeImmutable')) return;
+        if ( ! class_exists('\DateTimeImmutable')) {
+            return;
+        }
 
         $test = Converter::import(new DateTimeImmutable('@0'));
 
@@ -29,7 +31,9 @@ class DateTimeImmutableTest extends \PHPUnit_Framework_TestCase
      */
     public function testConvert()
     {
-        if ( ! class_exists('\DateTimeImmutable')) return;
+        if ( ! class_exists('\DateTimeImmutable')) {
+            return;
+        }
 
         $test = Converter::convert(Calends::create(0, 'unix'));
 

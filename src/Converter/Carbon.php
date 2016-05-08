@@ -2,9 +2,9 @@
 
 namespace Danhunsaker\Calends\Converter;
 
-use Danhunsaker\Calends\Calends;
 use Carbon\Carbon as Source;
 use Carbon\CarbonInterval;
+use Danhunsaker\Calends\Calends;
 
 /**
  * Convert between Calends and Carbon objects

@@ -13,5 +13,4 @@ class UnitName extends Model
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit');
     }
-
 }

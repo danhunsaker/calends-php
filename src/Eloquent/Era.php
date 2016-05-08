@@ -23,5 +23,4 @@ class Era extends Model
     {
         return $this->morphMany('Danhunsaker\Calends\Eloquent\FragmentFormats', 'fragment');
     }
-
 }

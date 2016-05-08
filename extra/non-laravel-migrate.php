@@ -10,9 +10,8 @@ $autoloader = function () {
     throw new Exception('Composer autoloader not found.  Cannot continue.');
 };
 
-$progress = function($message) {
-    if ( ! (defined('MIGRATE_SILENTLY') && MIGRATE_SILENTLY))
-    {
+$progress = function ($message) {
+    if ( ! (defined('MIGRATE_SILENTLY') && MIGRATE_SILENTLY)) {
         file_put_contents('php://stdout', $message);
     }
 };
@@ -54,8 +53,8 @@ foreach ($migrations as $file) {
 $batch = $repository->getNextBatchNumber();
 
 foreach ($migrations as $file) {
-    $class = implode('_', array_slice(explode('_', $file), 4));
-    $class = Illuminate\Support\Str::studly($class);
+    $class     = implode('_', array_slice(explode('_', $file), 4));
+    $class     = Illuminate\Support\Str::studly($class);
     $migration = new $class;
 
     $progress("Running {$class}::up() migration...");
