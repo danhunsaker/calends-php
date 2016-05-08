@@ -387,6 +387,6 @@ class TestHelpers
         DB::table('calendar_formats')->insert(['calendar_id' => $calId, 'format_name' => 'mod8601', 'format_string' => 'Y-m-d H:i:s.u', 'description' => 'A modified ISO 8601 date']);
         DB::table('calendar_formats')->insert(['calendar_id' => $calId, 'format_name' => 'filestr', 'format_string' => 'Y-m-d_H-i-s.u', 'description' => 'A date suitable for use in filenames']);
 
-        DB::table('calendars')->update($calId, ['default_format' => $formatId]);
+        DB::table('calendars')->where('id', $calId)->update(['default_format' => $formatId]);
     }
 }
