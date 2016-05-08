@@ -16,7 +16,7 @@ class CreateFragmentFormatsTable extends Migration
             $table->increments('id');
             $table->integer('calendar_id')->unsigned();
             $table->char('format_code', 1);
-            $table->morph('fragment');
+            $table->morphs('fragment');
             $table->string('format_string');
             $table->text('description')->nullable();
             $table->timestamps();
