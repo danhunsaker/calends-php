@@ -24,6 +24,7 @@ before_install:
   - mysql -u root -e 'CREATE DATABASE IF NOT EXISTS `database`;'
 install:
   - if [[ "$(phpenv version-name)" != "hhvm" ]]; then echo 'error_reporting = E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini; fi
+  - if [[ $(phpenv version-name) =~ ^hhvm ]]; then echo 'xdebug.enable = On' >> /etc/hhvm/php.ini; fi
   - travis_retry composer update --no-interaction --prefer-source $PREFER_LOWEST
 script:
   - vendor/bin/behat -v --config=.travis-behat.yml
