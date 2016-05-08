@@ -42,7 +42,7 @@ class TAI64 implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function fromInternal($stamp)
+    public static function fromInternal($stamp, $format)
     {
         return str_pad(gmp_strval(gmp_init($stamp['seconds'], 10), 16), 16, '0', STR_PAD_LEFT)
              . str_pad(gmp_strval(gmp_init($stamp['nano'], 10), 16), 8, '0', STR_PAD_LEFT)

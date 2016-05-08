@@ -32,9 +32,24 @@ class Unit extends Model
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit', 'scale_to');
     }
 
+    public function names()
+    {
+        return $this->hasMany('Danhunsaker\Calends\Eloquent\UnitName');
+    }
+
     public function lengths()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\UnitLength');
+    }
+
+    public function eras()
+    {
+        return $this->hasMany('Danhunsaker\Calends\Eloquent\Era');
+    }
+
+    public function formats()
+    {
+        return $this->morphMany('Danhunsaker\Calends\Eloquent\FragmentFormats', 'fragment');
     }
 
     public function toSeconds(array $unitArray)

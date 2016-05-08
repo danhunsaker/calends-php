@@ -32,9 +32,10 @@ interface ObjectDefinitionInterface
      *
      * @param string[] $stamp The internal TAI array representation to convert
      *        into the appropriate date/time value
+     * @param string $format Optional date format string; may be ignored
      * @return mixed
      */
-    public function fromInternal($stamp);
+    public function fromInternal($stamp, $format);
 
     /**
      * Calculate the TAI array at a given offset from another TAI array

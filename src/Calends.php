@@ -328,13 +328,14 @@ class Calends implements Serializable, JsonSerializable
      * @api
      *
      * @param string $calendar The calendar system definition to convert to
+     * @param string $format An optional date format string; value is calendar-specific
      * @throws InvalidCalendarException
      * @throws UnknownCalendarException
      * @return string|object|float|integer
      **/
-    public function getDate($calendar = 'unix')
+    public function getDate($calendar = 'unix', $format = null)
     {
-        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar($calendar)], $this->internalTime);
+        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar($calendar)], $this->internalTime, $format);
     }
 
     /**
@@ -367,13 +368,14 @@ class Calends implements Serializable, JsonSerializable
      * @api
      *
      * @param string $calendar The calendar system definition to convert to
+     * @param string $format An optional date format string; value is calendar-specific
      * @throws InvalidCalendarException
      * @throws UnknownCalendarException
      * @return string|object|float|integer
      **/
-    public function getEndDate($calendar = 'unix')
+    public function getEndDate($calendar = 'unix', $format = null)
     {
-        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar($calendar)], $this->endTime);
+        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar($calendar)], $this->endTime, $format);
     }
 
     // Comparison Functions
@@ -948,13 +950,14 @@ class Calends implements Serializable, JsonSerializable
      * @api
      *
      * @param string $calendar The calendar system definition to convert to
+     * @param string $format An optional date format string; value is calendar-specific
      * @throws InvalidCalendarException
      * @throws UnknownCalendarException
      * @return string|object|float|integer|(string|object|float|integer)[]
      **/
-    public function __invoke($calendar = 'unix')
+    public function __invoke($calendar = 'unix', $format = null)
     {
-        return $this->duration == 0 ? $this->getDate($calendar) : ['start' => $this->getDate($calendar), 'end' => $this->getEndDate($calendar)];
+        return $this->duration == 0 ? $this->getDate($calendar, $format) : ['start' => $this->getDate($calendar, $format), 'end' => $this->getEndDate($calendar, $format)];
     }
 
     /**

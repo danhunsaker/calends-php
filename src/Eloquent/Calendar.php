@@ -23,6 +23,21 @@ class Calendar extends Model implements Definition
         return $this->hasMany('Danhunsaker\Calends\Eloquent\Unit');
     }
 
+    public function formats()
+    {
+        return $this->hasMany('Danhunsaker\Calends\Eloquent\CalendarFormat');
+    }
+
+    public function defaultFormat()
+    {
+        return $this->belongsTo('Danhunsaker\Calends\Eloquent\CalendarFormat', 'default_format');
+    }
+
+    public function fragments()
+    {
+        return $this->hasMany('Danhunsaker\Calends\Eloquent\FragmentFormat');
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -34,9 +49,9 @@ class Calendar extends Model implements Definition
     /**
      * {@inheritdoc}
      */
-    public function fromInternal($stamp)
+    public function fromInternal($stamp, $format)
     {
-        return $this->formatDate($this->tsToUnits(Calends::fromInternalToUnix($stamp)));
+        return $this->formatDate($this->tsToUnits(Calends::fromInternalToUnix($stamp)), $format);
     }
 
     /**
@@ -62,9 +77,12 @@ class Calendar extends Model implements Definition
      * Format unit => value array into date/time string
      *
      * @param array $units A unit => value array
+     * @param string $format An optional date format string; value can be either
+     *                       a calendar format name, or a raw format string; both
+     *                       are calendar-specific
      * @return string
      */
-    protected function formatDate(array $units)
+    protected function formatDate(array $units, $format)
     {
         return json_encode($units);
     }
