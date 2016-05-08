@@ -40,27 +40,21 @@ class Era extends Model
         $raw    = $output['value'];
         $range  = $this->ranges()->where(function ($query) use ($raw) {
             $query->where(function ($query) use ($raw) {
-                    $query->where([
-                        ['direction', 'asc'],
-                        ['start_value', '<=', $raw],
-                        ['end_value', '>=', $raw],
-                    ]);
+                    $query->where('direction', 'asc')
+                          ->where('start_value', '<=', $raw)
+                          ->where('end_value', '>=', $raw);
                 })->orWhere(function ($query) use ($raw) {
-                    $query->where([
-                        ['direction', 'asc'],
-                        ['start_value', '<=', $raw],
-                    ])->whereNull('end_value');
+                    $query->where('direction', 'asc')
+                          ->where('start_value', '<=', $raw)
+                          ->whereNull('end_value');
                 })->orWhere(function ($query) use ($raw) {
-                    $query->where([
-                        ['direction', 'desc'],
-                        ['start_value', '>=', $raw],
-                        ['end_value', '<=', $raw],
-                    ]);
+                    $query->where('direction', 'desc')
+                          ->where('start_value', '>=', $raw)
+                          ->where('end_value', '<=', $raw);
                 })->orWhere(function ($query) use ($raw) {
-                    $query->where([
-                        ['direction', 'desc'],
-                        ['start_value', '>=', $raw],
-                    ])->whereNull('end_value');
+                    $query->where('direction', 'desc')
+                          ->where('start_value', '>=', $raw)
+                          ->whereNull('end_value');
                 });
             })->first();
 
