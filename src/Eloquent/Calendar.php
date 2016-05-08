@@ -16,6 +16,7 @@ class Calendar extends Model implements Definition
     /**
      * Relationship with the Unit model
      *
+     * @codeCoverageIgnore
      * @return Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function units()
@@ -26,6 +27,7 @@ class Calendar extends Model implements Definition
     /**
      * All Members Relationship with the CalendarFormat model
      *
+     * @codeCoverageIgnore
      * @return Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function formats()
@@ -36,7 +38,8 @@ class Calendar extends Model implements Definition
     /**
      * Default Format Relationship with the CalendarFormat model
      *
-     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     * @codeCoverageIgnore
+     * @return Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function defaultFormat()
     {
@@ -46,6 +49,7 @@ class Calendar extends Model implements Definition
     /**
      * Relationship with the FragmentFormat model
      *
+     * @codeCoverageIgnore
      * @return Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function fragments()

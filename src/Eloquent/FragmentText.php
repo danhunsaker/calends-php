@@ -9,6 +9,9 @@ class FragmentText extends Model
 {
     use SoftDeletes;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function fragmentFormat()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\FragmentFormat');

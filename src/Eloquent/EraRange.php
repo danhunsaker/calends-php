@@ -9,6 +9,9 @@ class EraRange extends Model
 {
     use SoftDeletes;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function era()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Era');

@@ -10,16 +10,25 @@ class FragmentFormat extends Model
 {
     use SoftDeletes;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function calendar()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Calendar');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function fragment()
     {
         return $this->morphTo();
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function texts()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\FragmentText');

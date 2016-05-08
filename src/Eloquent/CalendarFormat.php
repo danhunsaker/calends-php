@@ -9,6 +9,9 @@ class CalendarFormat extends Model
 {
     use SoftDeletes;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function calendar()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Calendar');

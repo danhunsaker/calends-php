@@ -17,36 +17,57 @@ class Unit extends Model
         'is_auxiliary'  => 'boolean',
     ];
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function calendar()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Calendar');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function scalesToMe()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\Unit', 'scale_to');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function scaleMeTo()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit', 'scale_to');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function names()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\UnitName');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function lengths()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\UnitLength');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function eras()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\Era');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function formats()
     {
         return $this->morphMany('Danhunsaker\Calends\Eloquent\FragmentFormats', 'fragment');

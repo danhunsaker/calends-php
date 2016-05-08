@@ -10,16 +10,25 @@ class Era extends Model
 {
     use SoftDeletes;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function unit()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function ranges()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\EraRange');
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function formats()
     {
         return $this->morphMany('Danhunsaker\Calends\Eloquent\FragmentFormats', 'fragment');

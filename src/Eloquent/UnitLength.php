@@ -9,6 +9,9 @@ class UnitLength extends Model
 {
     use SoftDeletes;
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function unit()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\Unit');
