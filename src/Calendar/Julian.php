@@ -28,7 +28,7 @@ class Julian implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function fromInternal($stamp, $format)
+    public static function fromInternal($stamp, $format = null)
     {
         $date = Calends::fromInternalToUnix($stamp);
         return date_create_from_format('n/j/Y', \JDToJulian(BC::add(BC::div($date, 86400, 18), 2440587.5, 0)))->format('D, d M Y') . ' ' . date_create_from_format('U.u', BC::add(0, $date, 6))->format('H:i:s.u P');

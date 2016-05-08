@@ -49,7 +49,7 @@ class Hebrew implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function fromInternal($stamp, $format)
+    public static function fromInternal($stamp, $format = null)
     {
         $date            = Calends::fromInternalToUnix($stamp);
         list($m, $d, $y) = explode('/', \jdtojewish(BC::add(BC::div($date, 86400, 18), 2440587.5, 0)));

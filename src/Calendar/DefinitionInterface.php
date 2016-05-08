@@ -34,7 +34,7 @@ interface DefinitionInterface
      * @param string $format Optional date format string; may be ignored
      * @return mixed
      */
-    public static function fromInternal($stamp, $format);
+    public static function fromInternal($stamp, $format = null);
 
     /**
      * Calculate the TAI array at a given offset from another TAI array

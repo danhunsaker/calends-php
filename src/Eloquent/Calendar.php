@@ -49,7 +49,7 @@ class Calendar extends Model implements Definition
     /**
      * {@inheritdoc}
      */
-    public function fromInternal($stamp, $format)
+    public function fromInternal($stamp, $format = null)
     {
         return $this->formatDate($this->tsToUnits(Calends::fromInternalToUnix($stamp)), $format);
     }

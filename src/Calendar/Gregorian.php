@@ -26,7 +26,7 @@ class Gregorian implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function fromInternal($stamp, $format)
+    public static function fromInternal($stamp, $format = null)
     {
         return date_create_from_format('U.u', BC::add(0, Calends::fromInternalToUnix($stamp), 6))->format($format ?: 'D, d M Y H:i:s.u P');
     }
