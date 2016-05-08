@@ -302,13 +302,15 @@ class CalendsSpec extends ObjectBehavior
     {
         TestHelpers::ensureEloquentSampleCalendar();
 
-        $this->beConstructedWith('', 'eloquent');
+        $this->beConstructedWith('01 Jan 1970 00:00:00', 'eloquent');
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
 
         $this->add('6 days 1 week 13 minutes 2 year', 'eloquent')->getDate('unix')->shouldBeLike('64195980');
 
-        // $this->getDate('eloquent')->shouldBeLike('1970-01-01 00:00:00.000000 +00:00');
+        $this->getDate('eloquent')->shouldBeLike('01 Jan 1970 00:00:00');
+        $this->getDate('eloquent', 'filestr')->shouldBeLike('1970-01-01_00-00-00');
+        $this->getDate('eloquent', '\\y\\e\\a\\r: Y')->shouldBeLike('year: 1970');
     }
 
     public function it_should_convert_date_time()

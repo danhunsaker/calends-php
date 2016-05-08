@@ -23,16 +23,31 @@ class Calendar extends Model implements Definition
         return $this->hasMany('Danhunsaker\Calends\Eloquent\Unit');
     }
 
+    /**
+     * All Members Relationship with the CalendarFormat model
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function formats()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\CalendarFormat');
     }
 
+    /**
+     * Default Format Relationship with the CalendarFormat model
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function defaultFormat()
     {
         return $this->belongsTo('Danhunsaker\Calends\Eloquent\CalendarFormat', 'default_format');
     }
 
+    /**
+     * Relationship with the FragmentFormat model
+     *
+     * @return Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function fragments()
     {
         return $this->hasMany('Danhunsaker\Calends\Eloquent\FragmentFormat');
@@ -84,7 +99,37 @@ class Calendar extends Model implements Definition
      */
     protected function formatDate(array $units, $format)
     {
-        return json_encode($units);
+        if (is_null($format)) {
+            if (is_null($this->defaultFormat)) {
+                $format = '';
+            } else {
+                $format = $this->defaultFormat->format_string;
+            }
+        } elseif (with($fmtObj = $this->formats()->where('format_name', 'like', $format))->count() > 0) {
+            $format = $fmtObj->first()->format_string;
+        }
+
+        $output = '';
+
+        for ($i = 0; $i < mb_strlen($format); $i++) {
+            $char = mb_substr($format, $i, 1);
+
+            if ($char == '\\') {
+                $output .= mb_substr($format, ++$i, 1);
+                continue;
+            } elseif (in_array($char, ['_', '%'])) {
+                $output .= $char;
+                continue;
+            }
+
+            if (with($fmtObj = $this->fragments()->where('format_code', 'like binary', $char))->count() > 0) {
+                $output .= $fmtObj->first()->formatFragment($units);
+            } else {
+                $output .= $char;
+            }
+        }
+
+        return $output;
     }
 
     /**

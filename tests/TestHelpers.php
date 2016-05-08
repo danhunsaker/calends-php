@@ -247,6 +247,14 @@ class TestHelpers
                 'format_string' => '%{value}$d',
                 'description'   => 'Numeric representation of a month, without leading zeros',
             ]),
+            't' => DB::table('fragment_formats')->insertGetId([
+                'calendar_id'   => $calId,
+                'format_code'   => 't',
+                'fragment_type' => 'Danhunsaker\Calends\Eloquent\Unit',
+                'fragment_id'   => $uIDs['month'],
+                'format_string' => '%{length}$d',
+                'description'   => 'Number of days in the given month',
+            ]),
             'Y' => DB::table('fragment_formats')->insertGetId([
                 'calendar_id'   => $calId,
                 'format_code'   => 'Y',
@@ -335,14 +343,18 @@ class TestHelpers
                 'format_string' => '%{value}$02d',
                 'description'   => 'Seconds, with leading zeros',
             ]),
-            'u' => DB::table('fragment_formats')->insertGetId([
-                'calendar_id'   => $calId,
-                'format_code'   => 'u',
-                'fragment_type' => 'Danhunsaker\Calends\Eloquent\Unit',
-                'fragment_id'   => $uIDs['microsecond'],
-                'format_string' => '%{value}$06d',
-                'description'   => 'Microseconds',
-            ]),
+            //
+            // Disabled because we don't, yet, have a clean way of presenting
+            // compound units; in this case millisecond . microsecnd
+            //
+            // 'u' => DB::table('fragment_formats')->insertGetId([
+            //     'calendar_id'   => $calId,
+            //     'format_code'   => 'u',
+            //     'fragment_type' => 'Danhunsaker\Calends\Eloquent\Unit',
+            //     'fragment_id'   => $uIDs['microsecond'],
+            //     'format_string' => '%{value}$06d',
+            //     'description'   => 'Microseconds',
+            // ]),
         ];
 
         DB::table('fragment_texts')->insert(['fragment_format_id' => $fIDs['F'], 'fragment_value' => 1, 'fragment_text' => 'January']);
@@ -383,9 +395,9 @@ class TestHelpers
 
     protected static function defineEloquentCalendarFormats($calId)
     {
-        $formatId = DB::table('calendar_formats')->insertGetId(['calendar_id' => $calId, 'format_name' => 'eloquent', 'format_string' => 'd M Y H:i:s.u', 'description' => 'A basic date format']);
-        DB::table('calendar_formats')->insert(['calendar_id' => $calId, 'format_name' => 'mod8601', 'format_string' => 'Y-m-d H:i:s.u', 'description' => 'A modified ISO 8601 date']);
-        DB::table('calendar_formats')->insert(['calendar_id' => $calId, 'format_name' => 'filestr', 'format_string' => 'Y-m-d_H-i-s.u', 'description' => 'A date suitable for use in filenames']);
+        $formatId = DB::table('calendar_formats')->insertGetId(['calendar_id' => $calId, 'format_name' => 'eloquent', 'format_string' => 'd M Y H:i:s', 'description' => 'A basic date format']);
+        DB::table('calendar_formats')->insert(['calendar_id' => $calId, 'format_name' => 'mod8601', 'format_string' => 'Y-m-d H:i:s', 'description' => 'A modified ISO 8601 date']);
+        DB::table('calendar_formats')->insert(['calendar_id' => $calId, 'format_name' => 'filestr', 'format_string' => 'Y-m-d_H-i-s', 'description' => 'A date suitable for use in filenames']);
 
         DB::table('calendars')->where('id', $calId)->update(['default_format' => $formatId]);
     }

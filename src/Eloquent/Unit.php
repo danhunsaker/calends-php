@@ -171,4 +171,19 @@ class Unit extends Model
 
         return $unitArray;
     }
+
+    public function getFormatArgs(array $units)
+    {
+        $raw = BC::add($units[$this->internal_name], 0, 0);
+        if (is_null($this->scale_amount) && with($lenObj = $this->lengths()->where('unit_value', $raw))->count() > 0) {
+            $length = $lenObj->first()->scale_amount;
+        } else {
+            $length = 0;
+        }
+
+        return [
+            'length' => $length,
+            'value'  => $raw,
+        ];
+    }
 }

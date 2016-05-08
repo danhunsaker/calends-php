@@ -15,10 +15,10 @@ Feature: Eloquent Calendar handling
     Then the return value should be <output>
 
     Examples:
-      | input                            | intype   | outtype  | output                                  |
-      | 1970-01-01 00:00:00              | eloquent | unix     | 0                                       |
-      | 1970-01-01 00:00:00              | eloquent | jdc      | 2440587.5                               |
-      | 1970-01-01 00:00:00              | eloquent | tai      | 40000000000000000000000000000000        |
-#      | 0                                | unix     | eloquent | Thu, 01 Jan 1970 00:00:00.000000 +00:00 |
-#      | 2440587.5                        | jdc      | eloquent | Thu, 01 Jan 1970 00:00:00.000000 +00:00 |
-#      | 40000000000000000000000000000000 | tai      | eloquent | Thu, 01 Jan 1970 00:00:00.000000 +00:00 |
+      | input                            | intype   | outtype  | output                           |
+      | 1970-01-01 00:00:00              | eloquent | unix     | 0                                |
+      | 1970-01-01 00:00:00              | eloquent | jdc      | 2440587.5                        |
+      | 1970-01-01 00:00:00              | eloquent | tai      | 40000000000000000000000000000000 |
+      | 0                                | unix     | eloquent | 01 Jan 1970 00:00:00             |
+      | 2440587.5                        | jdc      | eloquent | 01 Jan 1970 00:00:00             |
+      | 40000000000000000000000000000000 | tai      | eloquent | 01 Jan 1970 00:00:00             |
