@@ -306,11 +306,33 @@ class CalendsSpec extends ObjectBehavior
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
 
-        $this->add('6 days 1 week 13 minutes 2 year', 'eloquent')->getDate('unix')->shouldBeLike('64195980');
+        $this->add('6 days 1 week 13 minutes 2 year 2 month', 'eloquent')->getDate('unix')->shouldBeLike('69293580');
+        $this->add('69293580 second', 'eloquent')->getDate('unix')->shouldBeLike('69293580');
 
         $this->getDate('eloquent')->shouldBeLike('01 Jan 1970 00:00:00');
         $this->getDate('eloquent', 'filestr')->shouldBeLike('1970-01-01_00-00-00');
         $this->getDate('eloquent', '\\y\\e\\a\\r: Y')->shouldBeLike('year: 1970');
+    }
+
+    public function it_should_recognize_broken()
+    {
+        TestHelpers::ensureEloquentSampleCalendar();
+
+        $this->beConstructedWith('', 'broken');
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->getDate('unix')->shouldBeLike('0');
+
+        $this->getDate('broken')->shouldBeLike('');
+        $this->getDate('broken', '\\s\\e\\c\\o\\n\\d: s')->shouldBeLike('second: 00');
+    }
+
+    public function it_should_recognize_extra_broken()
+    {
+        TestHelpers::ensureEloquentSampleCalendar();
+
+        $this->beConstructedWith('', 'extra-broken');
+        $this->shouldHaveType('Danhunsaker\Calends\Calends');
+        $this->getDate('unix')->shouldBeLike('0');
     }
 
     public function it_should_convert_date_time()

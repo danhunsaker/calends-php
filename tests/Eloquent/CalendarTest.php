@@ -73,6 +73,7 @@ class CalendarTest extends \PHPUnit_Framework_TestCase
     public function testUnitsToTS()
     {
         $this->assertEquals(0, Calendar::find(1)->unitsToTS(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970]));
+        $this->assertEquals(0, Calendar::find(3)->unitsToTS([]));
     }
 
     /**

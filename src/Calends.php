@@ -244,7 +244,7 @@ class Calends implements Serializable, JsonSerializable
      */
     public static function toInternalFromUnix($stamp)
     {
-        $stamp = is_null($stamp) ? microtime(true) : $stamp;
+        $stamp = is_null($stamp) ? microtime(true) : (is_numeric($stamp) ? $stamp : 0);
 
         $time = [];
         if (BC::comp($stamp, BC::sub(0, BC::pow(2, 62, 18), 18), 18) === -1) {

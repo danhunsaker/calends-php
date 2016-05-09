@@ -171,7 +171,11 @@ class Calendar extends Model implements Definition
     protected function unitsToTS(array $units)
     {
         $unit = $this->units()->where('scale_to', 0)->first();
-        return $unit->toSeconds($this->addUnits($this->getEpochUnitArray(false), $units));
+        if (is_null($unit)) {
+            return 0;
+        } else {
+            return $unit->toSeconds($this->addUnits($this->getEpochUnitArray(false), $units));
+        }
     }
 
     /**

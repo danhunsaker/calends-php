@@ -24,8 +24,11 @@ class TestHelpers
         static::defineEloquentFragmentFormats($calId, $uIDs, $eIDs);
         static::defineEloquentCalendarFormats($calId);
 
-        $brokenId = DB::table('calendars')->insert(['name' => 'broken', 'description' => 'A broken test calendar.  Feel free to destroy it.']);
-        $bIDs     = static::defineBrokenUnits($brokenId);
+        $brokenId = DB::table('calendars')->insertGetId(['name' => 'broken', 'description' => 'A broken test calendar.  Feel free to destroy it.']);
+        $buIDs    = static::defineBrokenUnits($brokenId);
+        static::defineBrokenFragmentFormats($brokenId, $buIDs, []);
+
+        $extraBrokenId = DB::table('calendars')->insertGetId(['name' => 'extra-broken', 'description' => 'An extra-broken test calendar.  Feel free to destroy it.']);
     }
 
     protected static function defineEloquentUnits($calId)
@@ -156,16 +159,30 @@ class TestHelpers
 
     protected static function defineBrokenUnits($brokenId)
     {
-        $bIDs = [];
+        $buIDs = [];
 
-        $bIDs['second'] = DB::table('units')->insertGetId([
+        $buIDs['second'] = DB::table('units')->insertGetId([
             'calendar_id'  => $brokenId, 'internal_name' => 'second',
             'scale_amount' => null, 'scale_inverse' => false, 'scale_to' => 0,
-            'uses_zero'    => true, 'unix_epoch' => 0, 'is_auxiliary' => false,
+            'uses_zero'    => true, 'unix_epoch' => 0, 'is_auxiliary' => true,
         ]);
-        DB::table('unit_names')->insert(['unit_id' => $bIDs['second'], 'unit_name'  => 'seconds', 'name_context' => 'plural']);
+        DB::table('unit_names')->insert(['unit_id' => $buIDs['second'], 'unit_name'  => 'seconds', 'name_context' => 'plural']);
 
-        return $bIDs;
+        $buIDs['half-second'] = DB::table('units')->insertGetId([
+            'calendar_id'  => $brokenId, 'internal_name' => 'half-second',
+            'scale_amount' => 2, 'scale_inverse' => true, 'scale_to' => $buIDs['second'],
+            'uses_zero'    => true, 'unix_epoch' => 0, 'is_auxiliary' => true,
+        ]);
+        DB::table('unit_names')->insert(['unit_id' => $buIDs['half-second'], 'unit_name'  => 'half-seconds', 'name_context' => 'plural']);
+
+        $buIDs['broken-second'] = DB::table('units')->insertGetId([
+            'calendar_id'  => $brokenId, 'internal_name' => 'broken-second',
+            'scale_amount' => null, 'scale_inverse' => false, 'scale_to' => $buIDs['second'],
+            'uses_zero'    => true, 'unix_epoch' => 0, 'is_auxiliary' => true,
+        ]);
+        DB::table('unit_names')->insert(['unit_id' => $buIDs['broken-second'], 'unit_name'  => 'broken-seconds', 'name_context' => 'plural']);
+
+        return $buIDs;
     }
 
     protected static function defineEloquentUnitLengths($uIDs)
@@ -408,6 +425,20 @@ class TestHelpers
 
         DB::table('fragment_texts')->insert(['fragment_format_id' => $fIDs['A'], 'fragment_value' => 'am', 'fragment_text' => 'AM']);
         DB::table('fragment_texts')->insert(['fragment_format_id' => $fIDs['A'], 'fragment_value' => 'pm', 'fragment_text' => 'PM']);
+    }
+
+    protected static function defineBrokenFragmentFormats($brokenId, $buIDs, $beIDs)
+    {
+        $bfIDs = [
+            's' => DB::table('fragment_formats')->insertGetId([
+                'calendar_id'   => $brokenId,
+                'format_code'   => 's',
+                'fragment_type' => 'Danhunsaker\Calends\Eloquent\Unit',
+                'fragment_id'   => $buIDs['second'],
+                'format_string' => '%{value}$02d',
+                'description'   => 'Seconds, with leading zeros',
+            ]),
+        ];
     }
 
     protected static function defineEloquentCalendarFormats($calId)
