@@ -91,7 +91,7 @@ class Calendar extends Model implements Definition
      */
     protected function parseDate($date, $format = '')
     {
-        foreach ($this->formats->pluck('format_string')->prepend($format) as $format) {
+        foreach (with(method_exists($this->formats, 'pluck') ? $this->formats->pluck('format_string') : $this->formats->fetch('format_string'))->prepend($format) as $format) {
             $unitArray   = [];
             $fragments   = [];
             $parseArray  = [];
