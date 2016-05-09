@@ -18,7 +18,7 @@ class Unix implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function toInternal($date)
+    public static function toInternal($date, $format = null)
     {
         return Calends::toInternalFromUnix($date);
     }

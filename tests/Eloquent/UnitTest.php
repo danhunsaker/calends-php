@@ -61,4 +61,14 @@ class UnitTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['length' => 31, 'value' => 1], Unit::find(5)->getFormatArgs(['month' => '1']));
         $this->assertEquals(['length' => 1,  'value' => '62128339200'], Unit::find(1)->getFormatArgs(['second' => '62128339200']));
     }
+
+    /**
+     * @covers ::getEpochValue
+     */
+    public function testGetEpochValue()
+    {
+        $this->assertEquals(0, Unit::find(1)->getEpochValue());
+        $this->assertEquals(1, Unit::find(5)->getEpochValue());
+        $this->assertEquals(1970, Unit::find(6)->getEpochValue());
+    }
 }

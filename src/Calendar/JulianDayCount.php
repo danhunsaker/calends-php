@@ -18,7 +18,7 @@ class JulianDayCount implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function toInternal($date)
+    public static function toInternal($date, $format = null)
     {
         return Calends::toInternalFromUnix(BC::mul(BC::sub($date, 2440587.5, 18), 86400, 18));
     }

@@ -17,6 +17,7 @@ class CreateErasTable extends Migration
             $table->integer('unit_id')->unsigned();
             $table->string('internal_name');
             $table->text('description')->nullable();
+            $table->string('default_range');
             $table->timestamps();
             $table->softDeletes();
         });

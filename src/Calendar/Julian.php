@@ -19,7 +19,7 @@ class Julian implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function toInternal($date)
+    public static function toInternal($date, $format = null)
     {
         $greg = new DateTime($date);
         return Calends::toInternalFromUnix(BC::add(BC::mul(BC::sub(\JulianToJD($greg->format('n'), $greg->format('j'), $greg->format('Y')), 2440587, 18), 86400, 18), BC::mod($greg->getTimestamp(), 86400, 18), 18));

@@ -60,9 +60,9 @@ class Calendar extends Model implements Definition
     /**
      * {@inheritdoc}
      */
-    public function toInternal($date)
+    public function toInternal($date, $format = null)
     {
-        return Calends::toInternalFromUnix($this->unitsToTS($this->parseDate($date)));
+        return Calends::toInternalFromUnix($this->unitsToTS($this->parseDate($date, $format)));
     }
 
     /**
@@ -85,10 +85,65 @@ class Calendar extends Model implements Definition
      * Parse date/time string into unit => value array
      *
      * @param string $date The date/time string to parse
+     * @param string $format An optional date format string; must be a raw format
+     *                       string, which is calendar-specific
      * @return array
      */
-    protected function parseDate($date)
+    protected function parseDate($date, $format = '')
     {
+        foreach ($this->formats->pluck('format_string')->prepend($format) as $format) {
+            $unitArray   = [];
+            $fragments   = [];
+            $parseArray  = [];
+            $parseString = '';
+
+            for ($i = 0; $i < mb_strlen($format); $i++) {
+                $char = mb_substr($format, $i, 1);
+
+                if ($char == '\\') {
+                    $parseString .= mb_substr($format, ++$i, 1);
+                    continue;
+                } elseif ($char == '%') {
+                    $parseString .= '%%';
+                    continue;
+                } elseif (in_array($char, ['_'])) {
+                    $parseString .= $char;
+                    continue;
+                }
+
+                if (with($fmtObj = $this->fragments()->where('format_code', 'like binary', $char))->count() > 0) {
+                    $parseArray[] = $fmtObj->first();
+                    $parseString .= $fmtObj->first()->getParseString();
+                } else {
+                    $parseString .= $char;
+                }
+            }
+
+            $parsed = sscanf(str_replace(' ', '\\ ', $date), str_replace(' ', '\\ ', $parseString));
+            if (is_array($parsed) && ! empty($parsed) && ! in_array(null, $parsed, true)) {
+                foreach ($parsed as $index => $value) {
+                    $values = $parseArray[$index]->parseValue($value);
+                    foreach ($values as $value) {
+                        Arr::set($fragments, $value[0], $value[1]);
+                    }
+                }
+
+                foreach (Arr::get($fragments, 'unit', []) as $unit => $value) {
+                    if (array_key_exists('value', $value)) {
+                        $unitArray[$unit] = $value['value'];
+                    }
+                }
+
+                foreach (Arr::get($fragments, 'era', []) as $era => $value) {
+                    $eraObj             = Era::where('internal_name', $era)->first();
+                    list($unit, $value) = $eraObj->unitValue($value);
+                    $unitArray[$unit]   = $value;
+                }
+
+                return $unitArray;
+            }
+        }
+
         return $this->getEpochUnitArray(true);
     }
 

@@ -46,6 +46,9 @@ class CalendarTest extends \PHPUnit_Framework_TestCase
     public function testParseDate()
     {
         $this->assertEquals(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], Calendar::find(1)->parseDate('1970-01-01 00:00:00'));
+        $this->assertEquals(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], Calendar::find(1)->parseDate('1970-01-01_00-00-00'));
+        $this->assertEquals(['year' => 1970], Calendar::find(1)->parseDate('%_year_%: 1970', '%_\\y\\e\\a\\r_%: Y'));
+        $this->assertEquals(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], Calendar::find(1)->parseDate('invalid'));
     }
 
     /**
@@ -56,7 +59,7 @@ class CalendarTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('01 Jan 1970 00:00:00', Calendar::find(1)->formatDate(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], null));
         $this->assertEquals('', Calendar::find(2)->formatDate([], null));
         $this->assertEquals('1970-01-01_00-00-00', Calendar::find(1)->formatDate(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], 'filestr'));
-        $this->assertEquals('year: 1970', Calendar::find(1)->formatDate(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], '\\y\\e\\a\\r: Y'));
+        $this->assertEquals('%_year_%: 1970', Calendar::find(1)->formatDate(['second' => 0, 'minute' => 0, 'hour' => 0, 'day' => 1, 'month' => 1, 'year' => 1970], '%_\\y\\e\\a\\r_%: Y'));
     }
 
     /**

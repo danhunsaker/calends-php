@@ -206,8 +206,8 @@ class TestHelpers
     protected static function defineEloquentEras($uIDs)
     {
         $eIDs = [
-            'years' => DB::table('eras')->insertGetId(['unit_id' => $uIDs['year'], 'internal_name' => 'gregorian-years']),
-            'hours' => DB::table('eras')->insertGetId(['unit_id' => $uIDs['hour'], 'internal_name' => '12-hour-time']),
+            'years' => DB::table('eras')->insertGetId(['unit_id' => $uIDs['year'], 'internal_name' => 'gregorian-years', 'default_range' => 'ad']),
+            'hours' => DB::table('eras')->insertGetId(['unit_id' => $uIDs['hour'], 'internal_name' => '12-hour-time',    'default_range' => 'am']),
         ];
 
         DB::table('era_ranges')->insert(['era_id' => $eIDs['years'], 'range_code' => 'bc', 'start_value' => 0,  'end_value' => null, 'start_display' => 1,  'direction' => 'desc']);

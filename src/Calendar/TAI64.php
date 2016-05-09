@@ -18,7 +18,7 @@ class TAI64 implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function toInternal($date)
+    public static function toInternal($date, $format = null)
     {
         $date = str_pad(str_pad($date, 16, '0', STR_PAD_LEFT), 32, '0', STR_PAD_RIGHT);
 

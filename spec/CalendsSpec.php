@@ -306,6 +306,8 @@ class CalendsSpec extends ObjectBehavior
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
 
+        $this::create('%_year_%: 1970; dm: 01Jan', 'eloquent', '%_\\y\\e\\a\\r_%: Y; \d\m: dM')->getDate('unix')->shouldBeLike('0');
+
         $this->add('6 days 1 week 13 minutes 2 year 2 month', 'eloquent')->getDate('unix')->shouldBeLike('69293580');
         $this->add('69293580 second', 'eloquent')->getDate('unix')->shouldBeLike('69293580');
 

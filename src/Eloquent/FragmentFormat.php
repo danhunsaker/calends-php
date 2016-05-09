@@ -56,4 +56,45 @@ class FragmentFormat extends Model
 
         return vsprintf($format, array_values($values));
     }
+
+    public function getParseString()
+    {
+        return preg_replace('/%[^$]+\\$/', '%', $this->format_string);
+    }
+
+    public function parseValue($value)
+    {
+        preg_match_all('/%([^$]+)\\$/', $this->format_string, $matches, PREG_PATTERN_ORDER | PREG_OFFSET_CAPTURE);
+
+        $i      = count($matches[1]);
+        $values = [];
+        foreach (array_reverse($matches[1]) as $match) {
+            $fragmentType = strtolower(ltrim(strrchr(get_class($this->fragment), '\\'), '\\')); // era or unit
+            $fragmentName = $this->fragment->internal_name;
+            $partBegin    = stripos($match[0], '{');
+            if ($partBegin >= 0) {
+                $partEnd      = stripos($match[0], '}', $partBegin);
+                $fragmentPart = trim(substr($match[0], $partBegin, $partEnd), '{}');
+            } else {
+                $fragmentPart = 'unknown';
+            }
+            $type = "{$fragmentType}.{$fragmentName}.{$fragmentPart}";
+
+            if (with($txtObj = $this->texts()->where('fragment_text', $value))->count() > 0) {
+                $value = $txtObj->first()->fragment_value;
+            }
+
+            $invert = preg_replace('/##(\d+|\\{[^}]+\\})/', '*${1}+{epoch}%%${1}', str_replace(
+                ['\\*', '-%', '\\', '+', '-', ':', '/', '*', ':', '%%',          '%',          '__',         '$$'       ],
+                ['__',  '$$', '##', ':', '+', '-', ':', '/', '*', '+{epoch}\\*', '+{epoch}-%', '+{epoch}%%', '+{epoch}%'],
+                $match[0]));
+            $output = BC::parse($invert, ['epoch' => $this->fragment->getEpochValue(), $fragmentPart => $value], 0);
+
+            $values[$i] = [$type, $output];
+
+            $i--;
+        }
+
+        return $values;
+    }
 }

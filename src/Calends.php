@@ -66,18 +66,18 @@ class Calends implements Serializable, JsonSerializable
      * @throws InvalidCalendarException
      * @throws UnknownCalendarException
      **/
-    public function __construct($stamp = null, $calendar = 'unix')
+    public function __construct($stamp = null, $calendar = 'unix', $format = null)
     {
         static::registerCalendar('unix', __NAMESPACE__ . '\\Calendar\\Unix');
         static::registerCalendar('jdc', __NAMESPACE__ . '\\Calendar\\JulianDayCount');
         static::registerCalendar('tai', __NAMESPACE__ . '\\Calendar\\TAI64');
 
         if (is_array($stamp)) {
-            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp['start']);
-            $this->endTime      = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp['end']);
+            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp['start'], $format);
+            $this->endTime      = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp['end'], $format);
             $this->duration     = $this->difference($this, 'end-start');
         } else {
-            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp);
+            $this->internalTime = call_user_func(static::$timeConverters['toInternal'][static::getCalendar($calendar)], $stamp, $format);
             $this->endTime      = $this->internalTime;
             $this->duration     = 0;
         }
@@ -100,9 +100,9 @@ class Calends implements Serializable, JsonSerializable
      * @throws UnknownCalendarException
      * @return self
      **/
-    public static function create($stamp = null, $calendar = 'unix')
+    public static function create($stamp = null, $calendar = 'unix', $format = null)
     {
-        return new static($stamp, $calendar);
+        return new static($stamp, $calendar, $format);
     }
 
     /**

@@ -6,9 +6,9 @@ use Danhunsaker\Calends\Eloquent\Calendar as RealClass;
 
 class Calendar extends RealClass
 {
-    public function parseDate($date)
+    public function parseDate($date, $format = '')
     {
-        return parent::parseDate($date);
+        return parent::parseDate($date, $format);
     }
 
     public function formatDate(array $units, $format)

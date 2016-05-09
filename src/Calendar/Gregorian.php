@@ -18,9 +18,9 @@ class Gregorian implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function toInternal($date)
+    public static function toInternal($date, $format = null)
     {
-        return Calends::toInternalFromUnix(date_create($date)->format('U.u'));
+        return Calends::toInternalFromUnix(with(empty($format) ? date_create($date) : date_create_from_format($format, $date))->format('U.u'));
     }
 
     /**

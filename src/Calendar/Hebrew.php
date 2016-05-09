@@ -40,7 +40,7 @@ class Hebrew implements DefinitionInterface
     /**
      * {@inheritdoc}
      */
-    public static function toInternal($date)
+    public static function toInternal($date, $format = null)
     {
         $greg = new DateTime(str_replace(['6L', '7L'], ['06', '07'], str_ireplace(array_values(static::$months), array_keys(static::$months), $date)));
         return Calends::toInternalFromUnix(BC::add(BC::mul(BC::sub(\JewishToJD($greg->format('n'), $greg->format('j'), $greg->format('Y')), 2440587, 18), 86400, 18), BC::mod($greg->getTimestamp(), 86400, 18), 18));

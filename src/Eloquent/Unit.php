@@ -125,11 +125,11 @@ class Unit extends Model
                 $adjLoops   = BC::div($value, $lCount, 0);
                 $adjUnits   = BC::modfrac($value, $lCount, 18);
                 $adjRemains = BC::modfrac($adjUnits, 1, 18);
-                $adjUnits   = BC::add($adjUnits, $this->unix_epoch ?: 0, 0);
+                $adjUnits   = BC::add($adjUnits, $this->getEpochValue(), 0);
 
                 $adjustment = BC::mul($adjLoops, $lSum, 18);
 
-                for ($lNum = $this->unix_epoch ?: 0; BC::comp($lNum, $adjUnits) < 0; $lNum = BC::parse("({$lNum} + 1) % {$lCount}", null, 0)) {
+                for ($lNum = $this->getEpochValue(); BC::comp($lNum, $adjUnits) < 0; $lNum = BC::parse("({$lNum} + 1) % {$lCount}", null, 0)) {
                     $adjustment = BC::add($adjustment, $lengths[$lNum]->scale_amount, 18);
                 }
 
@@ -214,5 +214,10 @@ class Unit extends Model
             'length' => $length,
             'value'  => $raw,
         ];
+    }
+
+    public function getEpochValue()
+    {
+        return $this->unix_epoch ?: 0;
     }
 }

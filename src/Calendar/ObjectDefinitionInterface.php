@@ -23,9 +23,10 @@ interface ObjectDefinitionInterface
      *
      * @param string|object $date Value to parse/convert into the internal TAI
      *        array representation
+     * @param string $format Optional date format string; may be ignored
      * @return string[]
      */
-    public function toInternal($date);
+    public function toInternal($date, $format = null);
 
     /**
      * Convert an internal TAI array to a date representation
