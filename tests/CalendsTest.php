@@ -51,6 +51,9 @@ class CalendsTest extends \PHPUnit_Framework_TestCase
         // Retrieves the canonical calendar name
         $this->assertEquals('unix', Calends::getCalendar('unix'));
 
+        // Registers Eloquent calendar object
+        $this->assertEquals('eloquent', Calends::getCalendar('eloquent'));
+
         // Throws exception on unfound calendars
         $this->setExpectedException('Danhunsaker\Calends\UnknownCalendarException', "Can't find the 'invalid' calendar!");
         Calends::getCalendar('invalid');

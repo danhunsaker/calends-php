@@ -195,11 +195,15 @@ class Unit extends Model
 
     public function getFormatArgs(array $units)
     {
-        $raw = BC::add($units[$this->internal_name], 0, 0);
-        if (is_null($this->scale_amount) && with($lenObj = $this->lengths()->where('unit_value', $raw))->count() > 0) {
-            $length = $lenObj->first()->scale_amount;
+        $raw = BC::add(array_key_exists($this->internal_name, $units) ? $units[$this->internal_name] : 0, 0, 0);
+        if (is_null($this->scale_amount)) {
+            if (with($lenObj = $this->lengths()->where('unit_value', $raw))->count() > 0) {
+                $length = $lenObj->first()->scale_amount;
+            } else {
+                $length = 0;
+            }
         } else {
-            $length = 0;
+            $length = $this->scale_amount;
         }
 
         return [

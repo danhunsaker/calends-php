@@ -17,12 +17,15 @@ class TestHelpers
             return;
         }
 
-        $calId = DB::table('calendars')->insertGetId(['name' => 'eloquent', 'description' => 'A test calendar.  Feel free to destroy it.']);
-        $uIDs  = static::defineEloquentUnits($calId);
+        $calId    = DB::table('calendars')->insertGetId(['name' => 'eloquent', 'description' => 'A test calendar.  Feel free to destroy it.']);
+        $uIDs     = static::defineEloquentUnits($calId);
         static::defineEloquentUnitLengths($uIDs);
-        $eIDs = static::defineEloquentEras($uIDs);
+        $eIDs     = static::defineEloquentEras($uIDs);
         static::defineEloquentFragmentFormats($calId, $uIDs, $eIDs);
         static::defineEloquentCalendarFormats($calId);
+
+        $brokenId = DB::table('calendars')->insert(['name' => 'broken', 'description' => 'A broken test calendar.  Feel free to destroy it.']);
+        $bIDs     = static::defineBrokenUnits($brokenId);
     }
 
     protected static function defineEloquentUnits($calId)
@@ -149,6 +152,20 @@ class TestHelpers
         DB::table('unit_names')->insert(['unit_id' => $uIDs['attosecond'], 'unit_name'  => 'attoseconds', 'name_context' => 'plural']);
 
         return $uIDs;
+    }
+
+    protected static function defineBrokenUnits($brokenId)
+    {
+        $bIDs = [];
+
+        $bIDs['second'] = DB::table('units')->insertGetId([
+            'calendar_id'  => $brokenId, 'internal_name' => 'second',
+            'scale_amount' => null, 'scale_inverse' => false, 'scale_to' => 0,
+            'uses_zero'    => true, 'unix_epoch' => 0, 'is_auxiliary' => false,
+        ]);
+        DB::table('unit_names')->insert(['unit_id' => $bIDs['second'], 'unit_name'  => 'seconds', 'name_context' => 'plural']);
+
+        return $bIDs;
     }
 
     protected static function defineEloquentUnitLengths($uIDs)

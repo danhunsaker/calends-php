@@ -39,24 +39,26 @@ class Era extends Model
         $output = $this->unit->getFormatArgs($units);
         $raw    = $output['value'];
         $range  = $this->ranges()->where(function ($query) use ($raw) {
+            // @codeCoverageIgnoreStart
             $query->where(function ($query) use ($raw) {
-                    $query->where('direction', 'asc')
-                          ->where('start_value', '<=', $raw)
-                          ->where('end_value', '>=', $raw);
-                })->orWhere(function ($query) use ($raw) {
-                    $query->where('direction', 'asc')
-                          ->where('start_value', '<=', $raw)
-                          ->whereNull('end_value');
-                })->orWhere(function ($query) use ($raw) {
-                    $query->where('direction', 'desc')
-                          ->where('start_value', '>=', $raw)
-                          ->where('end_value', '<=', $raw);
-                })->orWhere(function ($query) use ($raw) {
-                    $query->where('direction', 'desc')
-                          ->where('start_value', '>=', $raw)
-                          ->whereNull('end_value');
-                });
-            })->first();
+                $query->where('direction', 'asc')
+                      ->where('start_value', '<=', $raw)
+                      ->where('end_value', '>=', $raw);
+            })->orWhere(function ($query) use ($raw) {
+                $query->where('direction', 'asc')
+                      ->where('start_value', '<=', $raw)
+                      ->whereNull('end_value');
+            })->orWhere(function ($query) use ($raw) {
+                $query->where('direction', 'desc')
+                      ->where('start_value', '>=', $raw)
+                      ->where('end_value', '<=', $raw);
+            })->orWhere(function ($query) use ($raw) {
+                $query->where('direction', 'desc')
+                      ->where('start_value', '>=', $raw)
+                      ->whereNull('end_value');
+            });
+            // @codeCoverageIgnoreEnd
+        })->first();
 
         $output['code']  = $range->range_code;
         $output['value'] = BC::parse("({$range->start_display}-{$range->start_value})" . ($range->direction == 'asc' ? '+' : '-') . $raw, null, 0);
