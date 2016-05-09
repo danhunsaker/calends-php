@@ -123,7 +123,7 @@ class Calendar extends Model implements Definition
             }
 
             $parsed = sscanf(str_replace(' ', '\\ ', $date), str_replace(' ', '\\ ', $parseString));
-            if (is_array($parsed) && ! empty($parsed) && ! in_array(null, $parsed, true)) {
+            if (is_array($parsed) && ! empty($parsed) && ! in_array(null, $parsed, true) && count($parsed) == count($parseArray)) {
                 foreach ($parsed as $index => $value) {
                     $values = $parseArray[$index]->parseValue($value);
                     foreach ($values as $value) {
