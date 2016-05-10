@@ -20,21 +20,6 @@ composer require danhunsaker/calends
 
 ## Usage ##
 
-- [x] Setup
-  - [x] Laravel
-  - [x] Other Projects
-- [x] Dates
-- [x] Conversion
-- [x] Storage
-- [x] Compare
-- [x] Modify
-- [x] Ranges
-- [ ] New Calendars
-  - [x] Class Definitions
-  - [ ] Database Definitions
-  - [x] Object Definitions
-- [x] New Converters
-
 ### Setup ###
 
 #### Laravel ####
@@ -147,6 +132,7 @@ $epoch = Calends::create(0);
 $epoch = Calends::create(0, 'unix');
 $epoch = Calends::create(2440587.5, 'jdc');
 $epoch = Calends::create('1970-01-01 00:00:00 UTC', 'gregorian');
+$epoch = Calends::create('1970-01-01', 'gregorian', 'Y-m-d');
 ```
 
 ### Conversion ###
@@ -166,9 +152,15 @@ $unix = $now('unix');              // 1451165670.329400000000000000
 $unix = $now();                    // 1451165670.329400000000000000
 
 $julianDayCount = $now('jdc');     // 2457383.398962145833333333
-$gregorian = $now('gregorian');    // Sat Dec 26 14:34:30 2015
+$gregorian = $now('gregorian');    // Sat, 26 Dec 2015 14:34:30.3294 -07:00
+$gregorian = $now('gregorian', 'Y-m-d_H-i-s-u'); // 2015-12-26_14-34-30-3294
 $julianCalendar = $now('julian');  // 12/13/2015 14:34:30 GMT-07:00
 ```
+
+> Note that while you can pass a format along to `Calends::create()` or
+> `Calends::getDate()` (and their respective variants), not all calendars will
+> pay any attention to them, and the formatting codes supported by each are
+> entirely defined by the calendar itself.
 
 You may also be interested in converting a `Calends` object into a different
 kind of date/time object.  Gotcha covered there, too:
@@ -536,8 +528,8 @@ use Danhunsaker\Calends\Calends;
 
 $now       = Calends::create();
 
-$next7days      = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
-$last7days      = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
+$next7days = Calends::create(['start' => 'now', 'end' => 'now +7 days'], 'gregorian');
+$last7days = Calends::create(['start' => 'now -7 days', 'end' => 'now'], 'gregorian');
 
 echo $now->difference($next7days, 'start');           // 0
 echo $now->difference($next7days, 'end');             // 604800
@@ -588,7 +580,596 @@ It takes a bit more work to use this approach, but it can be extremely useful in
 cases where you wish to allow your users to define their own calendar systems in
 your project, without expecting them to write any code.
 
-* **_TO DO:_** implement database definitions, and document them here.
+> A quick reminder to Laravel users to follow the setup instructions at the top
+> of this README to get the proper migrations installed, etc, before using
+> database definitions in your apps!
+
+There are two basic approaches to defining calendars in your database.  The
+first is to directly set the appropriate values in the database, be it via DB
+seed file, manual entry using tools like the MySQL client or phpMySQL, using one
+or more .sql dump files, or some other method.  This approach is flexible, but
+not terribly user-friendly for anyone who isn't a developer.  Enter the second
+approach - programmatic creation using the Eloquent models which form the core
+of the database definition functionality.  This README will focus on the latter;
+the former approach is pretty straightforward to work out from the way Eloquent
+works, and you can always check out [the TestHelpers class file][tests/TestHelpers.php]
+for a more elaborate example of defining calendars without Eloquent.
+
+##### Calendar #####
+
+Everything starts with `Danhunsaker\Calends\Eloquent\Calendar`.  This class
+serves as both the `ObjectDefinitionInterface` implementation (see below) and
+the core Eloquent model through which the other models are accessed.  Start by
+using the `Calendar` class to create a new (empty) calendar definition:
+
+```php
+use Danhunsaker\Calends\Eloquent\Calendar;
+
+$calendar = Calendar::create([
+    'name'        => 'example',
+    'description' => 'A simple example calendar.',
+]);
+```
+
+The `name` is pretty much exactly what it says - you'll use it to tell `Calends`
+which calendar definition to use.  The `description` is optional, so feel free
+to skip it if you like.
+
+##### Unit #####
+
+Now that we have a `Calendar` created, we can start adding `Unit`s to it:
+
+```php
+$second = $calendar->units()->create([
+    'internal_name' => 'second',
+    'scale_amount' => 1,
+    'scale_inverse' => false,
+    'scale_to' => 0,
+    'uses_zero' => true,
+    'unix_epoch' => 0,
+    'is_auxiliary' => false,
+]);
+```
+
+- The `internal_name` should be unique within the calendar, since it will be
+used to keep track of which values belong with which units.  Something
+human-readable is strongly recommended, as it's used in offset parsing (more
+on this below).
+
+- `scale_amount`, `scale_inverse`, and `scale_to` all work together to define
+how this `Unit` should be calculated relative to other `Unit`s.  `scale_to`
+specifies which `Unit` to calculate against, and will usually be the `id` of
+the appropriate `Unit`.  However, there is a special case for specifying the
+`Unit`'s relationship with UNIX timestamp seconds.  In this case, you'll set
+`scale_to` directly, to the value `0`, instead of adding another `Unit` via
+Eloquent relationships.  `scale_amount` specifies how many `scale_to`s are in
+a single `Unit`; `scale_inverse` specifies that the `scale_amount` is actually
+the number of `Unit`s in a single `scale_to`.  Don't worry if that doesn't
+make much sense, yet; there are more examples below that should help make this
+clearer.
+
+- `uses_zero` specifies whether the `Unit` starts counting from 0 or not.  If
+set to false, the `Unit` is assumed to start counting from 1 instead.  As an
+example of when this is useful, consider that seconds start counting from 0,
+but months start counting from 1.  (NOTE: While it's tempting to use this to
+indicate that something like years or hours don't use zero, the math starts to
+break down if used this way.  Instead, set up `Era`s to cover these scenarios
+(see below).)
+
+- `unix_epoch` specifies what the value of this `Unit` was at the UNIX Epoch, or
+`01 Jan 1970 00:00:00 UTC (Gregorian calendar)`.  This lets `Calends` determine
+where a given date is relative to every other, and is vital to being able to
+do things like convert dates to other calendar systems once they've been
+parsed in. That said, the value is optional, because not every `Unit` needs to
+specify its Epoch value (specifically, auxiliary `Unit` Epoch values should
+generally be calculated instead).
+
+- `is_auxiliary` tells `Calends` that the given `Unit` is a derived one, and not
+fundamental to the value of the date.  This is useful for things like weeks
+(for calendar systems where the week isn't vital to the date), centuries, and
+attoseconds, where it's useful to be able to compute the values, but not vital
+to the date calculations themselves.
+
+Let's add a few more, so we have something more substantial to work with:
+
+```php
+$minute = $calendar->units()->create([
+    'internal_name' => 'minute',
+    'scale_amount' => 60,
+    'scale_inverse' => false,
+    'uses_zero' => true,
+    'unix_epoch' => 0,
+    'is_auxiliary' => false,
+]);
+$minute->scaleMeTo()->save($second);
+
+$hour = $calendar->units()->create([
+    'internal_name' => 'hour',
+    'scale_amount' => 60,
+    'scale_inverse' => false,
+    'uses_zero' => true,
+    'unix_epoch' => 0,
+    'is_auxiliary' => false,
+]);
+$hour->scaleMeTo()->save($minute);
+
+$day = $calendar->units()->create([
+    'internal_name' => 'day',
+    'scale_amount' => 24,
+    'scale_inverse' => false,
+    'uses_zero' => false,
+    'unix_epoch' => 1,
+    'is_auxiliary' => false,
+]);
+$day->scaleMeTo()->save($hour);
+
+$month = $calendar->units()->create([
+    'internal_name' => 'month',
+    'scale_amount' => null,         // See below for why this works
+    'scale_inverse' => false,
+    'uses_zero' => false,
+    'unix_epoch' => 1,
+    'is_auxiliary' => false,
+]);
+$month->scaleMeTo()->save($day);
+
+$year = $calendar->units()->create([
+    'internal_name' => 'year',
+    'scale_amount' => 12,
+    'scale_inverse' => false,
+    'uses_zero' => true,
+    'unix_epoch' => 1970,
+    'is_auxiliary' => false,
+]);
+$year->scaleMeTo()->save($month);
+
+$century = $calendar->units()->create([
+    'internal_name' => 'century',
+    'scale_amount' => 100,
+    'scale_inverse' => false,
+    'uses_zero' => true,
+    'unix_epoch' => null,
+    'is_auxiliary' => true,
+]);
+$century->scaleMeTo()->save($year);
+
+$millisecond = $calendar->units()->create([
+    'internal_name' => 'millisecond',
+    'scale_amount' => 1000,
+    'scale_inverse' => true,
+    'uses_zero' => true,
+    'unix_epoch' => null,
+    'is_auxiliary' => true,
+]);
+$millisecond->scaleMeTo()->save($second);
+```
+
+That looks like a lot going on, there, but most of it is the same thing repeated
+over and over for each `Unit`.  Such is the nature of databases.  In there are
+some examples of auxiliary `Unit`s, when to use `uses_zero` or not, and even an
+inverted scale.  Also in there, though, is a special case we haven't discussed,
+yet.  For the month `Unit`, `scale_amount` is set to `null`.  This is because
+the number of day `Unit`s in a month `Unit` varies by month.  So we need to have
+some way to tell `Calends` the length isn't fixed.  That way it will know to
+check the `UnitLength`s instead, and handle them accordingly.
+
+##### UnitLength #####
+
+Let's define our month `UnitLength`s:
+
+```php
+$month->lengths()->createMany([
+    ['unit_value' => 1,  'scale_amount' => 31],
+    ['unit_value' => 2,  'scale_amount' => 28],
+    ['unit_value' => 3,  'scale_amount' => 31],
+    ['unit_value' => 4,  'scale_amount' => 30],
+    ['unit_value' => 5,  'scale_amount' => 31],
+    ['unit_value' => 6,  'scale_amount' => 30],
+    ['unit_value' => 7,  'scale_amount' => 31],
+    ['unit_value' => 8,  'scale_amount' => 31],
+    ['unit_value' => 9,  'scale_amount' => 30],
+    ['unit_value' => 10, 'scale_amount' => 31],
+    ['unit_value' => 11, 'scale_amount' => 30],
+    ['unit_value' => 12, 'scale_amount' => 31],
+]);
+```
+
+Pretty straightforward, there.  `unit_value` is the value of `Unit` for which
+the `scale_amount` specifies the correct length.
+
+##### Formatting and Parsing #####
+
+Now that we have all that set up, `Calends` can already start calculating dates
+in our new calendar system.  Of course, that's not terribly useful unless we can
+see and work with those dates, so next we need to define some formats.
+
+`Calends` formats use a layered approach.  `CalendarFormat`s specify full
+`format_string`s for complete dates, using a syntax similar to PHP's `date()`
+function. `FragmentFormat`s actually define the single-character formatting
+codes used by the `CalendarFormat`s, with `FragmentText`s providing a way to map
+numeric values to arbitrary strings of text.  But why call them
+`FragmentFormat`s?
+
+###### Era and EraRange ######
+
+Some `Unit`s are displayed and written using a nonlinear numbering.  For
+example, years in the Gregorian calendar system are numbered normally for years
+1 and higher, which are assigned the AD era.  But for years before 1, they are
+numbered in descending order starting from 1, not 0, resulting in year 0 being
+shown as 1 BC.  We need to properly handle these numbering schemes; enter `Era`
+and `EraRange`.
+
+`EraRange` is used to specify the `start_value` and `end_value` of an era, the
+`direction` in which displayed values increment, and the `start_display` value
+to map the starting `Unit` value to.  These attributes are also associated with
+an internal `range_code` identifying which era the given range belongs to - this
+is useful in a number of cases we'll explore in a moment.  `Era` simply groups
+`EraRange`s together, gives them a common `internal_name`, and specifies which
+internal era code to use when a given date being parsed doesn't include the code
+explicitly (that is, a `default_range`).
+
+Let's create a couple of `Era`s:
+
+```php
+$yearsEra = $year->eras()->create([
+    'internal_name' => 'gregorian-years',
+    'default_range' => 'ad'
+]);
+$hoursEra = $hour->eras()->create([
+    'internal_name' => '12-hour-time',
+    'default_range' => 'am'
+]);
+
+$yearsEra->ranges()->createMany([
+    [
+        'range_code'    => 'bc',
+        'start_value'   => 0,
+        'end_value'     => null,
+        'start_display' => 1,
+        'direction'     => 'desc'
+    ],
+    [
+        'range_code'    => 'ad',
+        'start_value'   => 1,
+        'end_value'     => null,
+        'start_display' => 1,
+        'direction'     => 'asc'
+    ]
+]);
+
+$hoursEra->ranges()->createMany([
+    [
+        'range_code'    => 'am',
+        'start_value'   => 0,
+        'end_value'     => 0,
+        'start_display' => 12,
+        'direction'     => 'asc'
+    ],
+    [
+        'range_code'    => 'am',
+        'start_value'   => 1,
+        'end_value'     => 11,
+        'start_display' => 1,
+        'direction'     => 'asc'
+    ],
+    [
+        'range_code'    => 'pm',
+        'start_value'   => 12,
+        'end_value'     => 12,
+        'start_display' => 12,
+        'direction'     => 'asc'
+    ],
+    [
+        'range_code'    => 'pm',
+        'start_value'   => 13,
+        'end_value'     => 23,
+        'start_display' => 1,
+        'direction'     => 'asc'
+    ],
+    [
+        'range_code'    => 'am',
+        'start_value'   => 24,
+        'end_value'     => 24,
+        'start_display' => 12,
+        'direction'     => 'asc'
+    ]
+]);
+
+```
+
+###### FragmentFormat and FragmentText ######
+
+Now back to the question of `FragmentFormat`.  An `Era` can be the target of a
+format just as much as a `Unit`, so a formatting approach that supports both
+equally makes sense, here.  Each is a fragment of a complete date, so calling
+it `FragmentFormat` also seems to make sense.  Let's build out a subset of the
+format codes supported by PHP's `date()`:
+
+```php
+$fragments = [
+    'd' => $calendar->fragments()->create([
+        'format_code'   => 'd',
+        'format_string' => '%{value}$02d',
+        'description'   => 'Day of the month, 2 digits with leading zeros',
+    ]),
+    'j' => $calendar->fragments()->create([
+        'format_code'   => 'j',
+        'format_string' => '%{value}$d',
+        'description'   => 'Day of the month without leading zeros',
+    ]),
+    'F' => $calendar->fragments()->create([
+        'format_code'   => 'F',
+        'format_string' => '%{value}$s',
+        'description'   => 'A full textual representation of a month, such as January or March',
+    ]),
+    'm' => $calendar->fragments()->create([
+        'format_code'   => 'm',
+        'format_string' => '%{value}$02d',
+        'description'   => 'Numeric representation of a month, with leading zeros',
+    ]),
+    'M' => $calendar->fragments()->create([
+        'format_code'   => 'M',
+        'format_string' => '%{value}$s',
+        'description'   => 'A short textual representation of a month, three letters',
+    ]),
+    'n' => $calendar->fragments()->create([
+        'format_code'   => 'n',
+        'format_string' => '%{value}$d',
+        'description'   => 'Numeric representation of a month, without leading zeros',
+    ]),
+    't' => $calendar->fragments()->create([
+        'format_code'   => 't',
+        'format_string' => '%{length}$d',
+        'description'   => 'Number of days in the given month',
+    ]),
+    'Y' => $calendar->fragments()->create([
+        'format_code'   => 'Y',
+        'format_string' => '%{value}$04d',
+        'description'   => 'A full numeric representation of a year, 4 digits',
+    ]),
+    'y' => $calendar->fragments()->create([
+        'format_code'   => 'y',
+        'format_string' => '%{value}%100$02d',
+        'description'   => 'A two digit representation of a year',
+    ]),
+    'E' => $calendar->fragments()->create([
+        'format_code'   => 'E',
+        'format_string' => '%{code}$s',
+        'description'   => 'The calendar epoch (BC/AD)',
+    ]),
+    'a' => $calendar->fragments()->create([
+        'format_code'   => 'a',
+        'format_string' => '%{code}$s',
+        'description'   => 'Lowercase Ante meridiem and Post meridiem',
+    ]),
+    'A' => $calendar->fragments()->create([
+        'format_code'   => 'A',
+        'format_string' => '%{code}$s',
+        'description'   => 'Uppercase Ante meridiem and Post meridiem',
+    ]),
+    'g' => $calendar->fragments()->create([
+        'format_code'   => 'g',
+        'format_string' => '%{value}$d',
+        'description'   => '12-hour format of an hour without leading zeros',
+    ]),
+    'G' => $calendar->fragments()->create([
+        'format_code'   => 'G',
+        'format_string' => '%{value}$d',
+        'description'   => '24-hour format of an hour without leading zeros',
+    ]),
+    'h' => $calendar->fragments()->create([
+        'format_code'   => 'h',
+        'format_string' => '%{value}$02d',
+        'description'   => '12-hour format of an hour with leading zeros',
+    ]),
+    'H' => $calendar->fragments()->create([
+        'format_code'   => 'H',
+        'format_string' => '%{value}$02d',
+        'description'   => '24-hour format of an hour with leading zeros',
+    ]),
+    'i' => $calendar->fragments()->create([
+        'format_code'   => 'i',
+        'format_string' => '%{value}$02d',
+        'description'   => 'Minutes with leading zeros',
+    ]),
+    's' => $calendar->fragments()->create([
+        'format_code'   => 's',
+        'format_string' => '%{value}$02d',
+        'description'   => 'Seconds, with leading zeros',
+    ]),
+];
+
+$fragments['d']->fragment()->save($day);
+$fragments['j']->fragment()->save($day);
+$fragments['F']->fragment()->save($month);
+$fragments['m']->fragment()->save($month);
+$fragments['M']->fragment()->save($month);
+$fragments['n']->fragment()->save($month);
+$fragments['t']->fragment()->save($month);
+$fragments['Y']->fragment()->save($yearsEra);
+$fragments['y']->fragment()->save($yearsEra);
+$fragments['E']->fragment()->save($yearsEra);
+$fragments['a']->fragment()->save($hoursEra);
+$fragments['A']->fragment()->save($hoursEra);
+$fragments['g']->fragment()->save($hoursEra);
+$fragments['G']->fragment()->save($hour);
+$fragments['h']->fragment()->save($hoursEra);
+$fragments['H']->fragment()->save($hour);
+$fragments['i']->fragment()->save($minute);
+$fragments['s']->fragment()->save($second);
+
+$fragments['F']->texts()->createMany([
+    ['fragment_value' => 1, 'fragment_text' => 'January'],
+    ['fragment_value' => 2, 'fragment_text' => 'February'],
+    ['fragment_value' => 3, 'fragment_text' => 'March'],
+    ['fragment_value' => 4, 'fragment_text' => 'April'],
+    ['fragment_value' => 5, 'fragment_text' => 'May'],
+    ['fragment_value' => 6, 'fragment_text' => 'June'],
+    ['fragment_value' => 7, 'fragment_text' => 'July'],
+    ['fragment_value' => 8, 'fragment_text' => 'August'],
+    ['fragment_value' => 9, 'fragment_text' => 'September'],
+    ['fragment_value' => 10, 'fragment_text' => 'October'],
+    ['fragment_value' => 11, 'fragment_text' => 'November'],
+    ['fragment_value' => 12, 'fragment_text' => 'December']
+]);
+
+$fragments['M']->texts()->createMany([
+    ['fragment_value' => 1, 'fragment_text' => 'Jan'],
+    ['fragment_value' => 2, 'fragment_text' => 'Feb'],
+    ['fragment_value' => 3, 'fragment_text' => 'Mar'],
+    ['fragment_value' => 4, 'fragment_text' => 'Apr'],
+    ['fragment_value' => 5, 'fragment_text' => 'May'],
+    ['fragment_value' => 6, 'fragment_text' => 'Jun'],
+    ['fragment_value' => 7, 'fragment_text' => 'Jul'],
+    ['fragment_value' => 8, 'fragment_text' => 'Aug'],
+    ['fragment_value' => 9, 'fragment_text' => 'Sep'],
+    ['fragment_value' => 10, 'fragment_text' => 'Oct'],
+    ['fragment_value' => 11, 'fragment_text' => 'Nov'],
+    ['fragment_value' => 12, 'fragment_text' => 'Dec']
+]);
+
+$fragments['E']->texts()->createMany([
+    ['fragment_value' => 'bc', 'fragment_text' => 'BC'],
+    ['fragment_value' => 'ad', 'fragment_text' => 'AD']
+]);
+
+$fragments['a']->texts()->createMany([
+    ['fragment_value' => 'am', 'fragment_text' => 'am'],
+    ['fragment_value' => 'pm', 'fragment_text' => 'pm']
+]);
+
+$fragments['A']->texts()->createMany([
+    ['fragment_value' => 'am', 'fragment_text' => 'AM'],
+    ['fragment_value' => 'pm', 'fragment_text' => 'PM']
+]);
+```
+
+###### CalendarFormat ######
+
+And of course the `CalendarFormat`s:
+
+```php
+$defaultFormat = $calendar->formats()->create([
+    'format_name' => 'eloquent',
+    'format_string' => 'd M Y H:i:s',
+    'description' => 'A basic date format'
+]);
+$calendar->formats()->create([
+    'format_name' => 'mod8601',
+    'format_string' => 'Y-m-d H:i:s',
+    'description' => 'A modified ISO 8601 date'
+]);
+$calendar->formats()->create([
+    'format_name' => 'filestr',
+    'format_string' => 'Y-m-d_H-i-s',
+    'description' => 'A date suitable for use in filenames'
+]);
+
+$calendar->defaultFormat->save($defaultFormat);
+```
+
+###### More on Formatting ######
+
+Again, a lot of repetition.  `FragmentFormat` has a `format_code`, which is the
+single-character date formatting code mentioned earlier, a `format_string`,
+which tells `Calends` how to render the value (more on that in a moment), and an
+optional `description`.
+
+The `format_string` is an expanded variant of the format used by PHP's
+`sprintf()` family of functions.  Where that spec places an integer value
+specifying which numbered argument to use in the given part of the expression,
+`Calends` expects a formula compatible with BC::math's `BC::parse()` method
+(BC::math is included as a dependency of Calends).  It will pass in a few
+properties of the fragment being rendered, such as the `length` and `value`, and
+in the case of an `Era` fragment, the range `code`.  It is the result of this
+expression that is actually rendered into the appropriate part of the date.
+Several examples are given above.
+
+It is important to actually assign a fragment object to each `FragmentFormat`,
+or the entire thing will fall apart.  This is done in the
+`$fragments[<code>]->fragment()->save(<fragment object>)` statements above.
+
+`FragmentText`s are pretty straightforward - as mentioned earlier, a
+`fragment_value` to be transformed into an associated `fragment_text`.
+
+That leaves the `CalendarFormat`s.  A `format_name` to provide an
+easily-remembered alias for `getDate()`, the actual (PHP `date()`-compatible)
+`format_string` that instructs `Calends` in the correct way to render the
+format, and an optional `description`.
+
+Now you can easily parse and format dates in your new calendar system!  The
+rendering formats are automatically reverse-engineered into parsing formats as
+needed, so no need to worry about defining those.
+
+##### Date Offsets and UnitName #####
+
+Of course, there is one scenario still unexplored, at this stage: date offsets.
+The most basic of offsets are already parsable thanks to the `internal_name` on
+your `Unit`s.  But what of plural forms and other alternative names for your
+units?  No worries, `UnitName` is available for just this purpose.  Let's add
+a few to our calendar definition:
+
+```php
+$second->names()->create([
+    'unit_name' => 'seconds',
+    'name_context' => 'plural'
+]);
+$minute->names()->create([
+    'unit_name' => 'minutes',
+    'name_context' => 'plural'
+]);
+$hour->names()->create([
+    'unit_name' => 'hours',
+    'name_context' => 'plural'
+]);
+$day->names()->create([
+    'unit_name' => 'days',
+    'name_context' => 'plural'
+]);
+$month->names()->create([
+    'unit_name' => 'months',
+    'name_context' => 'plural'
+]);
+$year->names()->create([
+    'unit_name' => 'years',
+    'name_context' => 'plural'
+]);
+$century->names()->create([
+    'unit_name' => 'centuries',
+    'name_context' => 'plural'
+]);
+$millisecond->names()->create([
+    'unit_name' => 'milliseconds',
+    'name_context' => 'plural'
+]);
+```
+
+Each `UnitName` provides an alternative `unit_name` for offset parsing, and an
+optional `name_context`, which is currently unused within `Calends` itself, but
+could be useful in cases like internationalization.
+
+##### Still To Come #####
+
+The observant reader will probably have noticed that we never touched on another
+form of special case encountered often in calendar systems, and which makes date
+libraries like this one particularly tricky to write.  This special case is
+called "intercalation", and refers to when units of time are inserted, removed,
+or otherwise changed from the basic calendar.  Perhaps the best known example is
+the one many of you will have noticed missing above - leap days.  As
+intercalations go, February 29th (actually the 24th due to the way the Romans
+set it up way back in Julius Caesar's day, but still) is pretty basic.  It
+wouldn't take too much to support that specific intercalation, but there are
+other, much more complex intercalations in use around the world, from the
+Hebrew calendar's intercalary month and varying month lengths, to the
+oft-overlooked leap second, and the goal is to support those kinds of
+intercalation as well.  So for the time being, intercalations are entirely
+unimplemented, and will be included in a future release.
+
+* **_TO DO:_** implement intercalations, and document them here.
+
+If you notice anything else missing, please feel free to open an issue on
+[GitHub][] and let me know about it.  Some features are outside the scope of the
+project, but I'd love to consider all options!
 
 #### Object Definitions ####
 
