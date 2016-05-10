@@ -31,7 +31,7 @@ class Carbon implements ConverterInterface
     {
         return [
             'start'    => Source::createFromTimestamp($cal->getDate('unix')),
-            'duration' => CarbonInterval::seconds($cal->getDuration()),
+            'duration' => CarbonInterval::seconds($cal->getDuration(0)),
             'end'      => Source::createFromTimestamp($cal->getEndDate('unix')),
         ];
     }

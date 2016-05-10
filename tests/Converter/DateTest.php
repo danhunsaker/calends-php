@@ -26,8 +26,10 @@ class DateTest extends \PHPUnit_Framework_TestCase
      */
     public function testConvert()
     {
-        $test = Converter::convert(Calends::create(0, 'unix'));
+        $test1 = Converter::convert(Calends::create(0, 'unix'));
+        $this->assertEquals(['start' => Date::createFromTimestamp(0), 'duration' => \Carbon\CarbonInterval::seconds(0), 'end' => Date::createFromTimestamp(0)], $test1);
 
-        $this->assertEquals(['start' => Date::createFromTimestamp(0), 'duration' => \Carbon\CarbonInterval::seconds(0), 'end' => Date::createFromTimestamp(0)], $test);
+        $test2 = Converter::convert(Calends::create(['start' => 0, 'end' => 86400], 'unix'));
+        $this->assertEquals(['start' => Date::createFromTimestamp(0), 'duration' => \Carbon\CarbonInterval::seconds(86400), 'end' => Date::createFromTimestamp(86400)], $test2);
     }
 }

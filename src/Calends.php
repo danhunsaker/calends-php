@@ -192,7 +192,7 @@ class Calends implements Serializable, JsonSerializable
         }
 
         if ( ! array_key_exists($converter, static::$timeConverters['import'])) {
-            $className = __NAMESPACE__ . "\\Converter\\" . @array_pop(explode('\\', $converter));
+            $className = __NAMESPACE__ . "\\Converter\\" . last(explode('\\', $converter));
 
             if (class_exists($className)) {
                 static::registerConverter($converter, $className);
@@ -345,9 +345,9 @@ class Calends implements Serializable, JsonSerializable
      *
      * @return float|integer
      **/
-    public function getDuration()
+    public function getDuration($scale = 18)
     {
-        return $this->duration;
+        return BC::round($this->duration, BC::intval($scale, 0));
     }
 
     /**

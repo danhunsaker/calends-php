@@ -32,7 +32,7 @@ class DateTime implements ConverterInterface
     {
         return [
             'start'    => Source::createFromFormat('U.u', BC::add($cal->getDate('unix'), 0, 6)),
-            'duration' => new DateInterval("PT{$cal->getDuration()}S"),
+            'duration' => new DateInterval("PT{$cal->getDuration(0)}S"),
             'end'      => Source::createFromFormat('U.u', BC::add($cal->getEndDate('unix'), 0, 6)),
         ];
     }

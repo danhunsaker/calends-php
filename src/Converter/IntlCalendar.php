@@ -35,7 +35,7 @@ class IntlCalendar implements ConverterInterface
      */
     public static function convert(Calends $cal)
     {
-        $source = @array_pop(explode('\\', get_called_class()));
+        $source = last(explode('\\', get_called_class()));
 
         $start = $source::createInstance(IntlTimeZone::getGMT(), static::$locale);
         $start->setTime(BC::mul($cal->getDate('unix'), 1000, 15));
@@ -45,7 +45,7 @@ class IntlCalendar implements ConverterInterface
 
         return [
             'start'    => $start,
-            'duration' => new DateInterval("PT{$cal->getDuration()}S"),
+            'duration' => new DateInterval("PT{$cal->getDuration(0)}S"),
             'end'      => $end,
         ];
     }

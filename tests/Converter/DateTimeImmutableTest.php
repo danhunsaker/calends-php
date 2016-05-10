@@ -35,8 +35,10 @@ class DateTimeImmutableTest extends \PHPUnit_Framework_TestCase
             return;
         }
 
-        $test = Converter::convert(Calends::create(0, 'unix'));
+        $test1 = Converter::convert(Calends::create(0, 'unix'));
+        $this->assertEquals(['start' => new DateTimeImmutable('@0'), 'duration' => new DateInterval('PT0S'), 'end' => new DateTimeImmutable('@0')], $test1);
 
-        $this->assertEquals(['start' => new DateTimeImmutable('@0'), 'duration' => new DateInterval('PT0S'), 'end' => new DateTimeImmutable('@0')], $test);
+        $test2 = Converter::convert(Calends::create(['start' => 0, 'end' => 86400], 'unix'));
+        $this->assertEquals(['start' => new DateTimeImmutable('@0'), 'duration' => new DateInterval('PT86400S'), 'end' => new DateTimeImmutable('@86400')], $test2);
     }
 }
