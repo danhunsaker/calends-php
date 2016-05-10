@@ -811,9 +811,9 @@ class Calends implements Serializable, JsonSerializable
      * @throws UnknownCalendarException
      * @return self
      **/
-    public function setDate($date, $calendar = 'unix')
+    public function setDate($date, $calendar = 'unix', $format = null)
     {
-        return static::create(['start' => $date, 'end' => $this->getEndDate($calendar)], $calendar);
+        return static::create(['start' => $date, 'end' => $this->getEndDate($calendar, $format)], $calendar, $format);
     }
 
     /**
@@ -828,9 +828,9 @@ class Calends implements Serializable, JsonSerializable
      * @throws UnknownCalendarException
      * @return self
      **/
-    public function setEndDate($date, $calendar = 'unix')
+    public function setEndDate($date, $calendar = 'unix', $format = null)
     {
-        return static::create(['start' => $this->getDate($calendar), 'end' => $date], $calendar);
+        return static::create(['start' => $this->getDate($calendar, $format), 'end' => $date], $calendar, $format);
     }
 
     /**
