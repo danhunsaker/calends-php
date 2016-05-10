@@ -11,6 +11,8 @@ class Era extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = ['internal_name', 'default_range'];
+
     /**
      * @codeCoverageIgnore
      */

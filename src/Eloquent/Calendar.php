@@ -13,6 +13,11 @@ class Calendar extends Model implements Definition
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'description'
+    ];
+
     /**
      * Relationship with the Unit model
      *

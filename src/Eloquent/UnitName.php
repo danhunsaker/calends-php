@@ -9,6 +9,8 @@ class UnitName extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = ['unit_name', 'name_context'];
+
     /**
      * @codeCoverageIgnore
      */

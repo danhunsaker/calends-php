@@ -11,6 +11,16 @@ class Unit extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'internal_name',
+        'scale_amount',
+        'scale_inverse',
+        'scale_to',
+        'uses_zero',
+        'unix_epoch',
+        'is_auxiliary',
+    ];
+
     protected $casts = [
         'scale_inverse' => 'boolean',
         'uses_zero'     => 'boolean',

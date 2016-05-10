@@ -9,6 +9,14 @@ class EraRange extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'range_code',
+        'start_value',
+        'end_value',
+        'start_display',
+        'direction',
+    ];
+
     /**
      * @codeCoverageIgnore
      */

@@ -10,6 +10,12 @@ class FragmentFormat extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'format_code',
+        'format_string',
+        'description',
+    ];
+
     /**
      * @codeCoverageIgnore
      */

@@ -9,6 +9,8 @@ class CalendarFormat extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = ['format_name', 'format_string', 'description'];
+
     /**
      * @codeCoverageIgnore
      */

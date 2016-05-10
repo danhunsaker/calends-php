@@ -9,6 +9,8 @@ class FragmentText extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = ['fragment_value', 'fragment_text'];
+
     /**
      * @codeCoverageIgnore
      */

@@ -9,6 +9,8 @@ class UnitLength extends Model
 {
     use SoftDeletes;
 
+    protected $fillable = ['unit_value', 'scale_amount'];
+
     /**
      * @codeCoverageIgnore
      */
