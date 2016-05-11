@@ -18,11 +18,9 @@ Use Composer:
 composer require danhunsaker/calends
 ```
 
-## Usage ##
+## Setup ##
 
-### Setup ###
-
-#### Laravel ####
+### Laravel ###
 
 A Laravel service provider is included.  Add it to your app's service providers
 list, publish the migrations for Eloquent calendars, run the migrations, and
@@ -51,7 +49,7 @@ will limit you to calendars defined as PHP classes, but if you don't need
 support for dynamically- and/or user-defined calendars, that shouldn't be a
 concern.
 
-You can also register the class as a Facade:
+You can also register a class alias like you would for a Facade:
 
 ```php
     'aliases' => [
@@ -61,10 +59,13 @@ You can also register the class as a Facade:
     ],    
 ```
 
-There isn't any major difference in usage between the Facade and the regular
-class; this is mostly just a convenience option.
+Of course, this isn't actually a Facade.  It simply sets up an alias (using
+PHP's `class_alias()` function, though for the sake of being lightweight, only
+when the alias is first accessed) so you can skip the namespace when accessing
+the class elsewhere in your project.  The only real advantage, here, is avoiding
+writing and maintaining `use` statements all over your app.
 
-#### Other Projects ####
+### Other Projects ###
 
 Once you have installed Calends, using it is generally as easy as creating a new
 `Calends` object and manipulating it from there.  If you want to use custom
@@ -103,7 +104,35 @@ php vendor/danhunsaker/calends/extra/non-laravel-migrate.php
 
 That should be it - your database is now set up, and your project is configured
 to properly connect to it so that Eloquent calendars will work correctly without
-further effort on your part.
+further effort on your part.  See below for how to actually create Eloquent
+calendars for use in your projects.
+
+## To Do ##
+
+Calends is functional and supports a handful of calendar systems out of the box,
+but it isn't quite production ready.  Following is a list of known issues, and
+plans for future versions.
+
+- [ ] More robust support for existing calendars
+  - [ ] The Hebrew and Julian calendars:
+    - Both rely on PHP's built-in (Gregorian) DateTime class to parse dates,
+    then convert the resulting values into timestamps for internal use.  They
+    should, instead, each have their own parsers, capable of handling the
+    nuances of each calendar.
+  - [ ] Honor the `$format` parameter:
+    - Currently, only the Gregorian and Elquent calendars honor the `$format`
+    parameter to methods that provide it.  For some, multiple formats don't make
+    sense, such as TAI64, Unix, and Julian Day Count, but the rest should
+    properly support this (admittedly optional) argument.
+- [ ] Eloquent calendar intercalation support (see below for more on this)
+- [ ] More calendar systems (via external libraries)
+  - [ ] Chinese (several variants)
+  - [ ] Discordian
+  - [ ] Meso-American (commonly called Mayan)
+  - [ ] Persian
+  - [ ] Stardate (Yes, the ones from Star Trek&trade;; several variants exist)
+
+## Usage ##
 
 ### Dates ###
 
