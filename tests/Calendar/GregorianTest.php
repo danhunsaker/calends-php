@@ -24,6 +24,9 @@ class GregorianTest extends \PHPUnit_Framework_TestCase
     public function testFromInternal()
     {
         $this->assertEquals('Thu, 01 Jan 1970 00:00:00.000000 +00:00', Gregorian::fromInternal(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0]));
+        $this->assertEquals('Thu, 01 Jan 1970 00:00:00 +0000', Gregorian::fromInternal(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], DATE_RFC2822));
+        $this->assertEquals('1970-01-01T00:00:00+00:00', Gregorian::fromInternal(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], DATE_W3C));
+        $this->assertEquals('1970-01-01_00-00-00.000000', Gregorian::fromInternal(['seconds' => BC::pow(2, 62), 'nano' => 0, 'atto' => 0], 'Y-m-d_H-i-s.u'));
     }
 
     /**

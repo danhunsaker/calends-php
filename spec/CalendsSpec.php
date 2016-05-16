@@ -65,6 +65,7 @@ class CalendsSpec extends ObjectBehavior
         $this::toInternalFromUnix(BC::sub(-1, BC::pow(2, 62)))->shouldHaveKeyWithValue('seconds', '0');
         $this::toInternalFromUnix(BC::sub(BC::pow(2, 63), BC::pow(2, 62)))->shouldHaveKeyWithValue('seconds', BC::sub(BC::pow(2, 63), 1, 0));
         $this::fromInternalToUnix(['seconds' => 0, 'nano' => 0, 'atto' => 0])->shouldBeString();
+        $this::fromInternalToUnix(['seconds' => 0, 'nano' => 0, 'atto' => 0])->shouldBeLike('-4611686018427387904');
     }
 
     public function it_should_compare_correctly()
@@ -249,6 +250,9 @@ class CalendsSpec extends ObjectBehavior
         $this->add('1 day', 'gregorian')->getDate('unix')->shouldBeLike('86400');
 
         $this->getDate('gregorian')->shouldBeLike('Thu, 01 Jan 1970 00:00:00.000000 +00:00');
+        $this->getDate('gregorian', DATE_RFC2822)->shouldBeLike('Thu, 01 Jan 1970 00:00:00 +0000');
+        $this->getDate('gregorian', DATE_W3C)->shouldBeLike('1970-01-01T00:00:00+00:00');
+        $this->getDate('gregorian', 'Y-m-d_H-i-s.u')->shouldBeLike('1970-01-01_00-00-00.000000');
     }
 
     public function it_should_recognize_hebrew()
@@ -280,9 +284,30 @@ class CalendsSpec extends ObjectBehavior
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
 
+        $this::create('2440587.5', 'jdc', 'geo-centric')->getDate('unix')->shouldBeLike('0');
+        $this::create('40587.5', 'jdc', 'reduced')->getDate('unix')->shouldBeLike('0');
+        $this::create('40587', 'jdc', 'modified')->getDate('unix')->shouldBeLike('0');
+        $this::create('0587', 'jdc', 'truncated')->getDate('unix')->shouldBeLike('0');
+        $this::create('25567.5', 'jdc', 'dublin')->getDate('unix')->shouldBeLike('0');
+        $this::create('-10957.5', 'jdc', 'j2000')->getDate('unix')->shouldBeLike('0');
+        $this::create('141428', 'jdc', 'lilian')->getDate('unix')->shouldBeLike('0');
+        $this::create('719163', 'jdc', 'rata-die')->getDate('unix')->shouldBeLike('0');
+        $this::create('34127.339438826655247253', 'jdc', 'mars-sol')->getDate('unix')->shouldBeLike('0.000000000000086400');
+        $this::create('2440587.5', 'jdc', 'invalid')->getDate('unix')->shouldBeLike('0');
+
         $this->add('1', 'jdc')->getDate('unix')->shouldBeLike('86400');
 
         $this->getDate('jdc')->shouldBeLike('2440587.5');
+        $this->getDate('jdc', 'geo-centric')->shouldBeLike('2440587.5');
+        $this->getDate('jdc', 'reduced')->shouldBeLike('40587.5');
+        $this->getDate('jdc', 'modified')->shouldBeLike('40587');
+        $this->getDate('jdc', 'truncated')->shouldBeLike('0587');
+        $this->getDate('jdc', 'dublin')->shouldBeLike('25567.5');
+        $this->getDate('jdc', 'j2000')->shouldBeLike('-10957.5');
+        $this->getDate('jdc', 'lilian')->shouldBeLike('141428');
+        $this->getDate('jdc', 'rata-die')->shouldBeLike('719163');
+        $this->getDate('jdc', 'mars-sol')->shouldBeLike('34127.339438826655247253');
+        $this->getDate('jdc', 'invalid')->shouldBeLike('2440587.5');
     }
 
     public function it_should_recognize_tai()
@@ -291,9 +316,22 @@ class CalendsSpec extends ObjectBehavior
         $this->shouldHaveType('Danhunsaker\Calends\Calends');
         $this->getDate('unix')->shouldBeLike('0');
 
+        $this::create('4000000000000000', 'tai', 'tai64')->getDate('unix')->shouldBeLike('0');
+        $this::create('400000000000000000000000', 'tai', 'tai64n')->getDate('unix')->shouldBeLike('0');
+        $this::create('40000000000000000000000000000000', 'tai', 'tai64na')->getDate('unix')->shouldBeLike('0');
+        $this::create('4611686018427387904.000000000000000000', 'tai', 'numeric')->getDate('unix')->shouldBeLike('0');
+        $this::create('4611686018427387904', 'tai', 'numeric')->getDate('unix')->shouldBeLike('0');
+        $this::create('-1', 'tai', 'numeric')->getDate('tai', 'numeric')->shouldBeLike('0');
+        $this::create('40000000000000000000000000000000', 'tai', 'invalid')->getDate('unix')->shouldBeLike('0');
+
         $this->add('0000000000015180', 'tai')->getDate('unix')->shouldBeLike('86400');
 
         $this->getDate('tai')->shouldBeLike('40000000000000000000000000000000');
+        $this->getDate('tai', 'tai64')->shouldBeLike('4000000000000000');
+        $this->getDate('tai', 'tai64n')->shouldBeLike('400000000000000000000000');
+        $this->getDate('tai', 'tai64na')->shouldBeLike('40000000000000000000000000000000');
+        $this->getDate('tai', 'numeric')->shouldBeLike('4611686018427387904.000000000000000000');
+        $this->getDate('tai', 'invalid')->shouldBeLike('40000000000000000000000000000000');
 
         $this::create('8000000000000000', 'tai')->getDate('tai')->shouldBeLike('7fffffffffffffff3b9ac9ff3b9ac9ff');
     }

@@ -28,7 +28,7 @@ class Gregorian implements DefinitionInterface
      */
     public static function fromInternal($stamp, $format = null)
     {
-        return date_create_from_format('U.u', BC::add(0, Calends::fromInternalToUnix($stamp), 6))->format($format ?: 'D, d M Y H:i:s.u P');
+        return date_create_from_format('U.u', BC::round(Calends::fromInternalToUnix($stamp), 6))->format($format ?: 'D, d M Y H:i:s.u P');
     }
 
     /**
@@ -36,6 +36,6 @@ class Gregorian implements DefinitionInterface
      */
     public static function offset($stamp, $offset)
     {
-        return Calends::toInternalFromUnix(date_create_from_format('U.u', BC::add(0, Calends::fromInternalToUnix($stamp), 6))->modify($offset)->format('U.u'));
+        return Calends::toInternalFromUnix(date_create_from_format('U.u', BC::round(Calends::fromInternalToUnix($stamp), 6))->modify($offset)->format('U.u'));
     }
 }

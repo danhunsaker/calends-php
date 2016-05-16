@@ -390,9 +390,7 @@ class Calends implements Serializable, JsonSerializable
      **/
     protected static function getInternalTimeAsString($time)
     {
-        $frac = str_pad($time['nano'], 9, '0', STR_PAD_LEFT) . str_pad($time['atto'], 9, '0', STR_PAD_LEFT);
-
-        return "{$time['seconds']}.{$frac}";
+        return call_user_func(static::$timeConverters['fromInternal'][static::getCalendar('tai')], $time, 'numeric');
     }
 
     /**

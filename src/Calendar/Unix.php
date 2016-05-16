@@ -20,7 +20,8 @@ class Unix implements DefinitionInterface
      */
     public static function toInternal($date, $format = null)
     {
-        return Calends::toInternalFromUnix($date);
+        $format = is_null($format) ? 18 : BC::max([BC::min([$format, 18], 0), 0], 0);
+        return Calends::toInternalFromUnix(BC::round($date, $format));
     }
 
     /**
@@ -28,7 +29,8 @@ class Unix implements DefinitionInterface
      */
     public static function fromInternal($stamp, $format = null)
     {
-        return Calends::fromInternalToUnix($stamp);
+        $format = is_null($format) ? 18 : BC::max([BC::min([$format, 18], 0), 0], 0);
+        return BC::round(Calends::fromInternalToUnix($stamp), $format);
     }
 
     /**

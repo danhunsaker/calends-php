@@ -12,13 +12,13 @@
         "ext-date": "*",
         "ext-gmp": "*",
         "ext-intl": "*",
-        "bossa/phpspec2-expect": "^1.0",
         "danhunsaker/bcmath": "^1.1.2",
         "fisharebest/ext-calendar": "^2.2",
         "rmiller/caser": "^0.1.0"
     },
     "require-dev": {
         "behat/behat": "^3.0.7",
+        "bossa/phpspec2-expect": "^1.0",
         "coduo/phpspec-data-provider-extension": "^1.0",
         "fightbulc/moment": "^1.17",
         "henrikbjorn/phpspec-code-coverage": "^2.0|^1.0",
