@@ -20,7 +20,7 @@ class JulianDayCount implements DefinitionInterface
      */
     public static function toInternal($date, $format = null)
     {
-        if ( ! in_array(strtolower($format), ['jd', 'gjd', 'geo', 'geo-centric', 'rjd', 'reduced', 'mjd', 'modified', 'tjd', 'truncated', 'djd', 'dublin', 'j2000', 'lilian', 'rata-die', 'mars-sol'])) {
+        if ( ! in_array(strtolower($format), ['jd', 'gjd', 'geo', 'geo-centric', 'rjd', 'reduced', 'mjd', 'modified', 'tjd', 'truncated', 'djd', 'dublin', 'j1900', 'j2000', 'lilian', 'rata-die', 'mars-sol'])) {
             $format = 'gjd';
         }
 
@@ -32,7 +32,7 @@ class JulianDayCount implements DefinitionInterface
             $jdc = BC::add($date, '2400000.5', 18);
         } elseif (in_array(strtolower($format), ['tjd', 'truncated'])) {
             $jdc = BC::add($date, '2440000.5', 18);
-        } elseif (in_array(strtolower($format), ['djd', 'dublin'])) {
+        } elseif (in_array(strtolower($format), ['djd', 'dublin', 'j1900'])) {
             $jdc = BC::add($date, '2415020', 18);
         } elseif (in_array(strtolower($format), ['j2000'])) {
             $jdc = BC::add($date, '2451545', 18);
@@ -52,7 +52,7 @@ class JulianDayCount implements DefinitionInterface
      */
     public static function fromInternal($stamp, $format = null)
     {
-        if ( ! in_array(strtolower($format), ['jd', 'gjd', 'geo', 'geo-centric', 'rjd', 'reduced', 'mjd', 'modified', 'tjd', 'truncated', 'djd', 'dublin', 'j2000', 'lilian', 'rata-die', 'mars-sol'])) {
+        if ( ! in_array(strtolower($format), ['jd', 'gjd', 'geo', 'geo-centric', 'rjd', 'reduced', 'mjd', 'modified', 'tjd', 'truncated', 'djd', 'dublin', 'j1900', 'j2000', 'lilian', 'rata-die', 'mars-sol'])) {
             $format = 'gjd';
         }
 
@@ -66,7 +66,7 @@ class JulianDayCount implements DefinitionInterface
             $output = BC::sub($jdc, '2400000.5', 18);
         } elseif (in_array(strtolower($format), ['tjd', 'truncated'])) {
             $output = BC::intval(BC::sub($jdc, '2440000.5', 18), 0);
-        } elseif (in_array(strtolower($format), ['djd', 'dublin'])) {
+        } elseif (in_array(strtolower($format), ['djd', 'dublin', 'j1900'])) {
             $output = BC::sub($jdc, '2415020', 18);
         } elseif (in_array(strtolower($format), ['j2000'])) {
             $output = BC::sub($jdc, '2451545', 18);

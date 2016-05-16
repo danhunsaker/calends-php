@@ -117,15 +117,16 @@ plans for future versions.
   - [ ] The Hebrew and Julian calendars:
     - Both rely on PHP's built-in (Gregorian) DateTime class to parse dates,
     then convert the resulting values into timestamps for internal use.  They
-    should, instead, each have their own parsers, capable of handling the
-    nuances of each calendar.
+    should, instead, each have their own parsers (or possibly access to a shared
+    one derived from the Eloquent parser), capable of handling the nuances of
+    each calendar.  Both also handle date output in a similar fashion, which
+    should also be changed to something more calendar-specific.
   - [ ] Honor the `$format` parameter:
-    - Currently, only the Gregorian and Elquent calendars honor the `$format`
-    parameter to methods that provide it.  For some, multiple formats don't make
-    sense, such as TAI64, Unix, and Julian Day Count, but the rest should
-    properly support this (admittedly optional) argument.
+    - Currently, only the Gregorian, Eloquent, TAI64, Unix, and Julian Day Count
+    calendars honor the `$format` parameter to methods that provide it.  The
+    others should properly support this (admittedly optional) argument.
 - [ ] Eloquent calendar intercalation support (see below for more on this)
-- [ ] More calendar systems (via external libraries)
+- [ ] More calendar systems (probably via external libraries)
   - [ ] Chinese (several variants)
   - [ ] Discordian
   - [ ] Meso-American (commonly called Mayan)
@@ -189,7 +190,8 @@ $julianCalendar = $now('julian');  // 12/13/2015 14:34:30 GMT-07:00
 > Note that while you can pass a format along to `Calends::create()` or
 > `Calends::getDate()` (and their respective variants), not all calendars will
 > pay any attention to them, and the formatting codes supported by each are
-> entirely defined by the calendar itself.
+> entirely defined by the calendar itself.  See the section on formats below for
+> more details.
 
 You may also be interested in converting a `Calends` object into a different
 kind of date/time object.  Gotcha covered there, too:
@@ -259,6 +261,82 @@ interfaces, which means you can `serialize()`, `unserialize()`, and
 `json_encode()` a `Calends` object safely, too - it will automatically convert
 itself to (and from, in the case of `unserialize()`) the `tai` date.  (More on
 this below, though...)
+
+### Formatting ###
+
+By now you've probably noticed that the methods for parsing and outputting date
+strings accept both a calendar and a format.  As noted above, some calendar
+systems will silently ignore this value, substituting their own hard-coded
+value.  As of this writing, the only calendars in this position are the Hebrew
+and Julian calendars.  However, the valid format strings for each calendar
+system are still very calendar-specific.  So below is a list of valid formats
+for each of the built-in calendar systems.
+
+- Gregorian
+  - Anything supported by PHP's `date()` function.  If a format is passed,
+  Calends uses `date_create_from_format()` to parse the date string, and always
+  uses `date()` to generate the output string.  The default output format is
+  `D, d M Y H:i:s.u P`.
+- Julian Day Count
+  - Not to be confused with the Julian Calendar, the JDC system supports a large
+  number of input and output formats.  Because all of these formats involve
+  an offset from the default result, it is very important to specify the correct
+  format during input, as the value calculated internally will vary widely from
+  one to the next.  All offsets below are taken from Wikipedia as a quick
+  reference point - **if you notice any inaccuracies, please let me know ASAP**.
+  - `JD` / `GJD` / `Geo` / `Geo-Centric` (the default, used if not supplied, or
+  unrecognized)
+    - The 'canonical' Julian Day Count, counting the number of days since **noon
+    BCE 4713 Jan 01 (Julian Calendar)**
+  - `RJD` / `Reduced`
+    - The geo-centric JDC without the first two digits, which are 24 in most
+    common situations
+  - `MJD` / `Modified`
+    - Same as the reduced JDC, but starting at **midnight** instead of noon
+  - `TJD` / `Truncated`
+    - Same as the geo-centric JDC, but without the first three digits, or any
+    fractional day
+  - `DJD` / `Dublin` / `J1900`
+    - Starts counting from **noon CE 1899 Dec 31 (Gregorian Calendar)**
+  - `J2000`
+    - From **noon CE 2000 Jan 01 (Gregorian Calendar)**
+  - `Lilian`
+    - Counts the number of days since the institution of Gregorian Calendar,
+    **midnight CE 1582 Oct 15 (Gregorian Calendar);** no fractional day
+  - `Rata-Die`
+    - The number of days since **midnight CE 0001 Jan 01 (Proleptic Gregorian
+    Calendar)**; no fractional day
+  - `Mars-Sol`
+    - Martian days (that is, days on Mars, which aren't the same length as those
+    on Earth; also known as 'sols' instead of 'days') since **noon CE 1873 Dec
+    29 (Gregorian Calendar)**
+- TAI64
+  - There are four formats available for `tai` dates.  Three are hexadecimal
+  formats defined in the TAI64 spec, and differ only in the precision of the
+  value they encode.  The fourth is a decimal (base-10) output format with full
+  18-digit precision.  **Note, again, that the TAI format does *not* supply
+  values in TAI seconds - these are UTC seconds in the TAI64 range and format.**
+  If/when a reliable mechanism for converting between the two is available, this
+  will change, and the `tai` calendar system will provide actual TAI seconds.
+  - `TAI64`
+    - Second-level precision; no fractional seconds are encoded.  This format is
+    exactly 16 characters long.
+  - `TAI64N`
+    - Nanosecond-level precision; fractional seconds are encoded to the
+    billionths.  This format is exactly 24 characters long.
+  - `TAI64NA` (the default, used if not supplied, or unrecognized)
+    - Attosecond-level precision; fractional seconds are encoded to the full
+    available quintillionths.  This format is exactly 32 characters long.
+  - `Numeric`
+    - Outputs the decimal (base-10) value of the timestamp, with full precision.
+- Unix
+  - This one is really straightforward.  The format is actually a precision
+  specifier, telling Calends how many digits after the decimal to return.  Valid
+  values are between `0` and `18`; all others will be forced into this range,
+  and `18` will be used if no value is provided.
+- Eloquent
+  - See below for how these are defined, and consult your specific calendar data
+  for the actual allowed values and what they mean.
 
 ### Compare ###
 
