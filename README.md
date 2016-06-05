@@ -3,7 +3,8 @@
 [![Software License](https://img.shields.io/packagist/l/danhunsaker/calends.svg?style=flat-square)](LICENSE)
 [![Gitter](https://img.shields.io/gitter/room/danhunsaker/calends.svg?style=flat-square)](https://gitter.im/danhunsaker/calends)
 
-[![Latest Version](https://img.shields.io/github/release/danhunsaker/calends.svg?style=flat-square)](https://github.com/danhunsaker/calends/releases)
+[![Latest Stable Version](https://img.shields.io/packagist/v/danhunsaker/calends.svg?label=stable&style=flat-square)](https://github.com/danhunsaker/calends/releases)
+[![Latest Unstable Version](https://img.shields.io/packagist/vpre/danhunsaker/calends.svg?label=unstable&style=flat-square)](https://github.com/danhunsaker/calends/releases)
 [![Build Status](https://img.shields.io/travis/danhunsaker/calends.svg?style=flat-square)](https://travis-ci.org/danhunsaker/calends)
 [![Codecov](https://img.shields.io/codecov/c/github/danhunsaker/calends.svg?style=flat-square)](https://codecov.io/gh/danhunsaker/calends)
 [![Total Downloads](https://img.shields.io/packagist/dt/danhunsaker/calends.svg?style=flat-square)](https://packagist.org/packages/danhunsaker/calends)

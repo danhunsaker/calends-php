@@ -1,5 +1,6 @@
 composer.lock
 composer.phar
 coverage/
+*.coverage.*
 vendor/
 *.bak
